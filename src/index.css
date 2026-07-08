@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Grotesk", ui-monospace, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  direction: rtl;
+  text-align: right;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* POS Thermal & Browser Print Styles */
+@media print {
+  /* 1. Hide all non-printable layout columns and elements cleanly */
+  header,
+  .pos-menu-column,
+  .pos-cart-column,
+  .print\:hidden,
+  [class*="print:hidden"],
+  button {
+    display: none !important;
+  }
+  
+  /* 2. Reset html and body layout */
+  html, body {
+    background-color: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    direction: rtl !important;
+  }
+
+  /* 3. Style print wrapper and override absolute/fixed positioning */
+  .receipt-print-wrapper {
+    display: block !important;
+    position: static !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    backdrop-filter: none !important;
+  }
+  
+  /* 4. Convert the modal card into a flat print layout of 76mm width */
+  .receipt-print-wrapper > div {
+    display: block !important;
+    position: static !important;
+    background: white !important;
+    color: black !important;
+    width: 76mm !important;
+    max-width: 76mm !important;
+    margin: 0 auto !important;
+    padding: 2mm !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* 5. Force solid black text and borders for thermal legibility */
+  .receipt-print-box,
+  .receipt-print-box * {
+    color: black !important;
+    border-color: black !important;
+    background: transparent !important;
+  }
+  
+  /* 6. Page setup (remove default browser margin/header/footer) */
+  @page {
+    size: auto;
+    margin: 0mm !important;
+  }
+}
