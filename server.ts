@@ -4,8 +4,73 @@ import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import pool from "./db/database.js";
+import nodemailer from "nodemailer";
 
 dotenv.config();
+
+// Mail Transporter configuration
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER || "",
+    pass: process.env.SMTP_PASS || "",
+  },
+});
+
+async function sendOTPEmail(email: string, otp: string, actionType: "signup" | "login") {
+  const cleanEmail = email.trim().toLowerCase();
+  const subject = actionType === "signup" 
+    ? "رمز التحقق لإنشاء حسابك في سفرة كلاود 🔑" 
+    : "رمز التحقق لتسجيل الدخول في سفرة كلاود 🔑";
+  
+  const title = actionType === "signup" ? "إنشاء حساب جديد" : "تسجيل الدخول السريع";
+  const desc = actionType === "signup" 
+    ? "شكراً لتسجيلك في منصة سفرة كلاود. يرجى استخدام رمز التحقق أدناه لتفعيل حسابك وإكمال التسجيل:"
+    : "تم طلب رمز دخول سريع لحسابك في سفرة كلاود. يرجى استخدام الرمز التالي لتسجيل الدخول إلى لوحتك:";
+
+  const htmlContent = `
+    <div dir="rtl" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="font-size: 40px;">🍽️</span>
+        <h1 style="color: #4f46e5; margin: 10px 0 0 0; font-size: 24px; font-weight: 800;">سفرة كلاود (Sufra Cloud)</h1>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 20px 0;">
+      <h2 style="color: #2d3748; font-size: 18px; font-weight: 700; margin-bottom: 10px;">${title}</h2>
+      <p style="color: #4a5568; font-size: 14px; line-height: 1.6; margin-bottom: 25px;">${desc}</p>
+      <div style="background-color: #f7fafc; border: 1px dashed #cbd5e0; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 25px;">
+        <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #4f46e5; font-family: monospace;">${otp}</span>
+        <p style="color: #a0aec0; font-size: 11px; margin: 5px 0 0 0;">(الرمز صالح لمدة 10 دقائق فقط)</p>
+      </div>
+      <p style="color: #718096; font-size: 12px; line-height: 1.5;">إذا لم تقم بطلب هذا الرمز، يرجى تجاهل هذا البريد الإلكتروني.</p>
+      <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 20px 0;">
+      <div style="text-align: center; color: #a0aec0; font-size: 11px;">
+        سفرة كلاود — نظام مبيعات وإدارة المطاعم SaaS السحابي المتكامل.
+      </div>
+    </div>
+  `;
+
+  const fromMail = process.env.SMTP_FROM || '"Sufra Cloud" <noreply@sufra.cloud>';
+
+  try {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn(`⚠️ Warning: SMTP_USER/PASS not configured. Simulated OTP for ${cleanEmail}: [ ${otp} ]`);
+      return false;
+    }
+    await transporter.sendMail({
+      from: fromMail,
+      to: cleanEmail,
+      subject: subject,
+      html: htmlContent,
+    });
+    console.log(`✉️ OTP email sent successfully to ${cleanEmail}`);
+    return true;
+  } catch (err: any) {
+    console.error(`❌ Failed to send OTP email to ${cleanEmail}:`, err.message);
+    return false;
+  }
+}
 
 const app = express();
 const PORT = 3000;
@@ -152,8 +217,30 @@ app.get("/api/tenants", async (req, res) => {
 });
 
 app.post("/api/tenants", async (req, res) => {
-  const { nameAr, subdomain, themeColor, logo, phone, address, ownerName, slogan, status, ownerEmail, password, subscriptionPlan, subscriptionAmount, subscriptionDate, currency } = req.body;
+  const { nameAr, subdomain, themeColor, logo, phone, address, ownerName, slogan, status, ownerEmail, password, subscriptionPlan, subscriptionAmount, subscriptionDate, currency, otpCode, bypassOTP } = req.body;
   try {
+    const cleanEmail = ownerEmail?.trim().toLowerCase();
+
+    // Verify OTP unless explicitly bypassed (e.g., direct admin creation or portal payment checkout)
+    if (!bypassOTP) {
+      if (!otpCode) {
+        return res.status(400).json({ error: "يرجى إدخال رمز التحقق (OTP) لإكمال عملية التسجيل" });
+      }
+
+      const otpCheck = await pool.query(
+        `SELECT * FROM tenant_otps 
+         WHERE LOWER(email) = $1 AND otp_code = $2 AND action_type = 'signup' AND expires_at > NOW()`,
+        [cleanEmail, otpCode]
+      );
+
+      if (otpCheck.rowCount === 0) {
+        return res.status(400).json({ error: "رمز التحقق من البريد الإلكتروني غير صحيح أو منتهي الصلاحية" });
+      }
+
+      // Delete verified OTP
+      await pool.query("DELETE FROM tenant_otps WHERE id = $1", [otpCheck.rows[0].id]);
+    }
+
     const check = await pool.query("SELECT 1 FROM tenants WHERE subdomain = $1", [subdomain?.toLowerCase()]);
     if (check.rowCount && check.rowCount > 0) {
       return res.status(400).json({ error: "هذا النطاق الفرعي (Subdomain) مستخدم بالفعل لمطعم آخر" });
@@ -294,6 +381,126 @@ app.delete("/api/tenants/:id", async (req, res) => {
 });
 
 // ============================================================
+// EMAIL OTP AUTHENTICATION
+// ============================================================
+app.post("/api/auth/send-otp", async (req, res) => {
+  const { email, actionType } = req.body;
+  if (!email || !actionType) {
+    return res.status(400).json({ error: "يرجى إدخال البريد الإلكتروني ونوع العملية" });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+
+  try {
+    if (actionType === "signup") {
+      const check = await pool.query(
+        "SELECT 1 FROM tenant_users WHERE LOWER(email) = $1 UNION SELECT 1 FROM tenants WHERE LOWER(owner_email) = $2",
+        [cleanEmail, cleanEmail]
+      );
+      if (check.rowCount && check.rowCount > 0) {
+        return res.status(400).json({ error: "البريد الإلكتروني هذا مسجل بالفعل في النظام" });
+      }
+    } else if (actionType === "login") {
+      const check = await pool.query(
+        "SELECT 1 FROM tenant_users WHERE LOWER(email) = $1",
+        [cleanEmail]
+      );
+      if (check.rowCount === 0) {
+        return res.status(400).json({ error: "البريد الإلكتروني هذا غير مسجل في النظام" });
+      }
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await pool.query(
+      "DELETE FROM tenant_otps WHERE LOWER(email) = $1 AND action_type = $2",
+      [cleanEmail, actionType]
+    );
+
+    await pool.query(
+      "INSERT INTO tenant_otps (email, otp_code, action_type, expires_at) VALUES ($1, $2, $3, $4)",
+      [cleanEmail, otpCode, actionType, expiresAt]
+    );
+
+    const emailSent = await sendOTPEmail(cleanEmail, otpCode, actionType);
+
+    res.json({
+      success: true,
+      simulated: !emailSent,
+      message: emailSent 
+        ? "تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح" 
+        : `[محاكاة] تم توليد رمز التحقق: ${otpCode} (يرجى ضبط إعدادات SMTP على السيرفر لتفعيل الإرسال الفعلي)`
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/auth/login-otp", async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: "يرجى إدخال البريد الإلكتروني ورمز التحقق" });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+
+  try {
+    const otpResult = await pool.query(
+      `SELECT * FROM tenant_otps 
+       WHERE LOWER(email) = $1 AND otp_code = $2 AND action_type = 'login' AND expires_at > NOW()`,
+      [cleanEmail, code]
+    );
+
+    if (otpResult.rowCount === 0) {
+      return res.status(400).json({ error: "رمز التحقق غير صحيح أو منتهي الصلاحية" });
+    }
+
+    await pool.query("DELETE FROM tenant_otps WHERE id = $1", [otpResult.rows[0].id]);
+
+    const userResult = await pool.query(
+      "SELECT * FROM tenant_users WHERE LOWER(email) = $1",
+      [cleanEmail]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "البريد الإلكتروني غير مرتبط بأي موظف مسجل" });
+    }
+
+    const dbUser = userResult.rows[0];
+    if (dbUser.status !== "active") {
+      return res.status(403).json({ error: "حساب المستخدم هذا موقوف أو غير نشط" });
+    }
+
+    const user = mapUser(dbUser);
+    const tenantResult = await pool.query("SELECT * FROM tenants WHERE id = $1", [user.tenantId]);
+    if (tenantResult.rows.length === 0) {
+      return res.status(404).json({ error: "لم يتم العثور على المطعم المرتبط بهذا المستخدم" });
+    }
+
+    const tenant = mapTenant(tenantResult.rows[0]);
+    if (tenant.status === "suspended") {
+      return res.status(403).json({ error: "⚠️ هذا المطعم موقوف مؤقتاً من قبل الإدارة العامة" });
+    }
+    if (tenant.status === "pending_approval") {
+      return res.status(403).json({ error: "⚠️ حساب مطعمك قيد المراجعة وبانتظار موافقة الإدارة العامة" });
+    }
+    if (tenant.status === "pending_payment") {
+      return res.status(403).json({ error: "⚠️ يرجى سداد فاتورة الاشتراك لتفعيل حسابك" });
+    }
+
+    res.json({
+      isSuperAdmin: false,
+      user,
+      tenant,
+      message: "تم تسجيل الدخول بنجاح"
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
 // AUTHENTICATION LOGIN
 // ============================================================
 app.post("/api/auth/login", async (req, res) => {
@@ -305,9 +512,12 @@ app.post("/api/auth/login", async (req, res) => {
   const cleanEmail = email.trim().toLowerCase();
 
   // 1. Check Super Admin
+  const saEmail = (process.env.SUPER_ADMIN_EMAIL || "admin@sufra.cloud").trim().toLowerCase();
+  const saPass = process.env.SUPER_ADMIN_PASSWORD || "admin123";
+
   if (
-    (cleanEmail === "admin@sufra.cloud" && password === "admin123") ||
-    (cleanEmail === "sa" && password === "sa")
+    (cleanEmail === saEmail && password === saPass) ||
+    (cleanEmail === "sa" && password === "sa" && saEmail === "admin@sufra.cloud" && saPass === "admin123")
   ) {
     return res.json({
       isSuperAdmin: true,
@@ -343,6 +553,12 @@ app.post("/api/auth/login", async (req, res) => {
 
     if (tenant.status === "suspended") {
       return res.status(403).json({ error: "⚠️ هذا المطعم موقوف مؤقتاً من قبل الإدارة العامة" });
+    }
+    if (tenant.status === "pending_approval") {
+      return res.status(403).json({ error: "⚠️ حساب مطعمك قيد المراجعة وبانتظار موافقة الإدارة العامة" });
+    }
+    if (tenant.status === "pending_payment") {
+      return res.status(403).json({ error: "⚠️ يرجى سداد فاتورة الاشتراك لتفعيل حسابك" });
     }
 
     res.json({

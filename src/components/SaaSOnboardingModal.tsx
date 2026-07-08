@@ -64,7 +64,8 @@ export const SaaSOnboardingModal: React.FC<SaaSOnboardingModalProps> = ({
           ownerName: ownerName || "المدير العام",
           phone: phone || "0500000000",
           address,
-          slogan
+          slogan,
+          bypassOTP: true
         })
       });
 

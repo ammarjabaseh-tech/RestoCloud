@@ -12,23 +12,37 @@ export default function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!email || !password) {
       setError("الرجاء إدخال البريد الإلكتروني وكلمة المرور");
       return;
     }
 
-    // Check credentials (e.g. admin@sufra.cloud / admin123 or similar)
-    if (
-      (email.toLowerCase() === "admin@sufra.cloud" && password === "admin123") || 
-      (email.toLowerCase() === "sa" && password === "sa")
-    ) {
-      onLoginSuccess();
-    } else {
-      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+      }
+      if (data.isSuperAdmin) {
+        onLoginSuccess();
+      } else {
+        throw new Error("هذا الحساب ليس لديه صلاحيات سوبر أدمن");
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,9 +102,10 @@ export default function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-indigo-600 py-3 font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-colors cursor-pointer mt-4"
+            disabled={loading}
+            className="w-full rounded-xl bg-indigo-600 py-3 font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-colors cursor-pointer mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            تسجيل الدخول الآمن
+            {loading ? "جاري التحقق..." : "تسجيل الدخول الآمن"}
           </button>
         </form>
 

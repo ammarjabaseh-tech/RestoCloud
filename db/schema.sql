@@ -163,6 +163,18 @@ CREATE TABLE IF NOT EXISTS invoices (
 );
 
 -- ==========================================
+-- 9. VERIFICATION OTPS (رموز التحقق عبر البريد الإلكتروني)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS tenant_otps (
+  id          SERIAL PRIMARY KEY,
+  email       TEXT NOT NULL,
+  otp_code    TEXT NOT NULL,
+  action_type TEXT NOT NULL,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ==========================================
 -- INDEXES (فهارس للأداء)
 -- ==========================================
 CREATE INDEX IF NOT EXISTS idx_categories_tenant    ON categories(tenant_id);

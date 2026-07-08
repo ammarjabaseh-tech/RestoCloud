@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ActivePortalView } from "../types";
-import { ArrowRight, UtensilsCrossed, Store, Mail, Lock, User, ChevronRight, Phone, MapPin } from "lucide-react";
+import { ArrowRight, UtensilsCrossed, Store, Mail, Lock, User, ChevronRight, Phone, MapPin, X } from "lucide-react";
 
 interface SaaSAuthViewProps {
   mode: "login" | "signup";
@@ -20,81 +20,123 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const [loginMethod, setLoginMethod] = useState<"password" | "otp">("password");
+  const [otpStep, setOtpStep] = useState<"request" | "verify">("request");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSentMsg, setOtpSentMsg] = useState<string | null>(null);
+  const [showRegisterOtpModal, setShowRegisterOtpModal] = useState(false);
+
+  // Send OTP helper for both signup and login
+  const handleSendOtp = async (actionType: "signup" | "login") => {
+    if (!email) {
+      setError("يرجى إدخال البريد الإلكتروني أولاً");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setOtpSentMsg(null);
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, actionType })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "فشل إرسال رمز التحقق");
+      
+      setOtpSentMsg(data.message);
+      if (actionType === "login") {
+        setOtpStep("verify");
+      } else {
+        setShowRegisterOtpModal(true);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyRegisterOtpAndSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      // Generate English subdomain slug from email or name
+      const cleanEmailUser = email.split("@")[0].replace(/[^a-z0-9]/g, "");
+      const slug = cleanEmailUser || `restaurant-${Date.now()}`;
+      
+      const res = await fetch("/api/tenants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nameAr: restaurantName,
+          subdomain: slug,
+          ownerName: name,
+          ownerEmail: email,
+          password: password,
+          phone: phone,
+          address: address,
+          status: "pending_approval",
+          themeColor: "emerald",
+          subscriptionPlan: "starter",
+          subscriptionAmount: 199,
+          otpCode: otpCode
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "خطأ أثناء إنشاء حساب المطعم");
+
+      setShowRegisterOtpModal(false);
+      setShowPendingMsg(true);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (mode === "signup") {
-      setLoading(true);
-      try {
-        // Generate English subdomain slug from email or name
-        const cleanEmailUser = email.split("@")[0].replace(/[^a-z0-9]/g, "");
-        const slug = cleanEmailUser || `restaurant-${Date.now()}`;
-        
-        const res = await fetch("/api/tenants", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nameAr: restaurantName,
-            subdomain: slug,
-            ownerName: name,
-            ownerEmail: email,
-            password: password,
-            phone: phone,
-            address: address,
-            status: "pending_approval",
-            themeColor: "emerald",
-            subscriptionPlan: "starter",
-            subscriptionAmount: 199
-          })
-        });
-
-        let data;
-        const text = await res.text();
-        try {
-          data = text ? JSON.parse(text) : {};
-        } catch (e) {
-          throw new Error("حدث خطأ في الاتصال بالخادم. يرجى المحاولة لاحقاً.");
-        }
-
-        if (!res.ok) {
-          throw new Error(data.error || "خطأ أثناء إنشاء حساب المطعم");
-        }
-
-        alert("تم تسجيل طلب حجز مطعمك بنجاح! 🎉 الحساب بانتظار موافقة الإدارة العامة. جاري تحويلك لصفحة تسجيل الدخول...");
-        onSelectView("auth_login");
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      // Step 1: Send registration OTP
+      await handleSendOtp("signup");
       return;
     }
 
+    // Login logic
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-
-      let data;
-      const text = await res.text();
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch (e) {
-        throw new Error("حدث خطأ في الاتصال بالخادم. يرجى المحاولة لاحقاً.");
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || "البريد الإلكتروني أو كلمة المرور غير صحيحة");
-      }
-
-      if (data.isSuperAdmin) {
-        onLoginSuccess(true);
-      } else {
+      if (loginMethod === "otp") {
+        // Login via OTP verification
+        const res = await fetch("/api/auth/login-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code: otpCode })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "رمز التحقق غير صحيح");
+        
         onLoginSuccess(false, data.user, data.tenant);
+      } else {
+        // Standard password login
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+
+        if (data.isSuperAdmin) {
+          onLoginSuccess(true);
+        } else {
+          onLoginSuccess(false, data.user, data.tenant);
+        }
       }
     } catch (err: any) {
       setError(err.message);
@@ -214,6 +256,48 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                   </div>
                 </>
               )}
+              {/* Login Method Toggle */}
+              {mode === "login" && (
+                <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl mb-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginMethod("password");
+                      setError(null);
+                      setOtpSentMsg(null);
+                    }}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      loginMethod === "password"
+                        ? "bg-white text-slate-800 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    🔑 تسجيل بكلمة المرور
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginMethod("otp");
+                      setOtpStep("request");
+                      setError(null);
+                      setOtpSentMsg(null);
+                    }}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      loginMethod === "otp"
+                        ? "bg-white text-slate-800 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    ✉️ التحقق عبر الإيميل (OTP)
+                  </button>
+                </div>
+              )}
+
+              {otpSentMsg && (
+                <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold text-center leading-relaxed">
+                  {otpSentMsg}
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1.5">البريد الإلكتروني</label>
@@ -222,46 +306,101 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                   <input
                     type="text"
                     required
+                    disabled={mode === "login" && loginMethod === "otp" && otpStep === "verify"}
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium"
+                    className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium disabled:opacity-60"
                     placeholder="admin@restaurant.com"
                   />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-bold text-slate-700">كلمة المرور</label>
-                  {mode === "login" && (
+                  {mode === "login" && loginMethod === "otp" && otpStep === "verify" && (
                     <button
                       type="button"
-                      onClick={() => alert("🔑 لاستعادة كلمة المرور أو إعادة تعيينها، يرجى التواصل مع الإدارة العامة للمنصة (Super Admin) أو مدير النظام الخاص بمطعمك لإعادة تعيين كلمة مرور جديدة.")}
-                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                      onClick={() => {
+                        setOtpStep("request");
+                        setOtpSentMsg(null);
+                        setError(null);
+                      }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
                     >
-                      نسيت كلمة المرور؟
+                      تغيير البريد
                     </button>
                   )}
                 </div>
-                <div className="relative">
-                  <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium"
-                    placeholder="••••••••"
-                  />
-                </div>
               </div>
+
+              {/* Password field - only for password login/signup */}
+              {((mode === "login" && loginMethod === "password") || mode === "signup") && (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-sm font-bold text-slate-700">كلمة المرور</label>
+                    {mode === "login" && (
+                      <button
+                        type="button"
+                        onClick={() => alert("🔑 لاستعادة كلمة المرور أو إعادة تعيينها، يرجى التواصل مع الإدارة العامة للمنصة (Super Admin) أو مدير النظام الخاص بمطعمك لإعادة تعيين كلمة مرور جديدة.")}
+                        className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                      >
+                        نسيت كلمة المرور؟
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* OTP Code input field for passwordless login verification */}
+              {mode === "login" && loginMethod === "otp" && otpStep === "verify" && (
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">رمز التحقق (OTP) من الإيميل</label>
+                  <div className="relative">
+                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ""))}
+                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono font-black text-lg tracking-[8px] text-center"
+                      placeholder="123456"
+                    />
+                  </div>
+                  <div className="mt-2 text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleSendOtp("login")}
+                      className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
+                    >
+                      إعادة إرسال رمز التحقق 🔄
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-black hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all mt-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-black hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all mt-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                {loading ? "جاري التحقق..." : mode === "login" ? "تسجيل الدخول" : "إنشاء الحساب مجاناً"}
+                {loading ? (
+                  "جاري المعالجة..."
+                ) : mode === "signup" ? (
+                  "تأكيد وإرسال رمز التحقق للبريد"
+                ) : loginMethod === "password" ? (
+                  "تسجيل الدخول"
+                ) : otpStep === "request" ? (
+                  "إرسال رمز الدخول السريع"
+                ) : (
+                  "تأكيد وتسجيل الدخول"
+                )}
                 <ChevronRight className="w-5 h-5" />
               </button>
 
@@ -270,7 +409,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                 <button
                   type="button"
                   onClick={() => onSelectView(mode === "login" ? "auth_signup" : "auth_login")}
-                  className="font-bold text-indigo-600 hover:text-indigo-700 underline underline-offset-4"
+                  className="font-bold text-indigo-600 hover:text-indigo-700 underline underline-offset-4 cursor-pointer"
                 >
                   {mode === "login" ? "أنشئ حسابك الآن" : "سجل دخولك"}
                 </button>
@@ -279,9 +418,9 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
               {mode === "signup" && (
                 <p className="text-center text-[11px] text-slate-400">
                   بإنشائك للحساب، فأنت توافق على{" "}
-                  <button type="button" onClick={() => onSelectView("terms")} className="underline">شروط الاستخدام</button>
+                  <button type="button" onClick={() => onSelectView("terms")} className="underline cursor-pointer">شروط الاستخدام</button>
                   {" "}و{" "}
-                  <button type="button" onClick={() => onSelectView("terms")} className="underline">سياسة الخصوصية</button>
+                  <button type="button" onClick={() => onSelectView("terms")} className="underline cursor-pointer">سياسة الخصوصية</button>
                   {" "}الخاصة بسفرة كلاود.
                 </p>
               )}
@@ -320,6 +459,72 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
           </div>
         </div>
       </div>
+
+      {/* Glassmorphic Registration OTP Verification Modal */}
+      {showRegisterOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-6">
+            <button
+              onClick={() => setShowRegisterOtpModal(false)}
+              className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto text-xl">
+                ✉️
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">التحقق من البريد الإلكتروني</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
+                لقد أرسلنا رمز تحقق (OTP) مكون من 6 أرقام إلى البريد الإلكتروني:
+                <br />
+                <span className="font-bold text-slate-800 dark:text-slate-200">{email}</span>
+              </p>
+            </div>
+
+            {otpSentMsg && (
+              <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs font-semibold text-center leading-relaxed">
+                {otpSentMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyRegisterOtpAndSignup} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5 text-center">أدخل الرمز هنا:</label>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ""))}
+                  className="w-full py-3 rounded-2xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono font-black text-2xl tracking-[12px] text-center text-slate-900 dark:text-white"
+                  placeholder="123456"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || otpCode.length < 6}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-black hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {loading ? "جاري التحقق..." : "تأكيد وتفعيل الحساب"}
+                <ChevronRight className="w-5 h-5" />
+              </button>
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSendOtp("signup")}
+                  className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
+                >
+                  إعادة إرسال الرمز 🔄
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

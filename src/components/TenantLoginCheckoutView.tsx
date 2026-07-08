@@ -194,7 +194,8 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
             subscriptionPlan: selectedPlan,
             subscriptionAmount: selectedPlanObj.price,
             subscriptionDate: new Date().toISOString().split('T')[0],
-            currency
+            currency,
+            bypassOTP: true
           })
         });
 

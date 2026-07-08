@@ -31,4 +31,20 @@ pool.on("error", (err) => {
   console.error("❌ PostgreSQL connection error:", err.message);
 });
 
+// Auto-create tenant_otps table if it doesn't exist on startup
+pool.query(`
+  CREATE TABLE IF NOT EXISTS tenant_otps (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL,
+    otp_code TEXT NOT NULL,
+    action_type TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`).then(() => {
+  console.log("🔒 Verification (tenant_otps) table initialized.");
+}).catch((err) => {
+  console.error("❌ Failed to initialize tenant_otps table:", err.message);
+});
+
 export default pool;

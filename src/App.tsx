@@ -64,7 +64,9 @@ export default function App() {
   }, [currentTenant]);
 
   useEffect(() => {
-    localStorage.setItem("activeView", activeView);
+    if (activeView !== 'super_admin_dashboard' && activeView !== 'super_admin_login') {
+      localStorage.setItem("activeView", activeView);
+    }
   }, [activeView]);
 
   // Handle login success from SaaSAuthView
@@ -107,59 +109,129 @@ export default function App() {
     }
   }, [currentTenant?.id]);
 
-  // Check URL query param for direct access to Super Admin
+  // Check URL query param, subdomain or path for routing on mount
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const view = params.get('view');
-    if (view === 'admin' || view === 'sa' || view === 'super_admin') {
-      setActiveView('super_admin_dashboard');
-    }
+    // Capture the initial pathname and search parameters synchronously on mount
+    const originalPathname = window.location.pathname;
+    const originalSearch = window.location.search;
+
+    const fetchAndRoute = async () => {
+      try {
+        setLoading(true);
+        // Fetch all tenants to check subdomain mapping
+        const res = await fetch("/api/tenants");
+        const data = await res.json();
+        let loadedTenants: Tenant[] = [];
+        if (Array.isArray(data)) {
+          setTenants(data);
+          loadedTenants = data;
+        }
+
+        // Parse hostname for subdomain (e.g. "ammar.sufra.cloud" or "ammar.localhost")
+        const hostname = window.location.hostname;
+        const parts = hostname.split('.');
+        let sub: string | null = null;
+        
+        if (parts.length > 2) {
+          if (parts[0] !== 'sa' && parts[0] !== 'admin' && parts[0] !== 'www') {
+            sub = parts[0].toLowerCase();
+          } else if (parts[0] === 'sa' || parts[0] === 'admin') {
+            sub = parts[0].toLowerCase();
+          }
+        } else if (parts.length === 2 && parts[1] === 'localhost') {
+          sub = parts[0].toLowerCase();
+        }
+
+        const params = new URLSearchParams(originalSearch);
+        const viewParam = params.get('view');
+        const previewTenantId = params.get("preview_tenant") || params.get("tenant");
+        
+        // 1. Is this a Super Admin path/subdomain?
+        const isSuperAdminRoute = sub === 'sa' || sub === 'admin' || originalPathname === '/sa' || viewParam === 'admin' || viewParam === 'sa' || viewParam === 'super_admin';
+        
+        const isSA = localStorage.getItem("isSuperAdmin") === "true";
+        console.log("[App Router] isSuperAdminRoute:", isSuperAdminRoute, "subdomain:", sub, "originalPathname:", originalPathname, "isSA:", isSA);
+
+        if (isSuperAdminRoute) {
+          if (isSA) {
+            console.log("[App Router] Setting view to super_admin_dashboard");
+            setActiveView('super_admin_dashboard');
+          } else {
+            console.log("[App Router] Setting view to super_admin_login (isSA is false)");
+            setActiveView('super_admin_login');
+          }
+        }
+        // 2. Is this a preview tenant parameter request?
+        else if (previewTenantId) {
+          const target = loadedTenants.find(t => t.id === previewTenantId || t.subdomain.toLowerCase() === previewTenantId.toLowerCase());
+          if (target) {
+            setCurrentTenant(target);
+            const usersRes = await fetch(`/api/tenants/${target.id}/users`);
+            const users = await usersRes.json();
+            if (Array.isArray(users) && users.length > 0) {
+              const owner = users.find((u: TenantUser) => u.role === "owner") || users[0];
+              setCurrentUser(owner);
+            }
+            setActiveView("pos_dashboard");
+          }
+        }
+        // 3. Is this a Tenant subdomain route?
+        else if (sub && sub !== 'sa' && sub !== 'admin' && sub !== 'www') {
+          const targetTenant = loadedTenants.find(t => t.subdomain.toLowerCase() === sub);
+          if (targetTenant) {
+            setCurrentTenant(targetTenant);
+            // If path is /menu or digital menu
+            if (originalPathname === '/menu' || originalPathname.includes('/menu')) {
+              setActiveView('digital_menu');
+            } else {
+              // Default to tenant brand view or login page for this tenant
+              setActiveView('tenant_login');
+            }
+          } else {
+            setActiveView('landing_page');
+          }
+        }
+        // 4. Normal SaaS Landing Page route
+        else {
+          const saved = localStorage.getItem("activeView");
+          if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login') {
+            setActiveView(saved as ActivePortalView);
+          } else {
+            setActiveView('landing_page');
+          }
+        }
+      } catch (e) {
+        console.error("Routing error:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAndRoute();
   }, []);
 
-  // Detect direct /sa path for Super Admin login page
+  // Synchronize browser address bar URL with activeView state
   useEffect(() => {
-    if (window.location.pathname === '/sa') {
-      const isSA = localStorage.getItem("isSuperAdmin") === "true";
-      if (isSA) {
-        setActiveView('super_admin_dashboard');
+    if (loading) return; // Do not alter the URL pathname while loading and resolving routing on mount!
+    
+    // We only alter path history if we are not on a custom tenant subdomain (which handles its own routing)
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+    const hasTenantSubdomain = (parts.length > 2 && parts[0] !== 'www' && parts[0] !== 'sa' && parts[0] !== 'admin') || 
+                               (parts.length === 2 && parts[1] === 'localhost' && parts[0] !== 'sa' && parts[0] !== 'admin');
+    
+    if (!hasTenantSubdomain) {
+      if (activeView === 'super_admin_dashboard' || activeView === 'super_admin_login') {
+        if (window.location.pathname !== '/sa') {
+          window.history.pushState({}, '', '/sa');
+        }
       } else {
-        setActiveView('super_admin_login');
+        if (window.location.pathname === '/sa') {
+          window.history.pushState({}, '', '/');
+        }
       }
     }
-  }, []);
-
-  // Check URL query param for previewing a tenant
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const previewTenantId = params.get("preview_tenant");
-    if (previewTenantId) {
-      const loadPreview = async () => {
-        try {
-          setLoading(true);
-          const tenantRes = await fetch(`/api/tenants`);
-          const allTenants = await tenantRes.json();
-          if (Array.isArray(allTenants)) {
-            const target = allTenants.find(t => t.id === previewTenantId);
-            if (target) {
-              setCurrentTenant(target);
-              const usersRes = await fetch(`/api/tenants/${previewTenantId}/users`);
-              const users = await usersRes.json();
-              if (Array.isArray(users) && users.length > 0) {
-                const owner = users.find((u: TenantUser) => u.role === "owner") || users[0];
-                setCurrentUser(owner);
-              }
-              setActiveView("pos_dashboard");
-            }
-          }
-        } catch (e) {
-          console.error("Failed to load preview tenant:", e);
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadPreview();
-    }
-  }, []);
+  }, [activeView, loading]);
 
   // Whenever activeView changes, if it is super_admin_dashboard, refetch tenants
   useEffect(() => {
