@@ -42,13 +42,31 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
   const baseDomain = getBaseDomain();
   const protocol = window.location.protocol;
 
-  // Generate URL based on selected target
+  // Check if host is a direct IP address (e.g. 192.168.1.1 or 123.45.67.89)
+  const isIPAddress = (hostStr: string) => {
+    const ip = hostStr.split(':')[0];
+    return /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(ip);
+  };
+
+  // Generate URL based on selected target (supports both subdomains and direct IP/port configurations)
   const getMenuUrl = (target: string | number) => {
-    const baseUrl = `${protocol}//${tenant.subdomain}.${baseDomain}/menu`;
-    if (target === "general" || !target) {
-      return baseUrl;
+    const host = window.location.host;
+    
+    if (isIPAddress(host)) {
+      // IP address fallback (uses query params instead of subdomains)
+      const baseUrl = `${protocol}//${host}/menu?tenant=${tenant.subdomain}`;
+      if (target === "general" || !target) {
+        return baseUrl;
+      }
+      return `${baseUrl}&table=${target}`;
+    } else {
+      // Standard subdomain configuration
+      const baseUrl = `${protocol}//${tenant.subdomain}.${baseDomain}/menu`;
+      if (target === "general" || !target) {
+        return baseUrl;
+      }
+      return `${baseUrl}?table=${target}`;
     }
-    return `${baseUrl}?table=${target}`;
   };
 
   const currentUrl = getMenuUrl(selectedTarget);
@@ -361,7 +379,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                     {renderSVGQR("general", 160)}
                   </div>
                   <div className="text-[9px] font-mono text-slate-400 truncate">
-                    {protocol}//{tenant.subdomain}.{baseDomain}/menu
+                    {getMenuUrl("general")}
                   </div>
                 </div>
 
@@ -382,7 +400,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       {renderSVGQR(t.tableNumber, 160)}
                     </div>
                     <div className="text-[9px] font-mono text-slate-400 truncate">
-                      {protocol}//{tenant.subdomain}.{baseDomain}/menu?table={t.tableNumber}
+                      {getMenuUrl(t.tableNumber)}
                     </div>
                   </div>
                 ))}

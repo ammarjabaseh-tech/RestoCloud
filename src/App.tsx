@@ -183,7 +183,17 @@ export default function App() {
             setActiveView('super_admin_login');
           }
         }
-        // B. Is this a preview tenant parameter request?
+        // B. Is this a customer digital menu request via IP or query parameter? (e.g. /menu?tenant=ammar)
+        else if ((originalPathname === '/menu' || originalPathname.includes('/menu')) && previewTenantId) {
+          const target = loadedTenants.find(t => t.id === previewTenantId || t.subdomain.toLowerCase() === previewTenantId.toLowerCase());
+          if (target) {
+            setCurrentTenant(target);
+            setActiveView('digital_menu');
+          } else {
+            setActiveView('landing_page');
+          }
+        }
+        // C. Is this a preview tenant parameter request?
         else if (previewTenantId) {
           const target = loadedTenants.find(t => t.id === previewTenantId || t.subdomain.toLowerCase() === previewTenantId.toLowerCase());
           if (target) {
