@@ -99,7 +99,7 @@ export const SaaSPortalView: React.FC<SaaSPortalViewProps> = ({
               <span>نظام سحابي متعدد المستأجرين (Multi-Tenant SaaS Architecture)</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              بوابة إدارة منصة <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">سفرة كلاود</span>
+              بوابة إدارة منصة <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">ريستو كلاود (RestoCloud)</span>
             </h1>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
               تحكم كامل في جميع المطاعم المسجلة في المنصة. كل مطعم يمتلك نطاقاً فرعياً مستقلاً (Subdomain)، لوحة كاشير POS سريعة، قائمة طعام رقمية متجاوبة، وقاعدة بيانات معزولة جاهزة للتشغيل على سيرفرات VPS.
@@ -167,7 +167,7 @@ export const SaaSPortalView: React.FC<SaaSPortalViewProps> = ({
           </div>
           <div>
             <p className="text-xs text-slate-500 font-medium">النطاقات الفرعية النشطة</p>
-            <h3 className="text-2xl font-black text-slate-900 mt-0.5" dir="ltr">*.sufra.app</h3>
+            <h3 className="text-2xl font-black text-slate-900 mt-0.5" dir="ltr">*.restocloud.app</h3>
           </div>
         </div>
 
@@ -218,7 +218,7 @@ export const SaaSPortalView: React.FC<SaaSPortalViewProps> = ({
                         <h3 className="text-base font-black text-slate-900 dark:text-white">{t.nameAr}</h3>
                         <div className="flex items-center gap-1 mt-1 text-xs text-slate-500 font-mono" dir="ltr">
                           <Globe className="w-3.5 h-3.5 text-amber-500" />
-                          <span className="text-emerald-600 font-bold">{t.subdomain}</span>.sufra.app
+                          <span className="text-emerald-600 font-bold">{t.subdomain}</span>.restocloud.app
                         </div>
                       </div>
                     </div>
@@ -315,7 +315,7 @@ export const SaaSPortalView: React.FC<SaaSPortalViewProps> = ({
                         </h3>
                         <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono" dir="ltr">
                           <Globe className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="text-indigo-600 font-semibold">{t.subdomain}</span>.sufra.app
+                          <span className="text-indigo-600 font-semibold">{t.subdomain}</span>.restocloud.app
                         </div>
                       </div>
                     </div>

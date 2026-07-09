@@ -22,19 +22,19 @@ const transporter = nodemailer.createTransport({
 async function sendOTPEmail(email: string, otp: string, actionType: "signup" | "login") {
   const cleanEmail = email.trim().toLowerCase();
   const subject = actionType === "signup" 
-    ? "رمز التحقق لإنشاء حسابك في سفرة كلاود 🔑" 
-    : "رمز التحقق لتسجيل الدخول في سفرة كلاود 🔑";
+    ? "رمز التحقق لإنشاء حسابك في ريستو كلاود (RestoCloud) 🔑" 
+    : "رمز التحقق لتسجيل الدخول في ريستو كلاود (RestoCloud) 🔑";
   
   const title = actionType === "signup" ? "إنشاء حساب جديد" : "تسجيل الدخول السريع";
   const desc = actionType === "signup" 
-    ? "شكراً لتسجيلك في منصة سفرة كلاود. يرجى استخدام رمز التحقق أدناه لتفعيل حسابك وإكمال التسجيل:"
-    : "تم طلب رمز دخول سريع لحسابك في سفرة كلاود. يرجى استخدام الرمز التالي لتسجيل الدخول إلى لوحتك:";
+    ? "شكراً لتسجيلك في منصة ريستو كلاود (RestoCloud). يرجى استخدام رمز التحقق أدناه لتفعيل حسابك وإكمال التسجيل:"
+    : "تم طلب رمز دخول سريع لحسابك في ريستو كلاود (RestoCloud). يرجى استخدام الرمز التالي لتسجيل الدخول إلى لوحتك:";
 
   const htmlContent = `
     <div dir="rtl" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
       <div style="text-align: center; margin-bottom: 20px;">
         <span style="font-size: 40px;">🍽️</span>
-        <h1 style="color: #4f46e5; margin: 10px 0 0 0; font-size: 24px; font-weight: 800;">سفرة كلاود (Sufra Cloud)</h1>
+        <h1 style="color: #4f46e5; margin: 10px 0 0 0; font-size: 24px; font-weight: 800;">ريستو كلاود (RestoCloud) (RestoCloud)</h1>
       </div>
       <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 20px 0;">
       <h2 style="color: #2d3748; font-size: 18px; font-weight: 700; margin-bottom: 10px;">${title}</h2>
@@ -46,12 +46,12 @@ async function sendOTPEmail(email: string, otp: string, actionType: "signup" | "
       <p style="color: #718096; font-size: 12px; line-height: 1.5;">إذا لم تقم بطلب هذا الرمز، يرجى تجاهل هذا البريد الإلكتروني.</p>
       <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 20px 0;">
       <div style="text-align: center; color: #a0aec0; font-size: 11px;">
-        سفرة كلاود — نظام مبيعات وإدارة المطاعم SaaS السحابي المتكامل.
+        ريستو كلاود (RestoCloud) — نظام مبيعات وإدارة المطاعم SaaS السحابي المتكامل.
       </div>
     </div>
   `;
 
-  const fromMail = process.env.SMTP_FROM || '"Sufra Cloud" <noreply@sufra.cloud>';
+  const fromMail = process.env.SMTP_FROM || '"RestoCloud" <noreply@restocloud.app>';
 
   try {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -512,12 +512,12 @@ app.post("/api/auth/login", async (req, res) => {
   const cleanEmail = email.trim().toLowerCase();
 
   // 1. Check Super Admin
-  const saEmail = (process.env.SUPER_ADMIN_EMAIL || "admin@sufra.cloud").trim().toLowerCase();
+  const saEmail = (process.env.SUPER_ADMIN_EMAIL || "admin@restocloud.app").trim().toLowerCase();
   const saPass = process.env.SUPER_ADMIN_PASSWORD || "admin123";
 
   if (
     (cleanEmail === saEmail && password === saPass) ||
-    (cleanEmail === "sa" && password === "sa" && saEmail === "admin@sufra.cloud" && saPass === "admin123")
+    (cleanEmail === "sa" && password === "sa" && saEmail === "admin@restocloud.app" && saPass === "admin123")
   ) {
     return res.json({
       isSuperAdmin: true,
@@ -1065,7 +1065,7 @@ app.post("/api/ai/analyze-menu", async (req, res) => {
 app.get("/api/export/postgresql", async (req, res) => {
   try {
     const tenantsRes = await pool.query("SELECT * FROM tenants");
-    const sql = `-- Sufra Cloud PostgreSQL Export - ${new Date().toISOString()}\n\n` +
+    const sql = `-- RestoCloud PostgreSQL Export - ${new Date().toISOString()}\n\n` +
       tenantsRes.rows.map((t: any) =>
         `INSERT INTO tenants (id, subdomain, name_ar) VALUES ('${t.id}', '${t.subdomain}', '${t.name_ar}') ON CONFLICT (id) DO NOTHING;`
       ).join('\n');
@@ -1086,7 +1086,7 @@ if (process.env.NODE_ENV !== "production") {
   }).then((vite) => {
     app.use(vite.middlewares);
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Sufra Cloud Multi-Tenant POS Server running on http://localhost:${PORT}`);
+      console.log(`🚀 RestoCloud Multi-Tenant POS Server running on http://localhost:${PORT}`);
     });
   });
 } else {

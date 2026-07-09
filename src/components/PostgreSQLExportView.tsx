@@ -72,7 +72,7 @@ export const PostgreSQLExportView: React.FC<PostgreSQLExportViewProps> = ({ tena
               تصدير قاعدة بيانات <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">PostgreSQL</span> وسكربتات التثبيت
             </h1>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              تم تصميم هيكلية سفرة كلاود بكود نظيف ومعزول (SaaS Multi-Tenant Schema) يدعم العلاقات والجداول في PostgreSQL مع دعم النطاقات الفرعية وديمومة البيانات. يمكنك تحميل السكربت الكامل وتشغيله على أي سيرفر Linux VPS خاص.
+              تم تصميم هيكلية ريستو كلاود (RestoCloud) بكود نظيف ومعزول (SaaS Multi-Tenant Schema) يدعم العلاقات والجداول في PostgreSQL مع دعم النطاقات الفرعية وديمومة البيانات. يمكنك تحميل السكربت الكامل وتشغيله على أي سيرفر Linux VPS خاص.
             </p>
           </div>
 
@@ -177,10 +177,10 @@ export const PostgreSQLExportView: React.FC<PostgreSQLExportViewProps> = ({ tena
               <span>إعداد النطاقات الفرعية (Nginx Wildcard)</span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              قم بضبط Nginx Reverse Proxy لاستقبال النطاقات الفرعية <code className="bg-slate-200 dark:bg-slate-700 px-1 rounded">*.sufra.app</code> وتوجيهها للمنفذ 3000.
+              قم بضبط Nginx Reverse Proxy لاستقبال النطاقات الفرعية <code className="bg-slate-200 dark:bg-slate-700 px-1 rounded">*.restocloud.app</code> وتوجيهها للمنفذ 3000.
             </p>
             <div className="bg-slate-900 text-indigo-300 p-3 rounded-xl font-mono text-[11px]" dir="ltr">
-              server_name *.sufra.app;<br />
+              server_name *.restocloud.app;<br />
               proxy_pass http://localhost:3000;
             </div>
           </div>

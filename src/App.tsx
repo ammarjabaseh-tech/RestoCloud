@@ -127,7 +127,7 @@ export default function App() {
           loadedTenants = data;
         }
 
-        // Parse hostname for subdomain (e.g. "ammar.sufra.cloud" or "ammar.localhost")
+        // Parse hostname for subdomain (e.g. "ammar.restocloud.app" or "ammar.localhost")
         const hostname = window.location.hostname;
         const parts = hostname.split('.');
         let sub: string | null = null;
@@ -480,7 +480,7 @@ export default function App() {
         <div className="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-3xl shadow-sm animate-pulse">
           <Store className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold">جاري تشغيل منصة سفرة كلاود (Sufra Cloud)...</h2>
+        <h2 className="text-xl font-bold">جاري تشغيل منصة ريستو كلاود (RestoCloud) (RestoCloud)...</h2>
         <p className="text-xs text-slate-500">تحميل بيانات المستأجرين، لوحة الكاشير POS، وقوائم الطعام</p>
       </div>
     );
@@ -619,7 +619,7 @@ export default function App() {
       <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto shadow-sm print:hidden">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800">سفرة كلاود (Sufra Cloud)</span>
+            <span className="font-bold text-slate-800">ريستو كلاود (RestoCloud) (RestoCloud)</span>
             <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200 font-medium text-[10px]">
               SaaS Multi-Tenant
             </span>

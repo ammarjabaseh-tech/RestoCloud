@@ -26,7 +26,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
   // Generate URL based on selected target
   const getMenuUrl = (target: string | number) => {
-    const baseUrl = `https://${tenant.subdomain}.sufra.app/menu`;
+    const baseUrl = `https://${tenant.subdomain}.restocloud.app/menu`;
     if (target === "general" || !target) {
       return baseUrl;
     }
@@ -353,7 +353,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                     {renderSVGQR("general", 160)}
                   </div>
                   <div className="text-[9px] font-mono text-slate-400 truncate">
-                    https://{tenant.subdomain}.sufra.app/menu
+                    https://{tenant.subdomain}.restocloud.app/menu
                   </div>
                 </div>
 
@@ -374,7 +374,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       {renderSVGQR(t.tableNumber, 160)}
                     </div>
                     <div className="text-[9px] font-mono text-slate-400 truncate">
-                      https://{tenant.subdomain}.sufra.app/menu?table={t.tableNumber}
+                      https://{tenant.subdomain}.restocloud.app/menu?table={t.tableNumber}
                     </div>
                   </div>
                 ))}
@@ -386,7 +386,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
         {/* Modal Footer (Hidden in print) */}
         <div className="p-4 bg-white border-t border-slate-200 text-center text-xs text-slate-500 flex items-center justify-between print:hidden">
-          <span>نظام سفرة كلاود (Sufra Cloud) — باركود المنيو الرقمي الفوري</span>
+          <span>نظام ريستو كلاود (RestoCloud) (RestoCloud) — باركود المنيو الرقمي الفوري</span>
           <button
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"

@@ -239,7 +239,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-wide text-slate-100">سفرة كلاود <span className="text-xs font-medium text-indigo-400">سوبر أدمن</span></h1>
+              <h1 className="text-lg font-black tracking-wide text-slate-100">ريستو كلاود (RestoCloud) <span className="text-xs font-medium text-indigo-400">سوبر أدمن</span></h1>
               <p className="text-[10px] text-slate-400">لوحة التحكم السحابية المركزية</p>
             </div>
           </div>

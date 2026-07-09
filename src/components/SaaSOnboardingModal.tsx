@@ -167,7 +167,7 @@ export const SaaSOnboardingModal: React.FC<SaaSOnboardingModalProps> = ({
               </label>
               <div className="flex items-center" dir="ltr">
                 <span className="bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-300 dark:border-slate-700 text-slate-500 px-3 py-2.5 rounded-l-xl text-sm font-mono">
-                  .sufra.app
+                  .restocloud.app
                 </span>
                 <input
                   type="text"
@@ -178,7 +178,7 @@ export const SaaSOnboardingModal: React.FC<SaaSOnboardingModalProps> = ({
                   className="w-full px-4 py-2.5 rounded-r-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">سيكون رابط المنيو: {subdomain || 'name'}.sufra.app</p>
+              <p className="text-[11px] text-slate-400 mt-1">سيكون رابط المنيو: {subdomain || 'name'}.restocloud.app</p>
             </div>
           </div>
 

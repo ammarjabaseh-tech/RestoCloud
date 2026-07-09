@@ -24,7 +24,7 @@ export const pool = new Pool(
 
 // Test connection on startup
 pool.on("connect", () => {
-  console.log("✅ PostgreSQL connected: sufra_cloud database");
+  console.log("✅ PostgreSQL connected: RestoCloud database");
 });
 
 pool.on("error", (err) => {

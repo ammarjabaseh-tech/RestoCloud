@@ -1,6 +1,6 @@
 -- ==========================================
--- Sufra Cloud - PostgreSQL Schema
--- قاعدة بيانات منصة سفرة كلاود SaaS
+-- RestoCloud - PostgreSQL Schema
+-- قاعدة بيانات منصة ريستو كلاود (RestoCloud) SaaS
 -- ==========================================
 
 -- Enable UUID generation

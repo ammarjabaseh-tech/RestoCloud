@@ -20,7 +20,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({ onSelectView }
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
               <UtensilsCrossed className="w-6 h-6" />
             </div>
-            <span className="text-xl font-black tracking-tight text-white">سفرة كلاود</span>
+            <span className="text-xl font-black tracking-tight text-white">ريستو كلاود (RestoCloud)</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
             <a href="#features" className="hover:text-white transition-colors">المميزات</a>
@@ -57,7 +57,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({ onSelectView }
             نظام مبيعات متكامل،<br />مدعوم بالذكاء الاصطناعي
           </h1>
           <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-            منصة سفرة كلاود توفر لك نقاط بيع سريعة، منيو رقمي تفاعلي، وفواتير إلكترونية متوافقة مع متطلبات هيئة الزكاة (ZATCA)، لتنطلق بمطعمك نحو العالمية.
+            منصة ريستو كلاود (RestoCloud) توفر لك نقاط بيع سريعة، منيو رقمي تفاعلي، وفواتير إلكترونية متوافقة مع متطلبات هيئة الزكاة (ZATCA)، لتنطلق بمطعمك نحو العالمية.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
@@ -81,7 +81,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({ onSelectView }
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-black mb-4">كل ما يحتاجه مطعمك في مكان واحد</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">صممنا سفرة كلاود ليكون الحل الشامل الذي يغنيك عن عشرات البرامج المعقدة.</p>
+            <p className="text-slate-400 max-w-2xl mx-auto">صممنا ريستو كلاود (RestoCloud) ليكون الحل الشامل الذي يغنيك عن عشرات البرامج المعقدة.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -198,9 +198,9 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({ onSelectView }
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-center gap-3 mb-6">
             <UtensilsCrossed className="w-5 h-5 text-slate-400" />
-            <span className="font-bold text-slate-300">سفرة كلاود</span>
+            <span className="font-bold text-slate-300">ريستو كلاود (RestoCloud)</span>
           </div>
-          <p className="mb-4">جميع الحقوق محفوظة &copy; {new Date().getFullYear()} نظام سفرة كلاود لتقنية المعلومات.</p>
+          <p className="mb-4">جميع الحقوق محفوظة &copy; {new Date().getFullYear()} نظام ريستو كلاود (RestoCloud) لتقنية المعلومات.</p>
           <div className="flex items-center justify-center gap-6">
             <button onClick={() => onSelectView('terms')} className="hover:text-white transition-colors">شروط الاستخدام</button>
             <button onClick={() => onSelectView('terms')} className="hover:text-white transition-colors">سياسة الخصوصية</button>

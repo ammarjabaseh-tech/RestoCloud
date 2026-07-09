@@ -58,7 +58,7 @@ export default function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps
             <ShieldAlert className="w-9 h-9" />
           </div>
           <h2 className="text-2xl font-bold text-slate-100">دخول السوبر أدمن</h2>
-          <p className="text-xs text-slate-400 mt-2">لوحة التحكم المركزية لسفرة كلاود</p>
+          <p className="text-xs text-slate-400 mt-2">لوحة التحكم المركزية لريستو كلاود (RestoCloud)</p>
         </div>
 
         {error && (
@@ -76,7 +76,7 @@ export default function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps
               </span>
               <input
                 type="text"
-                placeholder="sa أو admin@sufra.cloud"
+                placeholder="sa أو admin@restocloud.app"
                 className="w-full rounded-xl border border-slate-800 bg-slate-950/40 py-3 pr-10 pl-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

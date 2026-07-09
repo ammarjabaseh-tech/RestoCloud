@@ -200,7 +200,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       <div className="bg-slate-900 text-slate-300 px-4 py-2.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono border border-slate-800 shadow-md">
         <div className="flex items-center gap-2 truncate w-full sm:w-auto" dir="ltr">
           <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="text-white font-bold truncate">https://{tenant.subdomain}.sufra.app/menu</span>
+          <span className="text-white font-bold truncate">https://{tenant.subdomain}.restocloud.app/menu</span>
         </div>
         <button
           onClick={() => setShowQRModal(true)}

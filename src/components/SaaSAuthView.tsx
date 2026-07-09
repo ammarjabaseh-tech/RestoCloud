@@ -169,7 +169,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
           <p className="text-slate-500 mb-8 font-medium">
             {mode === "login"
               ? "سجل دخولك لإدارة مطعمك ونقاط البيع"
-              : "أنشئ حسابك الآن وجرب سفرة كلاود مجاناً"}
+              : "أنشئ حسابك الآن وجرب ريستو كلاود (RestoCloud) مجاناً"}
           </p>
 
           {showPendingMsg ? (
@@ -421,7 +421,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                   <button type="button" onClick={() => onSelectView("terms")} className="underline cursor-pointer">شروط الاستخدام</button>
                   {" "}و{" "}
                   <button type="button" onClick={() => onSelectView("terms")} className="underline cursor-pointer">سياسة الخصوصية</button>
-                  {" "}الخاصة بسفرة كلاود.
+                  {" "}الخاصة بريستو كلاود (RestoCloud).
                 </p>
               )}
             </form>
@@ -454,7 +454,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
             </div>
             <div className="text-right text-sm text-indigo-200">
               <div className="font-bold text-white">+500 مطعم وكافيه</div>
-              يستخدمون سفرة كلاود يومياً
+              يستخدمون ريستو كلاود (RestoCloud) يومياً
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 {
-  "name": "سفرة كلاود - نظام إدارة ومبيعات المطاعم (SaaS)",
+  "name": "ريستو كلاود (RestoCloud) - نظام إدارة ومبيعات المطاعم (SaaS)",
   "description": "نظام ويب متكامل لإدارة ومبيعات المطاعم بنظام متعدد المستأجرين (Multi-tenant POS & Menu SaaS) مع دعم اللغة العربية RTL، لوحة كاشير POS، لوحة إدارة للمطعم، وقائمة طعام رقمية تفاعلية للزبائن.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

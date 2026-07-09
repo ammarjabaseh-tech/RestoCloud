@@ -69,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-1.5 font-bold text-base tracking-tight text-slate-900">
               <span className="bg-indigo-600 text-white font-bold px-2 py-1 rounded-lg text-xs flex items-center gap-1 shadow-sm">
                 <Store className="w-3.5 h-3.5 text-white" />
-                سفرة كلاود
+                ريستو كلاود (RestoCloud)
               </span>
             </div>
 

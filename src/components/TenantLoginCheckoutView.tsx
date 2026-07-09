@@ -99,7 +99,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
       features: [
         "منيو إلكتروني رقمي مع باركود QR",
         "حتى 500 طلب شهرياً",
-        "استضافة على نطاق فرعي (*.sufra.app)",
+        "استضافة على نطاق فرعي (*.restocloud.app)",
         "لوحة تحكم أساسية للمنتجات والأقسام",
         "دعم فني عبر البريد الإلكتروني"
       ],
@@ -284,7 +284,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
             حجز مطعمك على دومينك الخاص وتفعيل الاشتراكات
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-            أنشئ مطعمك السحابي، اختر باقتك المفضلة، وادفع إلكترونياً بأمان عبر مدى أو فيزا. سيتم حجز دومينك الخاص (<span className="font-mono text-emerald-400">yourname.sufra.app</span>) ومراجعة طلبك من قبل إدارة المنصة لتفعليه فوراً.
+            أنشئ مطعمك السحابي، اختر باقتك المفضلة، وادفع إلكترونياً بأمان عبر مدى أو فيزا. سيتم حجز دومينك الخاص (<span className="font-mono text-emerald-400">yourname.restocloud.app</span>) ومراجعة طلبك من قبل إدارة المنصة لتفعليه فوراً.
           </p>
         </div>
 
@@ -392,14 +392,14 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                       }`}
                       dir="ltr"
                     />
-                    <span className="absolute left-3 text-xs font-mono text-slate-400 pointer-events-none">.sufra.app</span>
+                    <span className="absolute left-3 text-xs font-mono text-slate-400 pointer-events-none">.restocloud.app</span>
                   </div>
                   {cleanSubdomain && (
                     <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold">
                       {isSubdomainTaken ? (
                         <span className="text-rose-600 flex items-center gap-1">❌ هذا الدومين محجوز مسبقاً، اختر اسماً آخر</span>
                       ) : (
-                        <span className="text-emerald-600 flex items-center gap-1">✅ دومين رائع ومتاح للحجز الفوري! (https://{cleanSubdomain}.sufra.app)</span>
+                        <span className="text-emerald-600 flex items-center gap-1">✅ دومين رائع ومتاح للحجز الفوري! (https://{cleanSubdomain}.restocloud.app)</span>
                       )}
                     </div>
                   )}
@@ -716,7 +716,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">النطاق المحجوز:</span>
-                      <span className="font-mono font-bold text-emerald-600" dir="ltr">{cleanSubdomain}.sufra.app</span>
+                      <span className="font-mono font-bold text-emerald-600" dir="ltr">{cleanSubdomain}.restocloud.app</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">المسؤول:</span>
@@ -885,7 +885,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                   🎉 تم دفع الرسوم وحجز مطعمك بنجاح!
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  لقد تم إنشاء حساب مطعم <span className="font-bold text-indigo-600">{createdTenantResult.nameAr}</span> وحجز النطاق الفرعي <span className="font-mono font-bold text-emerald-600" dir="ltr">{createdTenantResult.subdomain}.sufra.app</span> بنجاح.
+                  لقد تم إنشاء حساب مطعم <span className="font-bold text-indigo-600">{createdTenantResult.nameAr}</span> وحجز النطاق الفرعي <span className="font-mono font-bold text-emerald-600" dir="ltr">{createdTenantResult.subdomain}.restocloud.app</span> بنجاح.
                 </p>
               </div>
 
@@ -1012,7 +1012,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
 
               <div className="text-xs text-amber-900/90 dark:text-amber-200 space-y-1.5 leading-relaxed">
                 <p>أهلاً بك <strong>{loggedInPendingTenant.ownerName}</strong> في مطعم <strong>{loggedInPendingTenant.nameAr}</strong>.</p>
-                <p>لقد تم استلام دفعة الاشتراك بنجاح وحجز الدومين <span className="font-mono font-bold" dir="ltr">{loggedInPendingTenant.subdomain}.sufra.app</span>.</p>
+                <p>لقد تم استلام دفعة الاشتراك بنجاح وحجز الدومين <span className="font-mono font-bold" dir="ltr">{loggedInPendingTenant.subdomain}.restocloud.app</span>.</p>
                 <p className="font-bold text-indigo-700 dark:text-indigo-400">حسابك الآن قيد المراجعة والموافقة من الإدارة العامة (Super Admin). بمجرد الضغط على زر "موافقة وتفعيل المطعم" من لوحة الإدارة، سيتم فتح الكاشير والمنيو الفوري لك!</p>
               </div>
 

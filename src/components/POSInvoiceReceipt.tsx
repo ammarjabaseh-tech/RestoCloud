@@ -168,7 +168,7 @@ export const POSInvoiceReceipt: React.FC<POSInvoiceReceiptProps> = ({
         </div>
 
         <p className="text-[11px] font-bold text-slate-800">شكراً لزيارتكم! نتمنى لكم أطيب الأوقات</p>
-        <p className="text-[10px] text-slate-500 font-mono" dir="ltr">Powered by Sufra Cloud POS v2.5</p>
+        <p className="text-[10px] text-slate-500 font-mono" dir="ltr">Powered by RestoCloud POS v2.5</p>
       </div>
     </div>
   );
