@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import QRCode from "qrcode";
 import { Tenant, TableItem } from "../types";
 import { getThemeClasses } from "../utils/theme";
 import { RestaurantLogo } from "./RestaurantLogo";
@@ -67,80 +68,70 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
     window.print();
   };
 
-  // Helper to render a high-contrast decorative SVG QR Pattern representing the URL
-  const renderSVGQR = (targetStr: string | number, size = 220) => {
-    // Generate deterministic pattern based on target string
-    const seed = `${tenant.subdomain}-${targetStr}`;
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = (hash << 5) - hash + seed.charCodeAt(i);
-      hash |= 0;
-    }
+  const [qrUrls, setQrUrls] = useState<Record<string, string>>({});
 
-    const gridSize = 15;
-    const cellSize = size / gridSize;
-    const cells = [];
+  useEffect(() => {
+    const generateAllQrs = async () => {
+      const urls: Record<string, string> = {};
+      try {
+        // Generate general QR
+        const genUrl = getMenuUrl("general");
+        urls["general"] = await QRCode.toDataURL(genUrl, {
+          margin: 1,
+          width: 250,
+          color: {
+            dark: "#0f172a",
+            light: "#ffffff"
+          }
+        });
 
-    // Finder patterns (Top-Left, Top-Right, Bottom-Left)
-    const isFinder = (r: number, c: number) => {
-      if (r <= 3 && c <= 3) return true;
-      if (r <= 3 && c >= gridSize - 4) return true;
-      if (r >= gridSize - 4 && c <= 3) return true;
-      return false;
+        // Generate QRs for all tables
+        for (const t of tables) {
+          const tblUrl = getMenuUrl(t.tableNumber);
+          urls[t.tableNumber.toString()] = await QRCode.toDataURL(tblUrl, {
+            margin: 1,
+            width: 250,
+            color: {
+              dark: "#0f172a",
+              light: "#ffffff"
+            }
+          });
+        }
+        setQrUrls(urls);
+      } catch (err) {
+        console.error("Failed to generate QR codes:", err);
+      }
     };
 
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        if (isFinder(r, c)) continue;
-        // Don't draw in center (3x3) where restaurant logo goes
-        if (r >= 6 && r <= 8 && c >= 6 && c <= 8) continue;
+    generateAllQrs();
+  }, [tables, tenant.subdomain, baseDomain, protocol]);
 
-        const cellHash = Math.sin(r * 12.9898 + c * 78.233 + hash) * 43758.5453;
-        const isFilled = (cellHash - Math.floor(cellHash)) > 0.42;
-        if (isFilled) {
-          cells.push(
-            <rect
-              key={`${r}-${c}`}
-              x={c * cellSize}
-              y={r * cellSize}
-              width={cellSize + 0.5}
-              height={cellSize + 0.5}
-              rx={2}
-              fill="#0f172a"
-            />
-          );
-        }
-      }
+  // Helper to render a high-contrast real QR code representing the URL
+  const renderSVGQR = (targetStr: string | number, size = 220) => {
+    const dataUrl = qrUrls[targetStr.toString()];
+    if (!dataUrl) {
+      return (
+        <div 
+          style={{ width: size, height: size }} 
+          className="mx-auto flex items-center justify-center bg-slate-50 border rounded-2xl animate-pulse text-xs text-slate-400"
+        >
+          جاري التوليد...
+        </div>
+      );
     }
 
     return (
-      <div className="relative inline-block bg-white p-4 rounded-3xl shadow-md border-2 border-slate-100 mx-auto">
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto block">
-          {/* Background */}
-          <rect width={size} height={size} fill="#ffffff" rx={8} />
-
-          {/* Top-Left Finder Pattern */}
-          <rect x={0} y={0} width={cellSize * 4} height={cellSize * 4} rx={6} fill="#0f172a" />
-          <rect x={cellSize * 0.7} y={cellSize * 0.7} width={cellSize * 2.6} height={cellSize * 2.6} rx={4} fill="#ffffff" />
-          <rect x={cellSize * 1.4} y={cellSize * 1.4} width={cellSize * 1.2} height={cellSize * 1.2} rx={2} fill="#0f172a" />
-
-          {/* Top-Right Finder Pattern */}
-          <rect x={size - cellSize * 4} y={0} width={cellSize * 4} height={cellSize * 4} rx={6} fill="#0f172a" />
-          <rect x={size - cellSize * 3.3} y={cellSize * 0.7} width={cellSize * 2.6} height={cellSize * 2.6} rx={4} fill="#ffffff" />
-          <rect x={size - cellSize * 2.6} y={cellSize * 1.4} width={cellSize * 1.2} height={cellSize * 1.2} rx={2} fill="#0f172a" />
-
-          {/* Bottom-Left Finder Pattern */}
-          <rect x={0} y={size - cellSize * 4} width={cellSize * 4} height={cellSize * 4} rx={6} fill="#0f172a" />
-          <rect x={cellSize * 0.7} y={size - cellSize * 3.3} width={cellSize * 2.6} height={cellSize * 2.6} rx={4} fill="#ffffff" />
-          <rect x={cellSize * 1.4} y={size - cellSize * 2.6} width={cellSize * 1.2} height={cellSize * 1.2} rx={2} fill="#0f172a" />
-
-          {/* Random Data Cells */}
-          {cells}
-        </svg>
-
-        {/* Center Logo Emoji Overlay */}
+      <div className="relative inline-block bg-white p-3 rounded-2xl shadow-md border border-slate-100 mx-auto">
+        <img 
+          src={dataUrl} 
+          width={size} 
+          height={size} 
+          alt={`QR for ${targetStr}`}
+          className="mx-auto block"
+        />
+        {/* Center Logo Overlay */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-12 h-12 rounded-2xl bg-white shadow-lg border-2 border-slate-200 flex items-center justify-center text-2xl transform hover:scale-110 transition-transform overflow-hidden">
+          <div className="w-10 h-10 rounded-xl bg-white shadow-md border border-slate-100 flex items-center justify-center text-xl overflow-hidden">
             <RestaurantLogo logo={tenant.logo} />
           </div>
         </div>
