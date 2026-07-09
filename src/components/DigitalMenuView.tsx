@@ -196,20 +196,22 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300" dir="rtl">
       
-      {/* Subdomain URL Simulation Badge */}
-      <div className="bg-slate-900 text-slate-300 px-4 py-2.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono border border-slate-800 shadow-md">
-        <div className="flex items-center gap-2 truncate w-full sm:w-auto" dir="ltr">
-          <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="text-white font-bold truncate">https://{tenant.subdomain}.restocloud.app/menu</span>
+      {/* Subdomain URL Simulation Badge (Only shown in administrative preview mode) */}
+      {!window.location.pathname.includes('/menu') && (
+        <div className="bg-slate-900 text-slate-300 px-4 py-2.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono border border-slate-800 shadow-md">
+          <div className="flex items-center gap-2 truncate w-full sm:w-auto" dir="ltr">
+            <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="text-white font-bold truncate">https://{tenant.subdomain}.restocloud.app/menu</span>
+          </div>
+          <button
+            onClick={() => setShowQRModal(true)}
+            className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold flex items-center justify-center gap-1.5 shadow-sm transform hover:scale-105 transition-all"
+          >
+            <QrCode className="w-4 h-4 text-white animate-bounce" />
+            <span>📲 عرض و طباعة باركود الـ QR (ستاند الطاولات)</span>
+          </button>
         </div>
-        <button
-          onClick={() => setShowQRModal(true)}
-          className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold flex items-center justify-center gap-1.5 shadow-sm transform hover:scale-105 transition-all"
-        >
-          <QrCode className="w-4 h-4 text-white animate-bounce" />
-          <span>📲 عرض و طباعة باركود الـ QR (ستاند الطاولات)</span>
-        </button>
-      </div>
+      )}
 
       {activeOrder && (
         <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl p-5 shadow-xl space-y-4 animate-in fade-in duration-300">
@@ -279,75 +281,56 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
         </div>
       )}
 
-      {/* Restaurant Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl p-6 sm:p-8 text-center space-y-4">
-        <div className={`absolute top-0 left-0 right-0 h-4 ${theme.primaryBg}`} />
+      {/* Restaurant Sleek Compact Header */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-lg p-5 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+        <div className={`absolute top-0 left-0 right-0 h-1.5 ${theme.primaryBg}`} />
         
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-slate-100 dark:bg-slate-800 text-4xl sm:text-5xl flex items-center justify-center mx-auto shadow-lg border-2 border-white dark:border-slate-700 transform hover:rotate-6 transition-transform overflow-hidden">
-          <RestaurantLogo logo={tenant.logo} />
+        <div className="flex items-center gap-4 w-full md:w-auto text-right">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-3xl flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
+            <RestaurantLogo logo={tenant.logo} />
+          </div>
+          <div className="space-y-0.5">
+            <h1 className="text-xl font-black text-slate-900 dark:text-white leading-tight">
+              {tenant.nameAr}
+            </h1>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+              {tenant.slogan || "نرحب بكم في منيو الطعام الرقمي التفاعلي."}
+            </p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-400 pt-0.5 font-sans">
+              {tenant.wifiPassword && (
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">📶 WiFi: {tenant.wifiPassword}</span>
+              )}
+              {tenant.wifiPassword && <span>•</span>}
+              <span>📞 {tenant.phone}</span>
+              <span>•</span>
+              <span>📍 {tenant.address}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-1 max-w-lg mx-auto">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            {tenant.nameAr}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-            {tenant.slogan || "نرحب بكم في منيو الطعام الرقمي التفاعلي. اختر أطباقك المفضلة وأرسل طلبك مباشرة!"}
-          </p>
-        </div>
-
-        {/* Info Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs pt-2">
-          {tenant.wifiPassword && (
-            <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
-              <Wifi className="w-3.5 h-3.5 text-emerald-500" />
-              <span>WiFi: <strong className="text-slate-900 dark:text-white">{tenant.wifiPassword}</strong></span>
-            </span>
-          )}
-          <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-            <MapPin className="w-3.5 h-3.5 text-rose-500" />
-            <span className="truncate max-w-[180px]">{tenant.address}</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
-            <Phone className="w-3.5 h-3.5 text-indigo-500" />
-            <span>{tenant.phone}</span>
-          </span>
-        </div>
-
-        {/* Ordering Mode Selector (Table vs Takeaway) */}
-        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 max-w-md mx-auto flex items-center justify-center gap-2">
+        {/* Compact Mode Selector */}
+        <div className="flex items-center gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 dark:border-slate-800">
           <button
             onClick={() => setOrderType("dine_in")}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+            className={`flex-1 md:flex-none py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 border ${
               orderType === "dine_in"
                 ? `${theme.primaryBg} text-white border-transparent shadow-md`
-                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
             }`}
           >
-            <UtensilsCrossed className="w-4 h-4" />
-            <span>طلب على الطاولة (Dine-in)</span>
+            <UtensilsCrossed className="w-3.5 h-3.5" />
+            <span>طلب محلي طاولات</span>
           </button>
           <button
             onClick={() => setOrderType("takeaway")}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+            className={`flex-1 md:flex-none py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 border ${
               orderType === "takeaway"
                 ? `${theme.primaryBg} text-white border-transparent shadow-md`
-                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
             }`}
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>طلب خارجي / سفري</span>
-          </button>
-        </div>
-
-        {/* QR Code Quick Access Button */}
-        <div className="pt-3 max-w-md mx-auto">
-          <button
-            onClick={() => setShowQRModal(true)}
-            className="w-full py-2.5 px-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200/80 shadow-2xs flex items-center justify-center gap-2 transition-all"
-          >
-            <QrCode className="w-4 h-4 text-indigo-600" />
-            <span>👉 أين الـ QR؟ اضغط هنا لعرض باركود المنيو وستاند الطاولة للطباعة</span>
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>سفري / سفري</span>
           </button>
         </div>
       </div>
