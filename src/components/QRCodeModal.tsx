@@ -24,9 +24,26 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
   const theme = getThemeClasses(tenant.themeColor);
 
+  // Extract platform base domain dynamically (e.g. restocloud.app or localhost:3000)
+  const getBaseDomain = () => {
+    const host = window.location.host;
+    const parts = host.split('.');
+    if (parts.length > 2) {
+      if (parts[0] !== 'www' && parts[0] !== 'sa' && parts[0] !== 'admin') {
+        return parts.slice(1).join('.');
+      }
+    } else if (parts.length === 2 && parts[1] === 'localhost') {
+      return parts[1];
+    }
+    return host;
+  };
+
+  const baseDomain = getBaseDomain();
+  const protocol = window.location.protocol;
+
   // Generate URL based on selected target
   const getMenuUrl = (target: string | number) => {
-    const baseUrl = `https://${tenant.subdomain}.restocloud.app/menu`;
+    const baseUrl = `${protocol}//${tenant.subdomain}.${baseDomain}/menu`;
     if (target === "general" || !target) {
       return baseUrl;
     }
@@ -353,7 +370,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                     {renderSVGQR("general", 160)}
                   </div>
                   <div className="text-[9px] font-mono text-slate-400 truncate">
-                    https://{tenant.subdomain}.restocloud.app/menu
+                    {protocol}//{tenant.subdomain}.{baseDomain}/menu
                   </div>
                 </div>
 
@@ -374,7 +391,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       {renderSVGQR(t.tableNumber, 160)}
                     </div>
                     <div className="text-[9px] font-mono text-slate-400 truncate">
-                      https://{tenant.subdomain}.restocloud.app/menu?table={t.tableNumber}
+                      {protocol}//{tenant.subdomain}.{baseDomain}/menu?table={t.tableNumber}
                     </div>
                   </div>
                 ))}
