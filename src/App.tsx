@@ -98,11 +98,7 @@ export default function App() {
   const handleRejectTenant = (tenantId: string) => {
     setTenants(prev => prev.filter(t => t.id !== tenantId));
   };
-  useEffect(() => {
-    fetchTenants(true);
-  }, []);
-
-  // Whenever currentTenant changes, fetch its data
+  // Whenever currentTenant changes, fetch its categories, items, and tables
   useEffect(() => {
     if (currentTenant) {
       fetchTenantData(currentTenant.id);
@@ -115,19 +111,45 @@ export default function App() {
     const originalPathname = window.location.pathname;
     const originalSearch = window.location.search;
 
-    const fetchAndRoute = async () => {
+    const initializeApp = async () => {
       try {
         setLoading(true);
-        // Fetch all tenants to check subdomain mapping
+        setError("");
+
+        // 1. Fetch all tenants (only one API call on mount!)
         const res = await fetch("/api/tenants");
+        if (!res.ok) throw new Error("Failed to fetch tenants from server");
         const data = await res.json();
+        
         let loadedTenants: Tenant[] = [];
         if (Array.isArray(data)) {
           setTenants(data);
           loadedTenants = data;
         }
 
-        // Parse hostname for subdomain (e.g. "ammar.restocloud.app" or "ammar.localhost")
+        // 2. Validate current tenant & user if logged in (prevent browser mismatch from causing problems)
+        if (currentTenant && currentUser && loadedTenants.length > 0) {
+          const latest = loadedTenants.find(t => t.id === currentTenant.id);
+          if (!latest || latest.status === "suspended") {
+            const isSA = localStorage.getItem("isSuperAdmin") === "true";
+            if (!isSA) {
+              setCurrentUser(null);
+              setCurrentTenant(null);
+              localStorage.removeItem("currentUser");
+              localStorage.removeItem("currentTenant");
+              localStorage.setItem("activeView", "landing_page");
+            }
+          } else {
+            setCurrentTenant(latest);
+          }
+        }
+
+        // Select first restaurant by default if none selected
+        if (!currentTenant && loadedTenants.length > 0) {
+          setCurrentTenant(loadedTenants[0]);
+        }
+
+        // 3. Resolve active view based on subdomain, pathname or search params
         const hostname = window.location.hostname;
         const parts = hostname.split('.');
         let sub: string | null = null;
@@ -146,7 +168,7 @@ export default function App() {
         const viewParam = params.get('view');
         const previewTenantId = params.get("preview_tenant") || params.get("tenant");
         
-        // 1. Is this a Super Admin path/subdomain?
+        // A. Is this a Super Admin path/subdomain?
         const isSuperAdminRoute = sub === 'sa' || sub === 'admin' || originalPathname === '/sa' || viewParam === 'admin' || viewParam === 'sa' || viewParam === 'super_admin';
         
         const isSA = localStorage.getItem("isSuperAdmin") === "true";
@@ -161,7 +183,7 @@ export default function App() {
             setActiveView('super_admin_login');
           }
         }
-        // 2. Is this a preview tenant parameter request?
+        // B. Is this a preview tenant parameter request?
         else if (previewTenantId) {
           const target = loadedTenants.find(t => t.id === previewTenantId || t.subdomain.toLowerCase() === previewTenantId.toLowerCase());
           if (target) {
@@ -175,23 +197,21 @@ export default function App() {
             setActiveView("pos_dashboard");
           }
         }
-        // 3. Is this a Tenant subdomain route?
+        // C. Is this a Tenant subdomain route?
         else if (sub && sub !== 'sa' && sub !== 'admin' && sub !== 'www') {
           const targetTenant = loadedTenants.find(t => t.subdomain.toLowerCase() === sub);
           if (targetTenant) {
             setCurrentTenant(targetTenant);
-            // If path is /menu or digital menu
             if (originalPathname === '/menu' || originalPathname.includes('/menu')) {
               setActiveView('digital_menu');
             } else {
-              // Default to tenant brand view or login page for this tenant
               setActiveView('tenant_login');
             }
           } else {
             setActiveView('landing_page');
           }
         }
-        // 4. Normal SaaS Landing Page route
+        // D. Normal SaaS Landing Page route
         else {
           const saved = localStorage.getItem("activeView");
           if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login') {
@@ -200,14 +220,15 @@ export default function App() {
             setActiveView('landing_page');
           }
         }
-      } catch (e) {
-        console.error("Routing error:", e);
+      } catch (err: any) {
+        console.error("Initialization error:", err);
+        setError("تعذر الاتصال بالخادم، يرجى تحديث الصفحة");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAndRoute();
+    initializeApp();
   }, []);
 
   // Synchronize browser address bar URL with activeView state
@@ -251,9 +272,12 @@ export default function App() {
         if (currentTenant && currentUser) {
           const latest = data.find(t => t.id === currentTenant.id);
           if (!latest || latest.status === "suspended") {
-            handleLogout();
-            if (latest?.status === "suspended") {
-              alert("⚠️ تم إيقاف حساب مطعمك مؤقتاً من قبل الإدارة. يرجى التواصل مع الدعم الفني.");
+            const isSA = localStorage.getItem("isSuperAdmin") === "true";
+            if (!isSA) {
+              handleLogout();
+              if (latest?.status === "suspended") {
+                alert("⚠️ تم إيقاف حساب مطعمك مؤقتاً من قبل الإدارة. يرجى التواصل مع الدعم الفني.");
+              }
             }
             return;
           } else {
