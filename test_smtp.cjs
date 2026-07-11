@@ -9,7 +9,24 @@ console.log("Host:", process.env.SMTP_HOST);
 console.log("Port:", process.env.SMTP_PORT);
 console.log("Secure:", process.env.SMTP_SECURE);
 console.log("User:", process.env.SMTP_USER);
-console.log("Pass length:", process.env.SMTP_PASS ? process.env.SMTP_PASS.length : 0);
+const pass = process.env.SMTP_PASS || "";
+console.log("Pass length:", pass.length);
+
+// Diagnostics for formatting issues in .env
+const hasCarriageReturn = pass.includes('\r');
+const hasNewLine = pass.includes('\n');
+const hasLeadingSpace = pass.startsWith(' ');
+const hasTrailingSpace = pass.endsWith(' ');
+const hasQuotes = pass.startsWith('"') && pass.endsWith('"');
+const hasSingleQuotes = pass.startsWith("'") && pass.endsWith("'");
+
+console.log("\n🔍 Password Formatting Diagnostics:");
+console.log(" - Contains carriage return (\\r):", hasCarriageReturn);
+console.log(" - Contains newline (\\n):", hasNewLine);
+console.log(" - Has leading space:", hasLeadingSpace);
+console.log(" - Has trailing space:", hasTrailingSpace);
+console.log(" - Has raw double quotes around it in value:", hasQuotes);
+console.log(" - Has raw single quotes around it in value:", hasSingleQuotes);
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
