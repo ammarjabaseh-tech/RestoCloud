@@ -297,10 +297,12 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               {tenant.slogan || "نرحب بكم في منيو الطعام الرقمي التفاعلي."}
             </p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-400 pt-0.5 font-sans">
-              {tenant.wifiPassword && (
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">📶 WiFi: {tenant.wifiPassword}</span>
+              {(tenant.wifiName || tenant.wifiPassword) && (
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">
+                  📶 WiFi: {tenant.wifiName || "عام"} {tenant.wifiPassword ? `(كلمة المرور: ${tenant.wifiPassword})` : "(بدون باسورد)"}
+                </span>
               )}
-              {tenant.wifiPassword && <span>•</span>}
+              {(tenant.wifiName || tenant.wifiPassword) && <span>•</span>}
               <span>📞 {tenant.phone}</span>
               <span>•</span>
               <span>📍 {tenant.address}</span>

@@ -96,6 +96,7 @@ function mapTenant(row: any) {
     status: row.status,
     slogan: row.slogan,
     wifiPassword: row.wifi_password,
+    wifiName: row.wifi_name,
     bannerImage: row.banner_image,
     subscriptionPlan: row.subscription_plan,
     subscriptionAmount: row.subscription_amount ? parseFloat(row.subscription_amount) : undefined,
@@ -369,6 +370,7 @@ app.put("/api/tenants/:id", async (req, res) => {
     const colMap: Record<string, string> = {
       nameAr: "name_ar", themeColor: "theme_color", ownerName: "owner_name",
       ownerEmail: "owner_email", taxRate: "tax_rate", wifiPassword: "wifi_password",
+      wifiName: "wifi_name",
       bannerImage: "banner_image", subscriptionPlan: "subscription_plan",
       subscriptionAmount: "subscription_amount", subscriptionDate: "subscription_date",
     };

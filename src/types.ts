@@ -17,6 +17,7 @@ export interface Tenant {
   bannerImage?: string;
   slogan?: string;
   wifiPassword?: string;
+  wifiName?: string;
   ownerEmail?: string;
   password?: string;
   subscriptionPlan?: 'starter' | 'pro' | 'enterprise';

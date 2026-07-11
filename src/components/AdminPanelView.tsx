@@ -172,6 +172,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   const [address, setAddress] = useState(tenant.address);
   const [taxRate, setTaxRate] = useState(tenant.taxRate.toString());
   const [wifiPass, setWifiPass] = useState(tenant.wifiPassword || "");
+  const [wifiName, setWifiName] = useState(tenant.wifiName || "");
   const [currency, setCurrency] = useState(tenant.currency || "ر.س");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -185,6 +186,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     setAddress(tenant.address);
     setTaxRate(tenant.taxRate.toString());
     setWifiPass(tenant.wifiPassword || "");
+    setWifiName(tenant.wifiName || "");
     setCurrency(tenant.currency || "ر.س");
   }, [tenant]);
 
@@ -292,6 +294,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
       address,
       taxRate: Number(taxRate) || 15,
       wifiPassword: wifiPass,
+      wifiName: wifiName,
       currency
     };
 
@@ -708,15 +711,28 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">كلمة مرور واي فاي المطعم (لعملائك)</label>
-              <input
-                type="text"
-                placeholder="اتركه فارغاً إذا لم يتوفر"
-                value={wifiPass}
-                onChange={(e) => setWifiPass(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">اسم شبكة واي فاي المطعم (WiFi SSID)</label>
+                <input
+                  type="text"
+                  placeholder="اتركه فارغاً إذا لم يتوفر"
+                  value={wifiName}
+                  onChange={(e) => setWifiName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">كلمة مرور واي فاي المطعم (لعملائك)</label>
+                <input
+                  type="text"
+                  placeholder="اتركه فارغاً إذا لم يتوفر"
+                  value={wifiPass}
+                  onChange={(e) => setWifiPass(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
+              </div>
             </div>
 
             <div className="md:col-span-2">

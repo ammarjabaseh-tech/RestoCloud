@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS tenants (
                   CHECK (status IN ('active','trial','suspended','pending_payment','pending_approval')),
   slogan          TEXT,
   wifi_password   TEXT,
+  wifi_name       TEXT,
   banner_image    TEXT,
   subscription_plan   TEXT DEFAULT 'starter'
                       CHECK (subscription_plan IN ('starter','pro','enterprise')),
