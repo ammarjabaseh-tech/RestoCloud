@@ -103,6 +103,22 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
           }
         });
 
+        // Generate WiFi QR if Wi-Fi details exist
+        if (tenant.wifiName || tenant.wifiPassword) {
+          const ssid = tenant.wifiName || tenant.nameAr;
+          const pass = tenant.wifiPassword || "";
+          const type = pass ? "WPA" : "nopass";
+          const wifiString = `WIFI:S:${ssid};T:${type};P:${pass};;`;
+          urls["wifi"] = await QRCode.toDataURL(wifiString, {
+            margin: 1,
+            width: 250,
+            color: {
+              dark: "#047857", // emerald-700
+              light: "#ffffff"
+            }
+          });
+        }
+
         // Generate QRs for all tables
         for (const t of tables) {
           const tblUrl = getMenuUrl(t.tableNumber);
@@ -122,7 +138,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
     };
 
     generateAllQrs();
-  }, [tables, tenant.subdomain, baseDomain, protocol]);
+  }, [tables, tenant.subdomain, baseDomain, protocol, tenant.wifiName, tenant.wifiPassword]);
 
   // Helper to render a high-contrast real QR code representing the URL
   const renderSVGQR = (targetStr: string | number, size = 220) => {
@@ -278,17 +294,40 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                   📲 امسح الباركود لطلب الطعام مباشرة من جوالك!
                 </div>
 
-                {/* QR CODE VISUAL */}
-                <div className="my-3 flex justify-center">
-                  {renderSVGQR(selectedTarget, 185)}
+                {/* QR CODES VISUAL */}
+                <div className="my-4 flex items-center justify-center gap-5 flex-wrap">
+                  <div className="text-center space-y-1">
+                    {renderSVGQR(selectedTarget, 150)}
+                    <span className="text-[9px] font-black text-slate-500 block">📲 باركود المنيو والطلب</span>
+                  </div>
+
+                  {(tenant.wifiName || tenant.wifiPassword) && qrUrls["wifi"] && (
+                    <div className="text-center space-y-1">
+                      <div className="relative inline-block bg-white p-2.5 rounded-2xl shadow-md border border-slate-100 mx-auto">
+                        <img 
+                          src={qrUrls["wifi"]} 
+                          width={150} 
+                          height={150} 
+                          alt="WiFi QR"
+                          className="mx-auto block"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-50 shadow-md border border-emerald-100 flex items-center justify-center text-emerald-600">
+                            <Wifi className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-black text-emerald-700 block">📶 اتصل بالواي فاي تلقائياً</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer Info: WiFi & URL */}
                 <div className="space-y-2 pt-2 border-t border-slate-100 text-[10px]">
-                  {tenant.wifiPassword && (
+                  {(tenant.wifiName || tenant.wifiPassword) && (
                     <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-lg border border-emerald-200/60 font-mono font-bold">
                       <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>WiFi: <strong className="text-emerald-900">{tenant.wifiPassword}</strong></span>
+                      <span>WiFi: <strong className="text-emerald-900">{tenant.wifiName || tenant.nameAr}</strong> {tenant.wifiPassword && <>| Pass: <strong className="text-emerald-900">{tenant.wifiPassword}</strong></>}</span>
                     </div>
                   )}
                   
@@ -297,7 +336,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                   </div>
 
                   <div className="text-[9px] text-slate-400 font-medium pt-0.5">
-                    بدون تطبيق أو تحميل — يفتح مباشرة في متصفح الهاتف
+                    امسح باركود الواي فاي للاتصال التلقائي بالشبكة فوراً
                   </div>
                 </div>
               </div>
@@ -375,8 +414,30 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                     </span>
                     <p className="text-[11px] text-slate-500 mt-2">امسح الباركود لطلب الطعام مباشرة</p>
                   </div>
-                  <div className="my-3">
-                    {renderSVGQR("general", 160)}
+                  <div className="my-3 flex items-center justify-center gap-4 flex-wrap">
+                    <div className="text-center">
+                      {renderSVGQR("general", 120)}
+                      <span className="text-[8px] font-black text-slate-400 block mt-1">📲 باركود المنيو</span>
+                    </div>
+                    {(tenant.wifiName || tenant.wifiPassword) && qrUrls["wifi"] && (
+                      <div className="text-center">
+                        <div className="relative inline-block bg-white p-2 rounded-xl shadow-sm border border-slate-100 mx-auto">
+                          <img 
+                            src={qrUrls["wifi"]} 
+                            width={120} 
+                            height={120} 
+                            alt="WiFi QR"
+                            className="mx-auto block"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-6 h-6 rounded-md bg-emerald-50 shadow-sm border border-emerald-100 flex items-center justify-center text-emerald-600">
+                              <Wifi className="w-3.5 h-3.5" />
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-[8px] font-black text-emerald-700 block mt-1">📶 اتصل بالواي فاي</span>
+                      </div>
+                    )}
                   </div>
                   <div className="text-[9px] font-mono text-slate-400 truncate">
                     {getMenuUrl("general")}
@@ -396,8 +457,30 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       </span>
                       <p className="text-[11px] text-slate-500 mt-2">امسح لطلب الطعام من الطاولة مباشرة</p>
                     </div>
-                    <div className="my-3">
-                      {renderSVGQR(t.tableNumber, 160)}
+                    <div className="my-3 flex items-center justify-center gap-4 flex-wrap">
+                      <div className="text-center">
+                        {renderSVGQR(t.tableNumber, 120)}
+                        <span className="text-[8px] font-black text-slate-400 block mt-1">📲 باركود المنيو</span>
+                      </div>
+                      {(tenant.wifiName || tenant.wifiPassword) && qrUrls["wifi"] && (
+                        <div className="text-center">
+                          <div className="relative inline-block bg-white p-2 rounded-xl shadow-sm border border-slate-100 mx-auto">
+                            <img 
+                              src={qrUrls["wifi"]} 
+                              width={120} 
+                              height={120} 
+                              alt="WiFi QR"
+                              className="mx-auto block"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="w-6 h-6 rounded-md bg-emerald-50 shadow-sm border border-emerald-100 flex items-center justify-center text-emerald-600">
+                                <Wifi className="w-3.5 h-3.5" />
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[8px] font-black text-emerald-700 block mt-1">📶 اتصل بالواي فاي</span>
+                        </div>
+                      )}
                     </div>
                     <div className="text-[9px] font-mono text-slate-400 truncate">
                       {getMenuUrl(t.tableNumber)}
