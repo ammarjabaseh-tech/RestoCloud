@@ -28,6 +28,8 @@ import {
   QrCode,
   Upload,
   Image,
+  ChevronLeft,
+  ChevronRight,
   Printer as PrinterIcon
 } from "lucide-react";
 import { QRCodeModal } from "./QRCodeModal";
@@ -44,6 +46,7 @@ interface AdminPanelViewProps {
   onUpdateItem: (id: string, updates: Partial<MenuItem>) => void;
   onDeleteItem: (id: string) => void;
   onUpdateTable: (id: string, updates: Partial<RestaurantTable>) => void;
+  onReorderCategories?: (orderedIds: string[]) => void;
 }
 
 export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
@@ -56,7 +59,8 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   onAddItem,
   onUpdateItem,
   onDeleteItem,
-  onUpdateTable
+  onUpdateTable,
+  onReorderCategories
 }) => {
   const [activeTab, setActiveTab] = useState<"menu" | "branding" | "tables" | "analytics" | "users" | "printers">("menu");
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
@@ -364,6 +368,20 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     return diffDays > 0 ? diffDays : 0;
   };
 
+  const handleMoveCategory = (idx: number, direction: number) => {
+    if (!onReorderCategories) return;
+    const newCats = [...categories];
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= newCats.length) return;
+    
+    // Swap items in local array
+    const temp = newCats[idx];
+    newCats[idx] = newCats[targetIdx];
+    newCats[targetIdx] = temp;
+    
+    onReorderCategories(newCats.map(c => c.id));
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200" dir="rtl">
       
@@ -496,13 +514,33 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
           {/* Categories Horizontal Banner */}
           <div className="flex items-center gap-3 overflow-x-auto pb-2">
-            {categories.map((cat) => (
+            {categories.map((cat, idx) => (
               <div key={cat.id} className="bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 shrink-0">
                 <span className="text-lg">{cat.icon}</span>
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{cat.nameAr}</span>
                 <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-slate-500 font-mono">
                   {items.filter(i => i.categoryId === cat.id).length}
                 </span>
+
+                {/* Reordering Controls */}
+                <div className="flex items-center gap-0.5 mr-1 border-r border-slate-200 dark:border-slate-800 pr-1.5">
+                  <button 
+                    disabled={idx === 0}
+                    onClick={() => handleMoveCategory(idx, -1)}
+                    className="p-0.5 rounded hover:bg-slate-150 dark:hover:bg-slate-800 text-slate-500 disabled:opacity-20 cursor-pointer"
+                    title="تحريك لليمين"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    disabled={idx === categories.length - 1}
+                    onClick={() => handleMoveCategory(idx, 1)}
+                    className="p-0.5 rounded hover:bg-slate-150 dark:hover:bg-slate-800 text-slate-500 disabled:opacity-20 cursor-pointer"
+                    title="تحريك لليسار"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

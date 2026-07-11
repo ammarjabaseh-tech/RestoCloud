@@ -377,6 +377,21 @@ export default function App() {
     }
   };
 
+  const handleReorderCategories = async (orderedIds: string[]) => {
+    if (!currentTenant) return;
+    try {
+      const res = await fetch(`/api/tenants/${currentTenant.id}/categories/reorder`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderedIds })
+      });
+      const data = await res.json();
+      setCategories(data);
+    } catch (err) {
+      alert("فشل في إعادة ترتيب الأقسام");
+    }
+  };
+
   const handleAddItem = async (item: Partial<MenuItem>) => {
     if (!currentTenant) return;
     try {
@@ -629,6 +644,7 @@ export default function App() {
             onUpdateItem={handleUpdateItem}
             onDeleteItem={handleDeleteItem}
             onUpdateTable={handleUpdateTable}
+            onReorderCategories={handleReorderCategories}
           />
         )}
 

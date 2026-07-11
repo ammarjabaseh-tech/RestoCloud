@@ -1036,6 +1036,26 @@ app.post("/api/tenants/:tenantId/categories", async (req, res) => {
   }
 });
 
+app.put("/api/tenants/:tenantId/categories/reorder", async (req, res) => {
+  const { tenantId } = req.params;
+  const { orderedIds } = req.body;
+  try {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await pool.query(
+        "UPDATE categories SET order_index = $1 WHERE id = $2 AND tenant_id = $3",
+        [i + 1, orderedIds[i], tenantId]
+      );
+    }
+    const result = await pool.query(
+      "SELECT * FROM categories WHERE tenant_id = $1 ORDER BY order_index",
+      [tenantId]
+    );
+    res.json(result.rows.map(mapCategory));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ============================================================
 // MENU ITEMS
 // ============================================================
