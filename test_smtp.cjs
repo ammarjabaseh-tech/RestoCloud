@@ -27,6 +27,7 @@ console.log(" - Has leading space:", hasLeadingSpace);
 console.log(" - Has trailing space:", hasTrailingSpace);
 console.log(" - Has raw double quotes around it in value:", hasQuotes);
 console.log(" - Has raw single quotes around it in value:", hasSingleQuotes);
+console.log(" - Password character codes:", Array.from(pass).map(c => c.charCodeAt(0)));
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
