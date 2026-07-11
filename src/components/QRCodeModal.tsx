@@ -61,7 +61,8 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
       return `${baseUrl}&table=${target}`;
     } else {
       // Standard subdomain configuration
-      const baseUrl = `${protocol}//${tenant.subdomain}.${baseDomain}/menu`;
+      const finalProtocol = baseDomain.includes("localhost") ? protocol : "https:";
+      const baseUrl = `${finalProtocol}//${tenant.subdomain}.${baseDomain}/menu`;
       if (target === "general" || !target) {
         return baseUrl;
       }
