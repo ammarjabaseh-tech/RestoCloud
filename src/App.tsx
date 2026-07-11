@@ -183,7 +183,28 @@ export default function App() {
             setActiveView('super_admin_login');
           }
         }
-        // B. Is this a customer digital menu request via IP or query parameter? (e.g. /menu?tenant=ammar)
+        // B. Is there a valid logged-in user session (not Super Admin)?
+        // If they are logged in, we preserve their dashboard view instead of throwing them to login/landing!
+        else if (currentTenant && currentUser) {
+          console.log("[App Router] Logged in user detected. Restoring dashboard session...");
+          const saved = localStorage.getItem("activeView");
+          // If they manually opened /menu, let them see the digital menu even if they are logged in
+          if (originalPathname === '/menu' || originalPathname.includes('/menu')) {
+            setActiveView('digital_menu');
+          } else if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login' && saved !== 'landing_page') {
+            setActiveView(saved as ActivePortalView);
+          } else {
+            // Fallback based on permissions
+            if (currentUser.permissions.canManagePOS) {
+              setActiveView('pos_dashboard');
+            } else if (currentUser.permissions.canManageMenu) {
+              setActiveView('admin_panel');
+            } else {
+              setActiveView('digital_menu');
+            }
+          }
+        }
+        // C. Is this a customer digital menu request via IP or query parameter? (e.g. /menu?tenant=ammar)
         else if ((originalPathname === '/menu' || originalPathname.includes('/menu')) && previewTenantId) {
           const target = loadedTenants.find(t => t.id === previewTenantId || t.subdomain.toLowerCase() === previewTenantId.toLowerCase());
           if (target) {
@@ -193,7 +214,7 @@ export default function App() {
             setActiveView('landing_page');
           }
         }
-        // C. Is this a preview tenant parameter request?
+        // D. Is this a preview tenant parameter request?
         else if (previewTenantId) {
           const target = loadedTenants.find(t => t.id === previewTenantId || t.subdomain.toLowerCase() === previewTenantId.toLowerCase());
           if (target) {
@@ -207,7 +228,7 @@ export default function App() {
             setActiveView("pos_dashboard");
           }
         }
-        // C. Is this a Tenant subdomain route?
+        // E. Is this a Tenant subdomain route?
         else if (sub && sub !== 'sa' && sub !== 'admin' && sub !== 'www') {
           const targetTenant = loadedTenants.find(t => t.subdomain.toLowerCase() === sub);
           if (targetTenant) {
@@ -221,7 +242,7 @@ export default function App() {
             setActiveView('landing_page');
           }
         }
-        // D. Normal SaaS Landing Page route
+        // F. Normal SaaS Landing Page route
         else {
           const saved = localStorage.getItem("activeView");
           if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login') {
