@@ -44,6 +44,34 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showTenantDropdown, setShowTenantDropdown] = React.useState(false);
   const theme = getThemeClasses(currentTenant.themeColor);
 
+  const getRestaurantMenuUrl = () => {
+    const host = window.location.host;
+    const protocol = window.location.protocol;
+    
+    const getBaseDomain = () => {
+      const parts = host.split('.');
+      if (parts.length > 2) {
+        if (parts[0] !== 'www' && parts[0] !== 'sa' && parts[0] !== 'admin') {
+          return parts.slice(1).join('.');
+        }
+      } else if (parts.length === 2 && parts[1] === 'localhost') {
+        return parts[1];
+      }
+      return host;
+    };
+    
+    const isIPAddress = (hostStr: string) => {
+      const ip = hostStr.split(':')[0];
+      return /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(ip);
+    };
+
+    if (isIPAddress(host)) {
+      return `${protocol}//${host}/menu?tenant=${currentTenant.subdomain}`;
+    } else {
+      return `${protocol}//${currentTenant.subdomain}.${getBaseDomain()}/menu`;
+    }
+  };
+
   if (activeView === 'super_admin_dashboard') {
     return (
       <header className="bg-white text-slate-800 sticky top-0 z-40 border-b border-slate-200 shadow-sm print:hidden">
@@ -83,9 +111,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <RestaurantLogo logo={currentTenant.logo} />
                   </span>
                   <span className="max-w-[110px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
-                  <span className="text-[9px] bg-white px-1.5 py-0.2 rounded text-indigo-600 font-mono border border-slate-100 shadow-3xs" dir="ltr">
-                    {currentTenant.subdomain}
-                  </span>
+                  <a
+                    href={getRestaurantMenuUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[9px] bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-indigo-700 hover:text-indigo-900 font-bold font-mono border border-indigo-200 transition-all shadow-3xs flex items-center gap-0.5"
+                    title="فتح المنيو الرقمي للزبائن"
+                  >
+                    <span>🔗 {currentTenant.subdomain}.resto-cloud.com</span>
+                  </a>
                 </div>
               ) : (
                 <>
@@ -97,9 +131,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <RestaurantLogo logo={currentTenant.logo} />
                     </span>
                     <span className="max-w-[110px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
-                    <span className="text-[9px] bg-white px-1.5 py-0.2 rounded text-indigo-600 font-mono border border-slate-100 shadow-3xs" dir="ltr">
-                      {currentTenant.subdomain}
-                    </span>
+                    <a
+                      href={getRestaurantMenuUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[9px] bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-indigo-700 hover:text-indigo-900 font-bold font-mono border border-indigo-200 transition-all shadow-3xs flex items-center gap-0.5"
+                      onClick={(e) => e.stopPropagation()} // Prevent dropdown toggle
+                      title="فتح المنيو الرقمي للزبائن"
+                    >
+                      <span>🔗 {currentTenant.subdomain}.resto-cloud.com</span>
+                    </a>
                     <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showTenantDropdown ? 'rotate-180' : ''}`} />
                   </button>
 

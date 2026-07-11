@@ -373,7 +373,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-extrabold text-slate-900">{tenant.nameAr}</h1>
-              <span className="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">
+              <span className="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200 font-sans">
                 لوحة المالك (Admin)
               </span>
               {tenant.status === 'trial' && (
