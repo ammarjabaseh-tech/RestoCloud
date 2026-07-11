@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tenant, Category, MenuItem, RestaurantTable, ThemeColor } from "../types";
+import { Tenant, Category, MenuItem, RestaurantTable, ThemeColor, Printer } from "../types";
 import { getThemeClasses } from "../utils/theme";
 import { TenantUsersView } from "./TenantUsersView";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
@@ -27,7 +27,8 @@ import {
   AlertCircle,
   QrCode,
   Upload,
-  Image
+  Image,
+  Printer as PrinterIcon
 } from "lucide-react";
 import { QRCodeModal } from "./QRCodeModal";
 import { RestaurantLogo } from "./RestaurantLogo";
@@ -57,9 +58,96 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   onDeleteItem,
   onUpdateTable
 }) => {
-  const [activeTab, setActiveTab] = useState<"menu" | "branding" | "tables" | "analytics" | "users">("menu");
+  const [activeTab, setActiveTab] = useState<"menu" | "branding" | "tables" | "analytics" | "users" | "printers">("menu");
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
   const [qrTargetTable, setQrTargetTable] = useState<number | "general">("general");
+  
+  // Printers State Configuration
+  const [printers, setPrinters] = useState<Printer[]>([]);
+  const [loadingPrinters, setLoadingPrinters] = useState(false);
+  const [showPrinterModal, setShowPrinterModal] = useState(false);
+  const [editingPrinter, setEditingPrinter] = useState<Partial<Printer> | null>(null);
+
+  const fetchPrinters = async () => {
+    setLoadingPrinters(true);
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/printers`);
+      if (res.ok) {
+        const data = await res.json();
+        setPrinters(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch printers:", err);
+    } finally {
+      setLoadingPrinters(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (activeTab === "printers") {
+      fetchPrinters();
+    }
+  }, [activeTab]);
+
+  const handleSavePrinter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPrinter || !editingPrinter.name || !editingPrinter.connectionType) return;
+    
+    const isNew = !editingPrinter.id;
+    const url = isNew 
+      ? `/api/tenants/${tenant.id}/printers` 
+      : `/api/tenants/${tenant.id}/printers/${editingPrinter.id}`;
+    const method = isNew ? "POST" : "PUT";
+    
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingPrinter)
+      });
+      if (res.ok) {
+        fetchPrinters();
+        setShowPrinterModal(false);
+        setEditingPrinter(null);
+      } else {
+        const data = await res.json();
+        alert(data.error || "خطأ أثناء حفظ الطابعة");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ بالاتصال");
+    }
+  };
+
+  const handleDeletePrinter = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذه الطابعة؟")) return;
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/printers/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchPrinters();
+      } else {
+        const data = await res.json();
+        alert(data.error || "خطأ أثناء حذف الطابعة");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ بالاتصال");
+    }
+  };
+
+  const handleTestPrint = async (id: string) => {
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/printers/${id}/print-test`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ " + data.message);
+      } else {
+        alert("❌ " + data.error);
+      }
+    } catch (err) {
+      alert("❌ حدث خطأ بالاتصال بالخادم");
+    }
+  };
   
   // Item Modal State
   const [showItemModal, setShowItemModal] = useState(false);
@@ -344,6 +432,18 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           >
             <Users className="w-3.5 h-3.5" />
             <span>الموظفون والصلاحيات</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("printers")}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+              activeTab === "printers"
+                ? `${theme.primaryBg} text-white shadow-sm`
+                : "text-slate-600 hover:bg-white/70"
+            }`}
+          >
+            <PrinterIcon className="w-3.5 h-3.5" />
+            <span>إدارة الطابعات</span>
           </button>
         </div>
       </div>
@@ -935,6 +1035,127 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
         <TenantUsersView currentTenant={tenant} />
       )}
 
+      {activeTab === "printers" && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <PrinterIcon className="w-5 h-5 text-emerald-600" />
+                <span>إدارة الطابعات الحرارية ({printers.length})</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">قم بتهيئة طابعات الفواتير أو بونات المطبخ للربط عبر الشبكة (IP) أو الـ USB.</p>
+            </div>
+            <button
+              onClick={() => {
+                setEditingPrinter({
+                  name: "",
+                  connectionType: "network",
+                  ipAddress: "",
+                  port: 9100,
+                  paperSize: "80mm",
+                  printerRole: "receipt",
+                  isActive: true,
+                  assignedCategories: []
+                });
+                setShowPrinterModal(true);
+              }}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors self-start sm:self-center shadow-md shadow-emerald-500/20"
+            >
+              <Plus className="w-4 h-4" />
+              <span>إضافة طابعة جديدة</span>
+            </button>
+          </div>
+
+          {loadingPrinters ? (
+            <div className="text-center py-12 text-slate-500">جاري تحميل الطابعات...</div>
+          ) : printers.length === 0 ? (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center max-w-md mx-auto space-y-4">
+              <PrinterIcon className="w-12 h-12 text-slate-300 mx-auto" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">لا يوجد طابعات مهيأة</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                لم تقم بتهيئة أي طابعة حتى الآن. يمكنك إضافة طابعة شبكية (Network IP) للمطبخ لتلقي بونات الطلبات تلقائياً أو طابعة كاشير للفواتير.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {printers.map((p) => (
+                <div key={p.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4 relative flex flex-col justify-between">
+                  <div className="space-y-3 text-right">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        {p.name}
+                      </h4>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                        p.connectionType === 'network'
+                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400'
+                          : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40'
+                      }`}>
+                        {p.connectionType === 'network' ? 'IP شبكة' : p.connectionType === 'usb' ? 'USB' : 'بلوتوث'}
+                      </span>
+                    </div>
+
+                    <div className="text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+                      {p.connectionType === 'network' && (
+                        <p className="font-mono">IP: {p.ipAddress}:{p.port || 9100}</p>
+                      )}
+                      <p>الدور: <span className="font-bold">{
+                        p.printerRole === 'receipt' ? 'فاتورة كاشير' : p.printerRole === 'kitchen' ? 'بون مطبخ' : p.printerRole === 'bar' ? 'مشروبات وعصائر' : 'عامة'
+                      }</span></p>
+                      <p>حجم الورق: <span className="font-mono">{p.paperSize}</span></p>
+                      
+                      {p.assignedCategories && p.assignedCategories.length > 0 && (
+                        <div className="pt-2">
+                          <p className="text-[10px] text-slate-400 mb-1 font-bold">التصنيفات الموجهة:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {p.assignedCategories.map(catId => {
+                              const cat = categories.find(c => c.id === catId);
+                              return cat ? (
+                                <span key={catId} className="text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-605 dark:text-slate-300 px-2 py-0.5 rounded-full">
+                                  {cat.icon} {cat.nameAr}
+                                </span>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
+                    {p.connectionType === 'network' && (
+                      <button
+                        onClick={() => handleTestPrint(p.id)}
+                        className="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors"
+                      >
+                        تجربة الطباعة 🔄
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setEditingPrinter({ ...p });
+                        setShowPrinterModal(true);
+                      }}
+                      className="p-2 rounded-xl bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 transition-colors"
+                      title="تعديل"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeletePrinter(p.id)}
+                      className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/20 hover:bg-rose-100 text-rose-600 transition-colors"
+                      title="حذف"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ADD / EDIT ITEM MODAL */}
       {showItemModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -1144,6 +1365,151 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 إضافة القسم
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD / EDIT PRINTER MODAL */}
+      {showPrinterModal && editingPrinter && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-6" dir="rtl">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <PrinterIcon className="w-5 h-5 text-emerald-600" />
+                <span>{editingPrinter.id ? "تعديل إعدادات الطابعة" : "إضافة طابعة جديدة"}</span>
+              </h3>
+              <button onClick={() => setShowPrinterModal(false)} className="text-slate-400 hover:text-slate-600 p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePrinter} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">اسم الطابعة (مثال: طابعة المطبخ) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingPrinter.name || ""}
+                    onChange={e => setEditingPrinter(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    placeholder="طابعة المطبخ"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">نوع الاتصال *</label>
+                  <select
+                    value={editingPrinter.connectionType || "network"}
+                    onChange={e => setEditingPrinter(prev => ({ ...prev, connectionType: e.target.value as any }))}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
+                  >
+                    <option value="network">IP شبكة (Network Ethernet/WiFi)</option>
+                    <option value="usb">USB (محلي للمتصفح)</option>
+                    <option value="bluetooth">بلوتوث</option>
+                  </select>
+                </div>
+              </div>
+
+              {editingPrinter.connectionType === 'network' && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">عنوان الـ IP الخاص بالطابعة *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingPrinter.ipAddress || ""}
+                      onChange={e => setEditingPrinter(prev => ({ ...prev, ipAddress: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
+                      placeholder="192.168.1.100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">المنفذ (Port)</label>
+                    <input
+                      type="number"
+                      required
+                      value={editingPrinter.port || 9100}
+                      onChange={e => setEditingPrinter(prev => ({ ...prev, port: Number(e.target.value) }))}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">حجم الورق *</label>
+                  <select
+                    value={editingPrinter.paperSize || "80mm"}
+                    onChange={e => setEditingPrinter(prev => ({ ...prev, paperSize: e.target.value as any }))}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
+                  >
+                    <option value="80mm">80mm (الحجم القياسي)</option>
+                    <option value="58mm">58mm (الورق الصغير)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">دور الطابعة الأساسي *</label>
+                  <select
+                    value={editingPrinter.printerRole || "receipt"}
+                    onChange={e => setEditingPrinter(prev => ({ ...prev, printerRole: e.target.value as any }))}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
+                  >
+                    <option value="receipt">طابعة الفواتير (الكاشير)</option>
+                    <option value="kitchen">طابعة المطبخ (أكلات رئيسية)</option>
+                    <option value="bar">طابعة بار المشروبات والعصائر</option>
+                    <option value="general">عامة (تطبع كل شيء)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 text-right">ربط توجيه الأقسام تلقائياً:</label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-2xl p-3 bg-slate-50 dark:bg-slate-800/40">
+                  {categories.map(cat => {
+                    const isChecked = (editingPrinter.assignedCategories || []).includes(cat.id);
+                    return (
+                      <label key={cat.id} className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:bg-slate-50 cursor-pointer text-xs font-bold">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={e => {
+                            const current = editingPrinter.assignedCategories || [];
+                            const updated = e.target.checked 
+                              ? [...current, cat.id]
+                              : current.filter(id => id !== cat.id);
+                            setEditingPrinter(prev => ({ ...prev, assignedCategories: updated }));
+                          }}
+                          className="w-4 h-4 rounded text-emerald-600 ml-1.5"
+                        />
+                        <span>{cat.icon} {cat.nameAr}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-slate-405 dark:text-slate-500 mt-1.5 leading-relaxed text-right">
+                  * سيتم توجيه طباعة الأصناف التابعة للأقسام المحددة فقط إلى هذه الطابعة عند إرسال طلب للمطبخ.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowPrinterModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  className={`px-6 py-2.5 rounded-xl ${theme.primaryBg} text-white text-xs font-bold shadow-md shadow-emerald-500/20`}
+                >
+                  حفظ الطابعة
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

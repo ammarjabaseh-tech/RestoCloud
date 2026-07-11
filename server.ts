@@ -189,6 +189,21 @@ function mapUser(row: any) {
   };
 }
 
+function mapPrinter(row: any, categories?: string[]) {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    name: row.name,
+    connectionType: row.connection_type,
+    ipAddress: row.ip_address,
+    port: row.port,
+    paperSize: row.paper_size,
+    printerRole: row.printer_role,
+    isActive: row.is_active,
+    assignedCategories: categories || [],
+  };
+}
+
 function mapInvoice(row: any) {
   return {
     id: row.id,
@@ -674,7 +689,6 @@ app.post("/api/invoices", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 app.put("/api/invoices/:id", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -687,6 +701,267 @@ app.put("/api/invoices/:id", async (req, res) => {
     res.json(mapInvoice(result.rows[0]));
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// PRINTERS MANAGEMENT & SILENT PRINTING
+// ============================================================
+function sendEscPosToNetworkPrinter(ip: string, port: number, data: Buffer): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const socket = new (require('net').Socket)();
+    socket.setTimeout(4000); // 4 seconds timeout
+
+    socket.connect(port, ip, () => {
+      socket.write(data);
+      socket.end();
+      resolve();
+    });
+
+    socket.on('error', (err: any) => {
+      socket.destroy();
+      reject(err);
+    });
+
+    socket.on('timeout', () => {
+      socket.destroy();
+      reject(new Error('اتصال الشبكة بالطابعة انتهت مهلته (قد تكون الطابعة غير متصلة)'));
+    });
+  });
+}
+
+// 1. Get printers list
+app.get("/api/tenants/:tenantId/printers", async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    const result = await pool.query(
+      `SELECT p.*, COALESCE(
+         json_agg(pc.category_id) FILTER (WHERE pc.category_id IS NOT NULL), '[]'
+       ) AS assigned_categories
+       FROM printers p
+       LEFT JOIN printer_categories pc ON pc.printer_id = p.id
+       WHERE p.tenant_id = $1
+       GROUP BY p.id ORDER BY p.created_at`,
+      [tenantId]
+    );
+    res.json(result.rows.map(row => mapPrinter(row, row.assigned_categories)));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Add printer
+app.post("/api/tenants/:tenantId/printers", async (req, res) => {
+  const { tenantId } = req.params;
+  const { name, connectionType, ipAddress, port, paperSize, printerRole, isActive, assignedCategories } = req.body;
+  
+  if (!name || !connectionType) {
+    return res.status(400).json({ error: "اسم الطابعة ونوع الاتصال مطلوبان" });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    
+    const printerId = `prt-${Date.now()}`;
+    const result = await client.query(
+      `INSERT INTO printers (id, tenant_id, name, connection_type, ip_address, port, paper_size, printer_role, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [printerId, tenantId, name, connectionType, ipAddress || null, port ? Number(port) : 9100, paperSize || '80mm', printerRole || 'receipt', isActive !== false]
+    );
+
+    const categories = assignedCategories || [];
+    for (const catId of categories) {
+      await client.query(
+        "INSERT INTO printer_categories (printer_id, category_id) VALUES ($1, $2)",
+        [printerId, catId]
+      );
+    }
+
+    await client.query("COMMIT");
+    res.status(201).json(mapPrinter(result.rows[0], categories));
+  } catch (err: any) {
+    await client.query("ROLLBACK");
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// 3. Edit printer
+app.put("/api/tenants/:tenantId/printers/:id", async (req, res) => {
+  const { tenantId, id } = req.params;
+  const { name, connectionType, ipAddress, port, paperSize, printerRole, isActive, assignedCategories } = req.body;
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      `UPDATE printers SET
+        name = COALESCE($2, name),
+        connection_type = COALESCE($3, connection_type),
+        ip_address = $4,
+        port = COALESCE($5, port),
+        paper_size = COALESCE($6, paper_size),
+        printer_role = COALESCE($7, printer_role),
+        is_active = COALESCE($8, is_active)
+       WHERE id = $1 AND tenant_id = $9 RETURNING *`,
+      [id, name, connectionType, ipAddress || null, port ? Number(port) : 9100, paperSize || '80mm', printerRole || 'receipt', isActive, tenantId]
+    );
+
+    if (result.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "الطابعة غير موجودة" });
+    }
+
+    if (assignedCategories) {
+      await client.query("DELETE FROM printer_categories WHERE printer_id = $1", [id]);
+      for (const catId of assignedCategories) {
+        await client.query(
+          "INSERT INTO printer_categories (printer_id, category_id) VALUES ($1, $2)",
+          [id, catId]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    res.json(mapPrinter(result.rows[0], assignedCategories));
+  } catch (err: any) {
+    await client.query("ROLLBACK");
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// 4. Delete printer
+app.delete("/api/tenants/:tenantId/printers/:id", async (req, res) => {
+  try {
+    const { tenantId, id } = req.params;
+    const result = await pool.query(
+      "DELETE FROM printers WHERE id = $1 AND tenant_id = $2 RETURNING *",
+      [id, tenantId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "الطابعة غير موجودة" });
+    }
+    res.json({ success: true, message: "تم حذف الطابعة بنجاح" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 5. Test print to network printer
+app.post("/api/tenants/:tenantId/printers/:id/print-test", async (req, res) => {
+  try {
+    const { tenantId, id } = req.params;
+    const printerResult = await pool.query("SELECT * FROM printers WHERE id = $1 AND tenant_id = $2", [id, tenantId]);
+    
+    if (printerResult.rows.length === 0) {
+      return res.status(404).json({ error: "الطابعة غير موجودة" });
+    }
+    
+    const p = printerResult.rows[0];
+    if (p.connection_type !== 'network' || !p.ip_address) {
+      return res.status(400).json({ error: "هذه الطابعة ليست طابعة شبكة (Network IP)" });
+    }
+
+    // ESC/POS test commands
+    const init = Buffer.from([0x1B, 0x40]);
+    const center = Buffer.from([0x1B, 0x61, 0x01]);
+    const bigFont = Buffer.from([0x1D, 0x21, 0x11]);
+    const normalFont = Buffer.from([0x1D, 0x21, 0x00]);
+    const feedAndCut = Buffer.from([0x1B, 0x64, 0x04, 0x1D, 0x56, 0x42, 0x00]);
+
+    const title = "RestoCloud\n";
+    const line = "------------------------\n";
+    const body = "Test Print Success!\n" +
+                 `Printer: ${p.name}\n` +
+                 `IP: ${p.ip_address}\n` +
+                 `Role: ${p.printer_role.toUpperCase()}\n` +
+                 `Paper Size: ${p.paper_size}\n` +
+                 "------------------------\n\n";
+
+    const printBuffer = Buffer.concat([
+      init,
+      center,
+      bigFont,
+      Buffer.from(title),
+      normalFont,
+      Buffer.from(line + body),
+      feedAndCut
+    ]);
+
+    await sendEscPosToNetworkPrinter(p.ip_address, p.port || 9100, printBuffer);
+    res.json({ success: true, message: "تم إرسال بون الاختبار للطابعة بنجاح!" });
+  } catch (err: any) {
+    res.status(500).json({ error: `فشل الطباعة: ${err.message}` });
+  }
+});
+
+// 6. Print order KOT/Receipt silently over network (API Fallback)
+app.post("/api/tenants/:tenantId/orders/:orderId/print", async (req, res) => {
+  try {
+    const { tenantId, orderId } = req.params;
+    const { printerId } = req.body;
+
+    const printerRes = await pool.query("SELECT * FROM printers WHERE id = $1 AND tenant_id = $2", [printerId, tenantId]);
+    if (printerRes.rows.length === 0) return res.status(404).json({ error: "الطابعة غير موجودة" });
+    const p = printerRes.rows[0];
+
+    if (p.connection_type !== 'network' || !p.ip_address) {
+      return res.json({ success: false, webPrintFallback: true, message: "الرجاء استخدام الطباعة الافتراضية للمتصفح لهذه الطابعة" });
+    }
+
+    const orderRes = await pool.query(
+      `SELECT o.*, COALESCE(json_agg(oi) FILTER (WHERE oi.id IS NOT NULL), '[]') as items
+       FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id
+       WHERE o.id = $1 AND o.tenant_id = $2 GROUP BY o.id`,
+      [orderId, tenantId]
+    );
+    if (orderRes.rows.length === 0) return res.status(404).json({ error: "الطلب غير موجود" });
+    const o = orderRes.rows[0];
+
+    // Build raw ESC/POS payload
+    const init = Buffer.from([0x1B, 0x40]);
+    const center = Buffer.from([0x1B, 0x61, 0x01]);
+    const left = Buffer.from([0x1B, 0x61, 0x00]);
+    const bigFont = Buffer.from([0x1D, 0x21, 0x11]);
+    const normalFont = Buffer.from([0x1D, 0x21, 0x00]);
+    const feedAndCut = Buffer.from([0x1B, 0x64, 0x04, 0x1D, 0x56, 0x42, 0x00]);
+
+    let text = "";
+    text += `RestoCloud Order\n`;
+    text += `Order: ${o.order_number}\n`;
+    text += `Type: ${o.order_type === 'dine_in' ? 'DINE IN' : 'TAKEAWAY'}\n`;
+    if (o.table_number) text += `Table: ${o.table_number}\n`;
+    text += `Date: ${new Date(o.created_at).toLocaleString()}\n`;
+    text += `--------------------------------\n`;
+
+    const items = o.items || [];
+    for (const item of items) {
+      text += `${item.name_ar} x ${item.quantity}\n`;
+      if (item.notes) text += ` * Note: ${item.notes}\n`;
+    }
+    text += `--------------------------------\n`;
+    text += `Total: ${o.total} SAR\n\n`;
+
+    const payload = Buffer.concat([
+      init,
+      center,
+      bigFont,
+      Buffer.from("RECEIPT\n"),
+      normalFont,
+      left,
+      Buffer.from(text),
+      feedAndCut
+    ]);
+
+    await sendEscPosToNetworkPrinter(p.ip_address, p.port || 9100, payload);
+    res.json({ success: true, message: "تم إرسال الفاتورة للطابعة بنجاح!" });
+  } catch (err: any) {
+    res.status(500).json({ error: `فشل الطباعة الشبكية: ${err.message}` });
   }
 });
 

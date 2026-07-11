@@ -151,3 +151,16 @@ export interface AIAnalysisResponse {
   }[];
   pricingAdvice: string;
 }
+
+export interface Printer {
+  id: string;
+  tenantId: string;
+  name: string;
+  connectionType: 'network' | 'usb' | 'bluetooth';
+  ipAddress?: string;
+  port?: number;
+  paperSize: '80mm' | '58mm';
+  printerRole: 'receipt' | 'kitchen' | 'bar' | 'general';
+  isActive: boolean;
+  assignedCategories?: string[]; // IDs of categories assigned to this printer
+}

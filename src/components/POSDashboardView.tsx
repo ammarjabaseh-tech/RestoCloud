@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Tenant, Category, MenuItem, RestaurantTable, OrderItem, OrderType, PaymentMethod, Order } from "../types";
+import { Tenant, Category, MenuItem, RestaurantTable, OrderItem, OrderType, PaymentMethod, Order, Printer } from "../types";
 import { getThemeClasses } from "../utils/theme";
 import { RestaurantLogo } from "./RestaurantLogo";
 import confetti from "canvas-confetti";
@@ -12,7 +12,7 @@ import {
   CreditCard, 
   Banknote, 
   Clock, 
-  Printer, 
+  Printer as PrinterIcon, 
   CheckCircle2, 
   UtensilsCrossed, 
   ShoppingBag, 
@@ -71,6 +71,55 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const pendingSelfOrders = useMemo(() => {
     return historyOrders.filter(o => o.orderStatus === "pending");
   }, [historyOrders]);
+
+  // Printers integration
+  const [printers, setPrinters] = useState<Printer[]>([]);
+  const [selectedPrinterId, setSelectedPrinterId] = useState<string>("");
+
+  React.useEffect(() => {
+    fetch(`/api/tenants/${tenant.id}/printers`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setPrinters(data);
+          const defaultPrinter = data.find(p => p.printerRole === 'receipt' && p.isActive) || data[0];
+          if (defaultPrinter) setSelectedPrinterId(defaultPrinter.id);
+        }
+      })
+      .catch(err => console.error("Failed to load printers:", err));
+  }, [tenant.id]);
+
+  const handlePrintOrder = async (order: Order, printRole: 'receipt' | 'kitchen') => {
+    if (!selectedPrinterId) {
+      window.print();
+      return;
+    }
+    const printer = printers.find(p => p.id === selectedPrinterId);
+    if (!printer || printer.connectionType !== 'network') {
+      window.print();
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/orders/${order.id}/print`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ printerId: printer.id, printRole })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("✅ " + data.message);
+      } else if (data.webPrintFallback) {
+        window.print();
+      } else {
+        alert("❌ " + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ فشل الاتصال بالطابعة الشبكية، جاري التحويل لطباعة المتصفح...");
+      window.print();
+    }
+  };
 
   // Silent polling of orders every 10 seconds for real-time mobile order receipt
   React.useEffect(() => {
@@ -795,7 +844,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               className="col-span-3 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-300 dark:border-slate-700 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 disabled:opacity-40"
               title="طباعة فاتورة للمراجعة قبل الدفع"
             >
-              <Printer className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+              <PrinterIcon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
               <span>فاتورة مبدئية</span>
             </button>
 
@@ -988,7 +1037,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                             className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 text-xs font-bold transition-all cursor-pointer"
                             title="طباعة إيصال المطبخ"
                           >
-                            <Printer className="w-4 h-4" />
+                            <PrinterIcon className="w-4 h-4" />
                           </button>
                           <button
                             onClick={async () => {
@@ -1020,7 +1069,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                             className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 text-xs font-bold transition-all cursor-pointer"
                             title="طباعة الفاتورة"
                           >
-                            <Printer className="w-4 h-4" />
+                            <PrinterIcon className="w-4 h-4" />
                           </button>
                           <button
                             onClick={async () => {
@@ -1050,7 +1099,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                           }}
                           className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
                         >
-                          <Printer className="w-3.5 h-3.5" />
+                          <PrinterIcon className="w-3.5 h-3.5" />
                           <span>إعادة طباعة</span>
                         </button>
                       )}
@@ -1096,7 +1145,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             {/* Print Header Controls (Hidden during print) */}
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 font-sans print:hidden">
               <span className="font-bold text-xs text-slate-500 flex items-center gap-1.5">
-                <Printer className="w-4 h-4 text-emerald-600" />
+                <PrinterIcon className="w-4 h-4 text-emerald-600" />
                 <span>{isDraftPrint ? "معاينة الفاتورة المبدئية" : "معاينة الفاتورة للطباعة"}</span>
               </span>
               <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono">
@@ -1108,6 +1157,24 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             <div className="max-h-[65vh] overflow-y-auto pr-1 print:max-h-none print:overflow-visible no-scrollbar">
               <POSInvoiceReceipt tenant={tenant} order={completedOrder} isDraft={isDraftPrint} />
             </div>
+
+            {/* Printer Selection (Hidden during print) */}
+            {printers.length > 0 && (
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-sans print:hidden" dir="rtl">
+                <span className="text-slate-500 font-bold whitespace-nowrap">الطابعة:</span>
+                <select
+                  value={selectedPrinterId}
+                  onChange={e => setSelectedPrinterId(e.target.value)}
+                  className="w-full bg-transparent font-bold outline-none cursor-pointer text-slate-800"
+                >
+                  {printers.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.connectionType === 'network' ? `IP: ${p.ipAddress}` : 'USB'}) - {p.printerRole === 'kitchen' ? 'مطبخ' : 'كاشير'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Actions Toolbar (Hidden during print) */}
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 font-sans print:hidden">
@@ -1122,11 +1189,11 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               </button>
               <button
                 onClick={() => {
-                  window.print();
+                  handlePrintOrder(completedOrder, 'receipt');
                 }}
                 className="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md"
               >
-                <Printer className="w-4 h-4" />
+                <PrinterIcon className="w-4 h-4" />
                 <span>طباعة الإيصال (🖨️)</span>
               </button>
             </div>
@@ -1300,7 +1367,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                             }}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-sm"
                           >
-                            <Printer className="w-3.5 h-3.5" />
+                            <PrinterIcon className="w-3.5 h-3.5" />
                             <span>طباعة الفاتورة</span>
                           </button>
                         )}

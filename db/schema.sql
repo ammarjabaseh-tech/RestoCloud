@@ -186,3 +186,28 @@ CREATE INDEX IF NOT EXISTS idx_orders_status        ON orders(order_status);
 CREATE INDEX IF NOT EXISTS idx_order_items_order    ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_tenant_users_tenant  ON tenant_users(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_tenant      ON invoices(tenant_id);
+
+-- ==========================================
+-- 10. PRINTERS (الطابعات الحرارية)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS printers (
+  id                  TEXT PRIMARY KEY DEFAULT 'prt-' || gen_random_uuid()::TEXT,
+  tenant_id           TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  name                TEXT NOT NULL,
+  connection_type     TEXT NOT NULL CHECK (connection_type IN ('network', 'usb', 'bluetooth')),
+  ip_address          TEXT,
+  port                INTEGER DEFAULT 9100,
+  paper_size          TEXT NOT NULL DEFAULT '80mm' CHECK (paper_size IN ('80mm', '58mm')),
+  printer_role        TEXT NOT NULL DEFAULT 'receipt' CHECK (printer_role IN ('receipt', 'kitchen', 'bar', 'general')),
+  is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS printer_categories (
+  printer_id          TEXT NOT NULL REFERENCES printers(id) ON DELETE CASCADE,
+  category_id         TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  PRIMARY KEY (printer_id, category_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_printers_tenant ON printers(tenant_id);
+
