@@ -196,22 +196,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300" dir="rtl">
       
-      {/* Subdomain URL Simulation Badge (Only shown in administrative preview mode) */}
-      {!window.location.pathname.includes('/menu') && (
-        <div className="bg-slate-900 text-slate-300 px-4 py-2.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono border border-slate-800 shadow-md">
-          <div className="flex items-center gap-2 truncate w-full sm:w-auto" dir="ltr">
-            <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="text-white font-bold truncate">https://{tenant.subdomain}.restocloud.app/menu</span>
-          </div>
-          <button
-            onClick={() => setShowQRModal(true)}
-            className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold flex items-center justify-center gap-1.5 shadow-sm transform hover:scale-105 transition-all"
-          >
-            <QrCode className="w-4 h-4 text-white animate-bounce" />
-            <span>📲 عرض و طباعة باركود الـ QR (ستاند الطاولات)</span>
-          </button>
-        </div>
-      )}
+
 
       {activeOrder && (
         <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl p-5 shadow-xl space-y-4 animate-in fade-in duration-300">
