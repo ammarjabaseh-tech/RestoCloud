@@ -188,7 +188,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
             address,
             ownerName,
             slogan: "مطعم مسجل حديثاً عبر بوابة الاشتراك والدفع",
-            status: "pending_approval", // Requires platform admin approval!
+            status: "trial", // Activated free trial on signup
             ownerEmail,
             password,
             subscriptionPlan: selectedPlan,
