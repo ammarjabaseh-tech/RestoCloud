@@ -222,8 +222,29 @@ function mapInvoice(row: any) {
 // ============================================================
 // TENANTS
 // ============================================================
+async function checkAndUpdateSubscriptions() {
+  try {
+    // 1. Suspend trials that have expired (> 14 days since created_at)
+    await pool.query(
+      `UPDATE tenants 
+       SET status = 'suspended' 
+       WHERE status = 'trial' AND created_at < NOW() - INTERVAL '14 days'`
+    );
+
+    // 2. Suspend active subscriptions that have expired (> 30 days since subscription_date)
+    await pool.query(
+      `UPDATE tenants 
+       SET status = 'suspended' 
+       WHERE status = 'active' AND subscription_date < CURRENT_DATE - INTERVAL '30 days'`
+    );
+  } catch (err: any) {
+    console.error("[Auto-Billing Error]:", err.message);
+  }
+}
+
 app.get("/api/tenants", async (req, res) => {
   try {
+    await checkAndUpdateSubscriptions();
     const result = await pool.query("SELECT * FROM tenants ORDER BY created_at DESC");
     res.json(result.rows.map(mapTenant));
   } catch (err: any) {
@@ -272,7 +293,7 @@ app.post("/api/tenants", async (req, res) => {
        RETURNING *`,
       [id, cleanSub, nameAr || "مطعم جديد", logo || "🍽️", themeColor || "emerald", currency || 'ر.س',
        address || "الرياض، المملكة العربية السعودية", phone || "0500000000", ownerName || "صاحب المطعم",
-       ownerEmail || "", password || "", status || "pending_approval",
+       ownerEmail || "", password || "", status || "trial",
        slogan || "نكهات طازجة وجودة عالية كل يوم", `${cleanSub}_wifi_2026`,
        subscriptionPlan || "starter", subscriptionAmount || 199,
        subscriptionDate || new Date().toISOString().split("T")[0]]
@@ -461,6 +482,7 @@ app.post("/api/auth/login-otp", async (req, res) => {
   const cleanEmail = email.trim().toLowerCase();
 
   try {
+    await checkAndUpdateSubscriptions();
     const otpResult = await pool.query(
       `SELECT * FROM tenant_otps 
        WHERE LOWER(email) = $1 AND otp_code = $2 AND action_type = 'login' AND expires_at > NOW()`,
@@ -541,6 +563,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 
   try {
+    await checkAndUpdateSubscriptions();
     // 2. Check Tenant Users (Staff)
     const userResult = await pool.query(
       "SELECT * FROM tenant_users WHERE LOWER(email) = $1 AND password_hash = $2",
@@ -698,6 +721,21 @@ app.put("/api/invoices/:id", async (req, res) => {
       [id, status]
     );
     if (!result.rows[0]) return res.status(404).json({ error: "الفاتورة غير موجودة" });
+
+    // If marked as paid, activate the corresponding tenant and set the active subscription plan
+    if (status === "paid") {
+      const inv = result.rows[0];
+      await pool.query(
+        `UPDATE tenants SET 
+          status = 'active', 
+          subscription_plan = $2, 
+          subscription_amount = $3, 
+          subscription_date = CURRENT_DATE 
+         WHERE id = $1`,
+        [inv.tenant_id, inv.plan, inv.amount]
+      );
+    }
+
     res.json(mapInvoice(result.rows[0]));
   } catch (err: any) {
     res.status(500).json({ error: err.message });

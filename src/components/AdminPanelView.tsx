@@ -352,6 +352,15 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     { id: "orange", name: "برتقالي", bg: "bg-orange-600" },
   ];
 
+  const getTrialDaysLeft = () => {
+    if (tenant.status !== 'trial') return null;
+    const createdDate = new Date(tenant.createdAt || new Date());
+    const trialEndDate = new Date(createdDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const diffTime = trialEndDate.getTime() - new Date().getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200" dir="rtl">
       
@@ -362,11 +371,16 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             <RestaurantLogo logo={tenant.logo} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-extrabold text-slate-900">{tenant.nameAr}</h1>
               <span className="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">
                 لوحة المالك (Admin)
               </span>
+              {tenant.status === 'trial' && (
+                <span className="text-[11px] bg-amber-100 dark:bg-amber-950 text-amber-855 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
+                  ⏳ تجريبي: متبقي {getTrialDaysLeft()} يوم
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-1">التحكم في الهوية، قائمة الأصناف والأسعار، وإدارة الطاولات</p>
           </div>

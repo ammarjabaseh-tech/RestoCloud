@@ -117,9 +117,18 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     } catch (err) {
       console.error(err);
       alert("❌ فشل الاتصال بالطابعة الشبكية، جاري التحويل لطباعة المتصفح...");
-      window.print();
     }
   };
+
+  const getTrialDaysLeft = () => {
+    if (tenant.status !== 'trial') return null;
+    const createdDate = new Date(tenant.createdAt || new Date());
+    const trialEndDate = new Date(createdDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const diffTime = trialEndDate.getTime() - new Date().getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
 
   // Silent polling of orders every 10 seconds for real-time mobile order receipt
   React.useEffect(() => {
@@ -378,7 +387,14 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               <RestaurantLogo logo={tenant.logo} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">نقطة البيع والكاشير (POS)</h2>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span>نقطة البيع والكاشير (POS)</span>
+                {tenant.status === 'trial' && (
+                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-850 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
+                    ⏳ تجريبي: متبقي {getTrialDaysLeft()} يوم
+                  </span>
+                )}
+              </h2>
               <p className="text-[10px] text-slate-500">{tenant.nameAr} - كاشير نشط</p>
             </div>
           </div>
