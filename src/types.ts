@@ -29,6 +29,8 @@ export interface Category {
   id: string;
   tenantId: string;
   nameAr: string;
+  nameEn?: string;
+  nameTr?: string;
   icon: string;
   orderIndex: number;
 }
@@ -38,7 +40,11 @@ export interface MenuItem {
   tenantId: string;
   categoryId: string;
   nameAr: string;
+  nameEn?: string;
+  nameTr?: string;
   descriptionAr: string;
+  descriptionEn?: string;
+  descriptionTr?: string;
   price: number;
   costPrice: number; // التكلفة التقريبية للطبق لحساب هامش الربح
   calories?: number;

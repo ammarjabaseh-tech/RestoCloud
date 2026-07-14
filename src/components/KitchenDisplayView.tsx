@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Tenant, Order, OrderStatus } from "../types";
+import { Tenant, Order, OrderStatus, MenuItem } from "../types";
 import { 
   ChefHat, 
   Clock, 
@@ -16,17 +16,137 @@ import {
 } from "lucide-react";
 import { getThemeClasses } from "../utils/theme";
 
+const kdsTranslations = {
+  ar: {
+    kdsTitle: "شاشة عرض المطبخ الذكية (KDS)",
+    activeKitchen: "مطبخ نشط 👨‍🍳",
+    subtitle: "تحضير الطلبات الحية، ملاحظات الشيف، وإشعار جاهزية الأكل للعملاء",
+    muteBtn: "كتم صوت التنبيه",
+    unmuteBtn: "تفعيل صوت التنبيه للطلبات الجديدة",
+    silentAlert: "تنبيه صامت",
+    activeAlert: "صوت التنبيه نشط",
+    refresh: "تحديث",
+    all: "الكل",
+    dineIn: "طاولات",
+    takeaway: "سفري",
+    delivery: "توصيل",
+    loadingOrders: "جاري تحميل طلبات المطبخ النشطة...",
+    emptyTitle: "المطبخ خالٍ من أي طلبات نشطة حالياً!",
+    emptyDesc: "عند قيام الكاشير بقبول وإرسال طلب جديد، سيظهر مباشرة هنا مصحوباً برنين تنبيه صوتي.",
+    preparingTitle: "الطلبات قيد التحضير في المطبخ",
+    readyTitle: "جاهز للتسليم (Pickup)",
+    noPreparing: "لا توجد طلبات قيد التحضير حالياً",
+    noReady: "لا توجد طلبات جاهزة بانتظار التسليم",
+    dineInLabel: "محلي (طاولة رقم",
+    takeawayLabel: "سفري",
+    deliveryLabel: "توصيل",
+    cashierLabel: "الكاشير:",
+    readyForCustomer: "جاهز للزبون",
+    since: "منذ",
+    minutes: "د",
+    noteLabel: "💡 ملاحظة:",
+    startPrep: "بدء التحضير (تجهيز)",
+    markReady: "جاهز للتسليم (جاهز)",
+    markDelivered: "تم التسليم (إنهاء وأرشفة)"
+  },
+  en: {
+    kdsTitle: "Kitchen Display System (KDS)",
+    activeKitchen: "Active Kitchen 👨‍🍳",
+    subtitle: "Prepare live orders, check chef notes, and update customers when ready",
+    muteBtn: "Mute sound alerts",
+    unmuteBtn: "Unmute sound alerts for new orders",
+    silentAlert: "Silent Alert",
+    activeAlert: "Sound Alert Active",
+    refresh: "Refresh",
+    all: "All",
+    dineIn: "Tables",
+    takeaway: "Takeaway",
+    delivery: "Delivery",
+    loadingOrders: "Loading active kitchen orders...",
+    emptyTitle: "Kitchen has no active orders currently!",
+    emptyDesc: "When the cashier approves a new order, it will appear here instantly with a notification chime.",
+    preparingTitle: "Orders in Preparation",
+    readyTitle: "Ready for Pickup",
+    noPreparing: "No orders in prep currently",
+    noReady: "No orders waiting for pickup",
+    dineInLabel: "Dine In (Table",
+    takeawayLabel: "Takeaway",
+    deliveryLabel: "Delivery",
+    cashierLabel: "Cashier:",
+    readyForCustomer: "Ready for Customer",
+    since: "since",
+    minutes: "min",
+    noteLabel: "💡 Note:",
+    startPrep: "Start Prep",
+    markReady: "Mark Ready",
+    markDelivered: "Mark Delivered & Archive"
+  },
+  tr: {
+    kdsTitle: "Mutfak Ekran Sistemi (KDS)",
+    activeKitchen: "Aktif Mutfak 👨‍🍳",
+    subtitle: "Canlı siparişleri hazırlayın, şef notlarını görün ve hazır olduğunda bildirin",
+    muteBtn: "Sesli uyarıyı sessize al",
+    unmuteBtn: "Yeni siparişler için sesli uyarıyı aç",
+    silentAlert: "Sessiz Uyarı",
+    activeAlert: "Sesli Uyarı Aktif",
+    refresh: "Yenile",
+    all: "Tümü",
+    dineIn: "Masalar",
+    takeaway: "Gel-Al",
+    delivery: "Paket Servis",
+    loadingOrders: "Aktif mutfak siparişleri yükleniyor...",
+    emptyTitle: "Mutfakta aktif sipariş bulunmamaktadır!",
+    emptyDesc: "Kasiyer yeni bir siparişi onayladığında, burada sesli uyarı ile anında görünecektir.",
+    preparingTitle: "Hazırlanan Siparişler",
+    readyTitle: "Teslime Hazır (Pickup)",
+    noPreparing: "Şu anda hazırlanan sipariş yok",
+    noReady: "Teslim edilmeyi bekleyen hazır sipariş yok",
+    dineInLabel: "Masada (Masa",
+    takeawayLabel: "Gel-Al",
+    deliveryLabel: "Paket Servis",
+    cashierLabel: "Kasiyer:",
+    readyForCustomer: "Müşteriye Hazır",
+    since: "süre:",
+    minutes: "dk",
+    noteLabel: "💡 Not:",
+    startPrep: "Hazırlığa Başla",
+    markReady: "Hazır Olarak İşaretle",
+    markDelivered: "Teslim Edildi & Arşivle"
+  }
+};
+
 interface KitchenDisplayViewProps {
   tenant: Tenant;
+  lang?: 'ar' | 'en' | 'tr';
 }
 
-export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }) => {
+export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant, lang = 'ar' }) => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [menuItems, setMenuItems] = useState<Record<string, MenuItem>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const [filterType, setFilterType] = useState<"all" | "dine_in" | "takeaway" | "delivery">("all");
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const res = await fetch(`/api/tenants/${tenant.id}/menu-items`);
+        if (res.ok) {
+          const data: MenuItem[] = await res.json();
+          const map: Record<string, MenuItem> = {};
+          data.forEach(item => {
+            map[item.id] = item;
+          });
+          setMenuItems(map);
+        }
+      } catch (err) {
+        console.error("Failed to fetch menu items for KDS translation", err);
+      }
+    };
+    fetchMenu();
+  }, [tenant.id]);
   
   const theme = getThemeClasses(tenant.themeColor);
 
@@ -165,7 +285,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
   const readyList = filteredOrders.filter(o => o.orderStatus === "ready");
 
   return (
-    <div className="min-h-[calc(100vh-130px)] bg-slate-950 text-slate-100 p-4 sm:p-6 rounded-3xl shadow-xl border border-slate-900 flex flex-col font-sans" dir="rtl">
+    <div className="min-h-[calc(100vh-130px)] bg-slate-950 text-slate-100 p-4 sm:p-6 rounded-3xl shadow-xl border border-slate-900 flex flex-col font-sans" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       {/* Top Header Dashboard */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-5 border-b border-slate-900">
@@ -175,12 +295,12 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black tracking-tight text-white">شاشة عرض المطبخ الذكية (KDS)</h1>
+              <h1 className="text-xl font-black tracking-tight text-white">{kdsTranslations[lang].kdsTitle}</h1>
               <span className="bg-slate-900 border border-slate-800 text-slate-400 text-[10px] font-black px-2 py-0.5 rounded-full">
-                مطبخ نشط 👨‍🍳
+                {kdsTranslations[lang].activeKitchen}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">تحضير الطلبات الحية، ملاحظات الشيف، وإشعار جاهزية الأكل للعملاء</p>
+            <p className="text-xs text-slate-400 mt-0.5">{kdsTranslations[lang].subtitle}</p>
           </div>
         </div>
 
@@ -194,10 +314,10 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
                 ? "bg-rose-950/20 border-rose-900/60 text-rose-400 hover:bg-rose-950/30" 
                 : "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800"
             }`}
-            title={isMuted ? "تفعيل صوت التنبيه للطلبات الجديدة" : "كتم صوت التنبيه"}
+            title={isMuted ? kdsTranslations[lang].unmuteBtn : kdsTranslations[lang].muteBtn}
           >
             {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
-            <span>{isMuted ? "تنبيه صامت" : "صوت التنبيه نشط"}</span>
+            <span>{isMuted ? kdsTranslations[lang].silentAlert : kdsTranslations[lang].activeAlert}</span>
           </button>
 
           {/* Manual Refresh */}
@@ -206,7 +326,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 text-xs font-bold transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>تحديث</span>
+            <span>{kdsTranslations[lang].refresh}</span>
           </button>
 
           <div className="h-5 w-px bg-slate-800 mx-1 hidden sm:block"></div>
@@ -223,7 +343,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
                     : "text-slate-400 hover:text-slate-200"
                 }`}
               >
-                {type === "all" ? "الكل" : type === "dine_in" ? "طاولات" : type === "takeaway" ? "سفري" : "توصيل"}
+                {type === "all" ? kdsTranslations[lang].all : type === "dine_in" ? kdsTranslations[lang].dineIn : type === "takeaway" ? kdsTranslations[lang].takeaway : kdsTranslations[lang].delivery}
               </button>
             ))}
           </div>
@@ -234,15 +354,15 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
       {loading && orders.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-500 text-sm gap-2">
           <RefreshCw className="w-8 h-8 animate-spin text-indigo-500" />
-          <span>جاري تحميل طلبات المطبخ النشطة...</span>
+          <span>{kdsTranslations[lang].loadingOrders}</span>
         </div>
       ) : orders.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center py-20 text-center space-y-3">
           <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 text-slate-600 flex items-center justify-center text-3xl">
             🍳
           </div>
-          <h3 className="text-base font-bold text-slate-300">المطبخ خالٍ من أي طلبات نشطة حالياً!</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">عند قيام الكاشير بقبول وإرسال طلب جديد، سيظهر مباشرة هنا مصحوباً برنين تنبيه صوتي.</p>
+          <h3 className="text-base font-bold text-slate-300">{kdsTranslations[lang].emptyTitle}</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">{kdsTranslations[lang].emptyDesc}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 flex-1 items-start">
@@ -252,7 +372,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
             <div className="flex items-center justify-between p-2 bg-slate-900/60 rounded-xl border border-slate-900/80">
               <span className="flex items-center gap-2 text-sm font-bold text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                <span>الطلبات قيد التحضير في المطبخ</span>
+                <span>{kdsTranslations[lang].preparingTitle}</span>
               </span>
               <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full text-xs font-black font-mono">
                 {preparingList.length}
@@ -263,7 +383,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
               {preparingList.map(order => renderOrderCard(order))}
               {preparingList.length === 0 && (
                 <div className="text-center py-10 border border-dashed border-slate-900/60 rounded-2xl text-xs text-slate-600 font-bold">
-                  لا توجد طلبات قيد التحضير حالياً
+                  {kdsTranslations[lang].noPreparing}
                 </div>
               )}
             </div>
@@ -274,7 +394,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
             <div className="flex items-center justify-between p-2 bg-slate-900/60 rounded-xl border border-slate-900/80">
               <span className="flex items-center gap-2 text-sm font-bold text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>جاهز للتسليم (Pickup)</span>
+                <span>{kdsTranslations[lang].readyTitle}</span>
               </span>
               <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full text-xs font-black font-mono">
                 {readyList.length}
@@ -285,7 +405,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
               {readyList.map(order => renderOrderCard(order))}
               {readyList.length === 0 && (
                 <div className="text-center py-10 border border-dashed border-slate-900/60 rounded-2xl text-xs text-slate-600 font-bold">
-                  لا توجد طلبات جاهزة بانتظار التسليم
+                  {kdsTranslations[lang].noReady}
                 </div>
               )}
             </div>
@@ -308,10 +428,10 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
       : Bike;
       
     const typeLabel = order.orderType === "dine_in" 
-      ? `محلي (طاولة ${order.tableNumber || 1})` 
+      ? `${kdsTranslations[lang].dineInLabel} ${order.tableNumber || 1})` 
       : order.orderType === "takeaway" 
-      ? "سفري" 
-      : "توصيل";
+      ? kdsTranslations[lang].takeawayLabel 
+      : kdsTranslations[lang].deliveryLabel;
 
     return (
       <div 
@@ -335,7 +455,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
               </span>
             </div>
             <div className="text-[10px] text-slate-500 font-medium">
-              <span>الكاشير: {order.cashierName || "الكاشير"}</span>
+              <span>{kdsTranslations[lang].cashierLabel} {order.cashierName || (lang === 'ar' ? "الكاشير" : lang === 'tr' ? "Kasiyer" : "Cashier")}</span>
               {order.customerName && order.orderType !== "dine_in" && (
                 <span className="mr-1.5 font-bold text-slate-400">({order.customerName})</span>
               )}
@@ -346,9 +466,9 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
           <div className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black tracking-wide ${getWaitingTimeColor(minsWaiting, order.orderStatus)}`}>
             <Clock className="w-3.5 h-3.5 shrink-0" />
             {order.orderStatus === "ready" ? (
-              <span>جاهز للزبون</span>
+              <span>{kdsTranslations[lang].readyForCustomer}</span>
             ) : (
-              <span>منذ {minsWaiting} د</span>
+              <span>{kdsTranslations[lang].since} {minsWaiting} {kdsTranslations[lang].minutes}</span>
             )}
           </div>
         </div>
@@ -356,21 +476,27 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
         {/* Card Body - Items & Notes */}
         <div className="p-3 flex-1 space-y-2">
           <div className="divide-y divide-slate-800/80">
-            {order.items.map((item, idx) => (
-              <div key={idx} className="py-2 first:pt-0 last:pb-0 space-y-1">
-                <div className="flex items-start justify-between text-xs gap-3">
-                  <span className="font-extrabold text-white leading-snug">{item.nameAr}</span>
-                  <span className="font-mono font-black text-sm bg-indigo-950/60 text-indigo-300 border border-indigo-900/40 px-2 py-0.2 rounded-lg shrink-0">
-                    x{item.quantity}
-                  </span>
-                </div>
-                {item.notes && (
-                  <div className="text-[10px] font-black text-amber-300 bg-amber-950/20 border border-amber-900/30 p-1.5 rounded-lg pr-2 leading-relaxed">
-                    💡 ملاحظة: {item.notes}
+            {order.items.map((item, idx) => {
+              const dbItem = menuItems[item.itemId];
+              const itemName = dbItem 
+                ? (lang === 'ar' ? dbItem.nameAr : (lang === 'tr' && dbItem.nameTr ? dbItem.nameTr : (dbItem.nameEn || dbItem.nameAr)))
+                : item.nameAr;
+              return (
+                <div key={idx} className="py-2 first:pt-0 last:pb-0 space-y-1">
+                  <div className="flex items-start justify-between text-xs gap-3">
+                    <span className="font-extrabold text-white leading-snug">{itemName}</span>
+                    <span className="font-mono font-black text-sm bg-indigo-950/60 text-indigo-300 border border-indigo-900/40 px-2 py-0.2 rounded-lg shrink-0">
+                      x{item.quantity}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+                  {item.notes && (
+                    <div className="text-[10px] font-black text-amber-300 bg-amber-950/20 border border-amber-900/30 p-1.5 rounded-lg pr-2 leading-relaxed">
+                      {kdsTranslations[lang].noteLabel} {item.notes}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -382,7 +508,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
               className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-black shadow-sm transition-all cursor-pointer"
             >
               <Play className="w-3.5 h-3.5" />
-              <span>بدء التحضير (تجهيز)</span>
+              <span>{kdsTranslations[lang].startPrep}</span>
             </button>
           )}
 
@@ -392,7 +518,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
               className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-sm transition-all cursor-pointer"
             >
               <Check className="w-3.5 h-3.5" />
-              <span>جاهز للتسليم (جاهز)</span>
+              <span>{kdsTranslations[lang].markReady}</span>
             </button>
           )}
 
@@ -402,7 +528,7 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant }
               className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition-all cursor-pointer"
             >
               <CheckSquare className="w-3.5 h-3.5" />
-              <span>تم التسليم (إنهاء وأرشفة)</span>
+              <span>{kdsTranslations[lang].markDelivered}</span>
             </button>
           )}
         </div>

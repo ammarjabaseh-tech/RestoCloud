@@ -28,6 +28,264 @@ import {
   History,
   Bell
 } from "lucide-react";
+const posTranslations = {
+  ar: {
+    cancelConfirm: "هل أنت متأكد من رفض وإلغاء هذا الطلب؟",
+    clearCartConfirm: "هل أنت متأكد من مسح جميع الأصناف من السلة؟",
+    selectTableAlert: "يرجى تحديد رقم الطاولة للطلب الداخلي",
+    dineInLabel: "طاولة رقم",
+    takeawayLabel: "عميل سفري",
+    deliveryLabel: "توصيل",
+    generalCashier: "الكاشير العام",
+    reviewInvoice: "الكاشير العام (فاتورة مراجعة)",
+    posTitle: "نقطة البيع والكاشير (POS)",
+    trialAlert: "⏳ تجريبي: متبقي",
+    days: "يوم",
+    activeCashier: "كاشير نشط",
+    newSale: "🛒 كاشير (بيع جديد)",
+    ordersList: "📋 قائمة طلبات المطعم",
+    invoiceHistory: "سجل الفواتير (طباعة)",
+    searchPlaceholder: "ابحث عن وجبة...",
+    cartTitle: "سلة المشتريات (الفاتورة)",
+    totalItems: "إجمالي الأصناف",
+    clearBtn: "مسح",
+    dineIn: "طاولات",
+    takeaway: "سفري",
+    delivery: "توصيل",
+    selectTable: "اختر الطاولة:",
+    tablesAvailable: "طاولات متاحة",
+    table: "طاولة",
+    customerNamePlaceholder: "اسم العميل (اختياري)",
+    phonePlaceholder: "رقم الهاتف",
+    addressPlaceholder: "عنوان التوصيل بالتفصيل *",
+    subtotal: "المجموع الفرعي:",
+    vat: "ضريبة القيمة المضافة",
+    discount: "الخصم:",
+    totalRequired: "الإجمالي المطلوب:",
+    paymentMethod: "طريقة الدفع:",
+    cash: "كاش (نقدي)",
+    card: "شبكة / بطاقة",
+    deferred: "آجل (معلق)",
+    draftInvoice: "فاتورة مبدئية",
+    holdInvoice: "تعليق",
+    completing: "جاري الإتمام...",
+    completeAndPrint: "إتمام وطباعة",
+    activeOrders: "الطلبات النشطة",
+    pendingOrders: "بانتظار الموافقة",
+    preparingOrders: "تحت التحضير",
+    readyOrders: "جاهز للتسليم",
+    archivedOrders: "المؤرشفة (المنتهية)",
+    ordersSearchPlaceholder: "ابحث برقم الطلب أو اسم الزبون...",
+    orderStatusPending: "معلق (موافقة)",
+    orderStatusPreparing: "في المطبخ",
+    orderStatusReady: "جاهز للتسليم",
+    orderStatusDelivered: "تم التسليم",
+    orderStatusCancelled: "ملغي",
+    orderNote: "💡 ملاحظة:",
+    finalTotal: "الإجمالي النهائي",
+    cancelOrder: "رفض وإلغاء الطلب",
+    approveBtn: "موافقة",
+    printKitchen: "طباعة إيصال المطبخ",
+    readyBtn: "جاهز",
+    printInvoice: "طباعة الفاتورة",
+    deliveredBtn: "تم التسليم",
+    reprintBtn: "إعادة طباعة",
+    noOrdersTitle: "لا توجد طلبات في هذا القسم حالياً",
+    noOrdersDesc: "ستظهر الطلبات الحية والنشطة هنا بمجرد وصولها لتسهيل إدارتها.",
+    printPreviewTitle: "معاينة الفاتورة للطباعة",
+    printPreviewDraftTitle: "معاينة الفاتورة المبدئية",
+    printerLabel: "الطابعة:",
+    closeAndNew: "إغلاق وطلب جديد",
+    printReceiptBtn: "طباعة الإيصال (🖨️)",
+    historyTitle: "سجل فواتير وطلبات المطعم (إعادة الطباعة)",
+    historyDesc: "اختر الفاتورة لعرض الإيصال وطباعته فوراً عبر المتصفح",
+    issuedInvoices: "فواتير المطعم الصادرة",
+    pendingMobileOrders: "طلبات الجوال المعلقة (QR)",
+    historySearchPlaceholder: "ابحث برقم الفاتورة، اسم العميل...",
+    refreshBtn: "تحديث الفواتير",
+    loadingHistory: "جاري تحميل سجل الفواتير...",
+    noMatchingInvoices: "لا توجد فواتير أو طلبات معلقة مطابقة",
+    noMatchingInvoicesDesc: "ستظهر هنا فواتير المطعم أو طلبات الكاستمر القادمة من المنيو الرقمي",
+    cashPayment: "نقدي (Cash)",
+    cardPayment: "بطاقة",
+    pendingPayment: "انتظار الموافقة",
+    deferredPayment: "آجل",
+    declineOrder: "رفض الطلب",
+    approveAndPrepare: "موافق وتحضير",
+    closeBtn: "إغلاق"
+  },
+  en: {
+    cancelConfirm: "Are you sure you want to decline and cancel this order?",
+    clearCartConfirm: "Are you sure you want to clear all items from the cart?",
+    selectTableAlert: "Please select a table number for dine-in orders",
+    dineInLabel: "Table No.",
+    takeawayLabel: "Takeaway Customer",
+    deliveryLabel: "Delivery",
+    generalCashier: "General Cashier",
+    reviewInvoice: "General Cashier (Draft Invoice)",
+    posTitle: "Point of Sale & Cashier (POS)",
+    trialAlert: "⏳ Trial:",
+    days: "days left",
+    activeCashier: "Active Cashier",
+    newSale: "🛒 Cashier (New Sale)",
+    ordersList: "📋 Active Restaurant Orders",
+    invoiceHistory: "Invoice History (Print)",
+    searchPlaceholder: "Search for a meal...",
+    cartTitle: "Shopping Cart (Receipt)",
+    totalItems: "Total Items",
+    clearBtn: "Clear",
+    dineIn: "Dine In",
+    takeaway: "Takeaway",
+    delivery: "Delivery",
+    selectTable: "Select Table:",
+    tablesAvailable: "tables available",
+    table: "Table",
+    customerNamePlaceholder: "Customer Name (Optional)",
+    phonePlaceholder: "Phone Number",
+    addressPlaceholder: "Detailed Delivery Address *",
+    subtotal: "Subtotal:",
+    vat: "VAT",
+    discount: "Discount:",
+    totalRequired: "Total Amount:",
+    paymentMethod: "Payment Method:",
+    cash: "Cash",
+    card: "Card / POS Terminal",
+    deferred: "Deferred (Pending)",
+    draftInvoice: "Draft Receipt",
+    holdInvoice: "Hold",
+    completing: "Completing...",
+    completeAndPrint: "Pay & Print",
+    activeOrders: "Active Orders",
+    pendingOrders: "Pending Approval",
+    preparingOrders: "Preparing",
+    readyOrders: "Ready",
+    archivedOrders: "Archived (Done)",
+    ordersSearchPlaceholder: "Search by order no. or customer name...",
+    orderStatusPending: "Pending Approval",
+    orderStatusPreparing: "In Kitchen",
+    orderStatusReady: "Ready for Pickup",
+    orderStatusDelivered: "Delivered",
+    orderStatusCancelled: "Cancelled",
+    orderNote: "💡 Note:",
+    finalTotal: "Final Total",
+    cancelOrder: "Reject & Cancel Order",
+    approveBtn: "Approve",
+    printKitchen: "Print Kitchen Ticket",
+    readyBtn: "Ready",
+    printInvoice: "Print Invoice",
+    deliveredBtn: "Mark Delivered",
+    reprintBtn: "Reprint",
+    noOrdersTitle: "No orders in this section currently",
+    noOrdersDesc: "Live and active orders will appear here once they arrive to make them easy to manage.",
+    printPreviewTitle: "Invoice Print Preview",
+    printPreviewDraftTitle: "Draft Invoice Preview",
+    printerLabel: "Printer:",
+    closeAndNew: "Close & New Order",
+    printReceiptBtn: "Print Receipt (🖨️)",
+    historyTitle: "Invoice History & Orders (Reprint)",
+    historyDesc: "Select an invoice to display the receipt and print it via browser",
+    issuedInvoices: "Issued Invoices",
+    pendingMobileOrders: "Pending Mobile Orders (QR)",
+    historySearchPlaceholder: "Search by invoice ID, customer...",
+    refreshBtn: "Refresh Invoices",
+    loadingHistory: "Loading invoice history...",
+    noMatchingInvoices: "No matching invoices or pending orders",
+    noMatchingInvoicesDesc: "Restaurant invoices or customer orders coming from the digital menu will appear here.",
+    cashPayment: "Cash",
+    cardPayment: "Card",
+    pendingPayment: "Pending Approval",
+    deferredPayment: "Deferred",
+    declineOrder: "Decline Order",
+    approveAndPrepare: "Approve & Prep",
+    closeBtn: "Close"
+  },
+  tr: {
+    cancelConfirm: "Bu siparişi reddetmek ve iptal etmek istediğinizden emin misiniz?",
+    clearCartConfirm: "Sepetteki tüm ürünleri temizlemek istediğinizden emin misiniz?",
+    selectTableAlert: "Lütfen masada servis için masa numarası seçin",
+    dineInLabel: "Masa No.",
+    takeawayLabel: "Gel-Al Müşterisi",
+    deliveryLabel: "Paket Servis",
+    generalCashier: "Genel Kasiyer",
+    reviewInvoice: "Genel Kasiyer (Taslak Fatura)",
+    posTitle: "Satış Noktası ve Kasiyer (POS)",
+    trialAlert: "⏳ Deneme:",
+    days: "gün kaldı",
+    activeCashier: "Aktif Kasiyer",
+    newSale: "🛒 Kasa (Yeni Satış)",
+    ordersList: "📋 Aktif Restoran Siparişleri",
+    invoiceHistory: "Fatura Geçmişi (Yazdır)",
+    searchPlaceholder: "Bir yemek arayın...",
+    cartTitle: "Alışveriş Sepeti (Fatura)",
+    totalItems: "Toplam Ürün",
+    clearBtn: "Temizle",
+    dineIn: "Masada Servis",
+    takeaway: "Gel-Al",
+    delivery: "Paket Servis",
+    selectTable: "Masa Seç:",
+    tablesAvailable: "boş masa var",
+    table: "Masa",
+    customerNamePlaceholder: "Müşteri Adı (İsteğe bağlı)",
+    phonePlaceholder: "Telefon Numarası",
+    addressPlaceholder: "Detaylı Teslimat Adresi *",
+    subtotal: "Ara Toplam:",
+    vat: "KDV",
+    discount: "İndirim:",
+    totalRequired: "Toplam Tutar:",
+    paymentMethod: "Ödeme Yöntemi:",
+    cash: "Nakit",
+    card: "Kart / POS Cihazı",
+    deferred: "Veresiye (Beklemede)",
+    draftInvoice: "Taslak Fiş",
+    holdInvoice: "Beklet",
+    completing: "Tamamlanıyor...",
+    completeAndPrint: "Öde ve Yazdır",
+    activeOrders: "Aktif Siparişler",
+    pendingOrders: "Onay Bekleyenler",
+    preparingOrders: "Hazırlanıyor",
+    readyOrders: "Hazır",
+    archivedOrders: "Arşivlendi (Bitti)",
+    ordersSearchPlaceholder: "Sipariş no veya müşteri adıyla ara...",
+    orderStatusPending: "Onay Bekliyor",
+    orderStatusPreparing: "Mutfakta",
+    orderStatusReady: "Teslime Hazır",
+    orderStatusDelivered: "Teslim Edildi",
+    orderStatusCancelled: "İptal Edildi",
+    orderNote: "💡 Not:",
+    finalTotal: "Genel Toplam",
+    cancelOrder: "Siparişi İptal Et",
+    approveBtn: "Onayla",
+    printKitchen: "Mutfak Fişi Yazdır",
+    readyBtn: "Hazır",
+    printInvoice: "Fatura Yazdır",
+    deliveredBtn: "Teslim Edildi",
+    reprintBtn: "Tekrar Yazdır",
+    noOrdersTitle: "Şu anda bu bölümde sipariş yok",
+    noOrdersDesc: "Canlı ve aktif siparişler geldikçe burada görünecektir.",
+    printPreviewTitle: "Fatura Önizleme",
+    printPreviewDraftTitle: "Taslak Fatura Önizleme",
+    printerLabel: "Yazıcı:",
+    closeAndNew: "Kapat ve Yeni Sipariş",
+    printReceiptBtn: "Fiş Yazdır (🖨️)",
+    historyTitle: "Fatura Geçmişi ve Siparişler (Tekrar Yazdır)",
+    historyDesc: "Fişi görüntülemek ve tarayıcıdan yazdırmak için fatura seçin",
+    issuedInvoices: "Kesilen Faturalar",
+    pendingMobileOrders: "Bekleyen Mobil Siparişler (QR)",
+    historySearchPlaceholder: "Fatura ID veya müşteri adıyla ara...",
+    refreshBtn: "Faturaları Yenile",
+    loadingHistory: "Fatura geçmişi yükleniyor...",
+    noMatchingInvoices: "Eşleşen fatura veya bekleyen sipariş yok",
+    noMatchingInvoicesDesc: "Restoran faturaları veya dijital menüden gelen siparişler burada görünecektir.",
+    cashPayment: "Nakit",
+    cardPayment: "Kart",
+    pendingPayment: "Onay Bekliyor",
+    deferredPayment: "Veresiye",
+    declineOrder: "Reddet",
+    approveAndPrepare: "Onayla ve Hazırla",
+    closeBtn: "Kapat"
+  }
+};
+
 import { POSInvoiceReceipt } from "./POSInvoiceReceipt";
 
 interface POSDashboardViewProps {
@@ -37,6 +295,7 @@ interface POSDashboardViewProps {
   tables: RestaurantTable[];
   onOrderCreated: (order: Order) => void;
   onUpdateTableStatus: (tableId: string, status: any) => void;
+  lang?: 'ar' | 'en' | 'tr';
 }
 
 export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
@@ -45,7 +304,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   items,
   tables,
   onOrderCreated,
-  onUpdateTableStatus
+  onUpdateTableStatus,
+  lang = 'ar'
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -180,7 +440,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   };
 
   const handleRejectOrder = async (orderId: string) => {
-    if (!confirm("هل أنت متأكد من رفض وإلغاء هذا الطلب؟")) return;
+    if (!confirm(posTranslations[lang].cancelConfirm)) return;
     try {
       const res = await fetch(`/api/tenants/${tenant.id}/orders/${orderId}`, {
         method: "PUT",
@@ -203,7 +463,11 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     return items.filter((item) => {
       const matchCat = selectedCategory === "all" || item.categoryId === selectedCategory;
       const matchSearch = item.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase());
+                          item.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.nameEn || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.nameTr || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.descriptionEn || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.descriptionTr || "").toLowerCase().includes(searchQuery.toLowerCase());
       return matchCat && matchSearch && item.isAvailable;
     });
   }, [items, selectedCategory, searchQuery]);
@@ -268,7 +532,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
 
   const clearCart = () => {
     if (cart.length === 0) return;
-    if (confirm("هل أنت متأكد من مسح جميع الأصناف من السلة؟")) {
+    if (confirm(posTranslations[lang].clearCartConfirm)) {
       setCart([]);
       setDiscountAmount(0);
     }
@@ -278,7 +542,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const handleCheckout = async (statusOverride?: 'paid' | 'pending') => {
     if (cart.length === 0) return;
     if (orderType === "dine_in" && !selectedTable) {
-      alert("يرجى تحديد رقم الطاولة للطلب الداخلي");
+      alert(posTranslations[lang].selectTableAlert);
       return;
     }
 
@@ -290,7 +554,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
         body: JSON.stringify({
           orderType,
           tableNumber: orderType === "dine_in" ? selectedTable : undefined,
-          customerName: customerName || (orderType === "dine_in" ? `طاولة رقم ${selectedTable}` : "عميل سفري"),
+          customerName: customerName || (orderType === "dine_in" ? `${posTranslations[lang].dineInLabel} ${selectedTable}` : posTranslations[lang].takeawayLabel),
           customerPhone,
           customerAddress: orderType === "delivery" ? customerAddress : undefined,
           items: cart,
@@ -300,12 +564,12 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           total,
           paymentMethod: statusOverride === 'pending' ? 'pending' : paymentMethod,
           paymentStatus: statusOverride === 'pending' ? 'pending' : 'paid',
-          cashierName: "الكاشير العام"
+          cashierName: posTranslations[lang].generalCashier
         })
       });
 
       const newOrder = await res.json();
-      if (!res.ok) throw new Error(newOrder.error || "فشل في إتمام الطلب");
+      if (!res.ok) throw new Error(newOrder.error || (lang === 'ar' ? "فشل في إتمام الطلب" : lang === 'tr' ? "Sipariş tamamlanamadı" : "Failed to place order"));
 
       // Trigger Confetti!
       try {
@@ -326,7 +590,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       setCustomerAddress("");
       setDiscountAmount(0);
     } catch (err: any) {
-      alert(err.message || "حدث خطأ في الاتصال");
+      alert(err.message || (lang === 'ar' ? "حدث خطأ في الاتصال" : lang === 'tr' ? "Bağlantı hatası oluştu" : "Connection error occurred"));
     } finally {
       setIsSubmitting(false);
     }
@@ -334,7 +598,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
 
   const handlePrintDraft = () => {
     if (cart.length === 0) {
-      alert("يرجى إضافة أصناف إلى السلة أولاً لطباعة الفاتورة المبدئية");
+      alert(lang === 'ar' ? "يرجى إضافة أصناف إلى السلة أولاً لطباعة الفاتورة المبدئية" : lang === 'tr' ? "Lütfen taslak fatura yazdırmak için önce sepete ürün ekleyin" : "Please add items to cart first to print draft invoice");
       return;
     }
     const draftOrder: Order = {
@@ -343,7 +607,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       tenantId: tenant.id,
       orderType,
       tableNumber: orderType === "dine_in" ? selectedTable : undefined,
-      customerName: customerName || (orderType === "dine_in" ? `طاولة رقم ${selectedTable}` : "عميل سفري"),
+      customerName: customerName || (orderType === "dine_in" ? `${posTranslations[lang].dineInLabel} ${selectedTable}` : posTranslations[lang].takeawayLabel),
       customerPhone,
       customerAddress: orderType === "delivery" ? customerAddress : undefined,
       items: cart,
@@ -354,8 +618,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       paymentMethod: paymentMethod,
       paymentStatus: "pending",
       orderStatus: "preparing",
-      createdAt: new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }),
-      cashierName: "الكاشير العام (فاتورة مراجعة)"
+      createdAt: new Date().toLocaleTimeString(lang === 'ar' ? 'ar-SA' : lang === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
+      cashierName: posTranslations[lang].reviewInvoice
     };
     setIsDraftPrint(true);
     setCompletedOrder(draftOrder);
@@ -388,14 +652,14 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <span>نقطة البيع والكاشير (POS)</span>
+                <span>{posTranslations[lang].posTitle}</span>
                 {tenant.status === 'trial' && (
-                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-850 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
-                    ⏳ تجريبي: متبقي {getTrialDaysLeft()} يوم
+                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-855 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
+                    {posTranslations[lang].trialAlert} {getTrialDaysLeft()} {posTranslations[lang].days}
                   </span>
                 )}
               </h2>
-              <p className="text-[10px] text-slate-500">{tenant.nameAr} - كاشير نشط</p>
+              <p className="text-[10px] text-slate-500">{lang === 'ar' ? tenant.nameAr : (tenant.nameEn || tenant.nameAr)} - {posTranslations[lang].activeCashier}</p>
             </div>
           </div>
 
@@ -408,7 +672,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     : "text-slate-600 hover:bg-white/70"
                 }`}
               >
-                🛒 كاشير (بيع جديد)
+                {posTranslations[lang].newSale}
               </button>
               <button
                 onClick={() => {
@@ -421,7 +685,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     : "text-slate-600 hover:bg-white/70"
                 }`}
               >
-                <span>📋 قائمة طلبات المطعم</span>
+                <span>{posTranslations[lang].ordersList}</span>
                 {pendingSelfOrders.length > 0 && (
                   <span className="absolute -top-1.5 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center animate-pulse">
                     {pendingSelfOrders.length}
@@ -438,11 +702,11 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   setShowOrderHistoryModal(true);
                 }}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] border border-slate-200 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
-                title="سجل الفواتير وإعادة الطباعة"
+                title={posTranslations[lang].invoiceHistory}
               >
                 <History className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">سجل الفواتير (طباعة)</span>
-                <span className="sm:hidden">الفواتير</span>
+                <span className="hidden sm:inline">{posTranslations[lang].invoiceHistory}</span>
+                <span className="sm:hidden">{lang === 'ar' ? 'الفواتير' : lang === 'tr' ? 'Faturalar' : 'Invoices'}</span>
               </button>
 
               {posMode === "sales" && (
@@ -450,7 +714,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="ابحث عن وجبة..."
+                    placeholder={posTranslations[lang].searchPlaceholder}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pr-8 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -480,12 +744,13 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                 }`}
               >
                 <span>🔥</span>
-                <span>الكل ({items.filter(i => i.isAvailable).length})</span>
+                <span>{lang === 'ar' ? 'الكل' : lang === 'tr' ? 'Tümü' : 'All'} ({items.filter(i => i.isAvailable).length})</span>
               </button>
 
               {categories.map((cat) => {
                 const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
                 const isSelected = selectedCategory === cat.id;
+                const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
                 return (
                   <button
                     key={cat.id}
@@ -497,7 +762,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     }`}
                   >
                     <span className="text-[10px]">{cat.icon}</span>
-                    <span>{cat.nameAr}</span>
+                    <span>{catName}</span>
                     <span className={`text-[8px] font-mono px-1 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
                       {count}
                     </span>
@@ -518,13 +783,19 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-3xl">
               🔍
             </div>
-            <h3 className="text-sm font-bold text-slate-800">لا توجد أصناف تطابق البحث</h3>
-            <p className="text-xs text-slate-500">جرب البحث بكلمات أخرى أو اختر قسماً مختلفاً من المنيو</p>
+            <h3 className="text-sm font-bold text-slate-800">
+              {lang === 'ar' ? 'لا توجد أصناف تطابق البحث' : lang === 'tr' ? 'Arama sonucu bulunamadı' : 'No items match search'}
+            </h3>
+            <p className="text-xs text-slate-500">
+              {lang === 'ar' ? 'جرب البحث بكلمات أخرى أو اختر قسماً مختلفاً من المنيو' : lang === 'tr' ? 'Farklı kelimelerle aramayı deneyin veya başka kategori seçin' : 'Try searching with other keywords or choose another category'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
             {filteredItems.map((item) => {
               const inCartQty = cart.find((i) => i.itemId === item.id)?.quantity || 0;
+              const itemName = lang === 'en' && item.nameEn ? item.nameEn : lang === 'tr' && item.nameTr ? item.nameTr : item.nameAr;
+              const itemDesc = lang === 'en' && item.descriptionEn ? item.descriptionEn : lang === 'tr' && item.descriptionTr ? item.descriptionTr : item.descriptionAr;
               return (
                 <div
                   key={item.id}
@@ -539,20 +810,20 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   <div className="relative h-14 w-full overflow-hidden bg-slate-50 border-b border-slate-100">
                     <img
                       src={item.image}
-                      alt={item.nameAr}
+                      alt={itemName}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
                     
                     {item.isBestSeller && (
-                      <span className="absolute top-1 right-1 bg-amber-500 text-white text-[7px] font-black px-1.5 py-0.1 rounded-full shadow-sm flex items-center gap-0.5">
+                      <span className={`absolute top-1 bg-amber-500 text-white text-[7px] font-black px-1.5 py-0.1 rounded-full shadow-sm flex items-center gap-0.5 ${lang === 'ar' ? 'right-1' : 'left-1'}`}>
                         <span>★</span>
-                        <span>مميز</span>
+                        <span>{lang === 'ar' ? 'مميز' : lang === 'tr' ? 'Popüler' : 'Featured'}</span>
                       </span>
                     )}
 
                     {inCartQty > 0 && (
-                      <span className={`absolute top-1 left-1 ${theme.primaryBg} text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-sm animate-pulse`}>
+                      <span className={`absolute top-1 ${lang === 'ar' ? 'left-1' : 'right-1'} ${theme.primaryBg} text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-sm animate-pulse`}>
                         {inCartQty}
                       </span>
                     )}
@@ -562,10 +833,10 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   <div className="p-1.5 flex-1 flex flex-col justify-between space-y-1">
                     <div className="space-y-0.5">
                       <h4 className="text-[10px] font-black text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                        {item.nameAr}
+                        {itemName}
                       </h4>
                       <p className="text-[8px] text-slate-400 line-clamp-1 leading-snug">
-                        {item.descriptionAr}
+                        {itemDesc}
                       </p>
                     </div>
 
@@ -574,7 +845,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                         {item.price} <span className="text-[8px] font-normal text-slate-400">{tenant.currency}</span>
                       </span>
                       <span className="text-[8px] font-medium text-slate-400 bg-slate-50 px-1 py-0.1 rounded border border-slate-100">
-                        {item.preparationTimeMin || 15} د
+                        {item.preparationTimeMin || 15} {lang === 'ar' ? 'د' : lang === 'tr' ? 'dk' : 'min'}
                       </span>
                     </div>
                   </div>
@@ -597,8 +868,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               <ShoppingCart className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">سلة المشتريات (الفاتورة)</h3>
-              <p className="text-[10px] text-slate-500">إجمالي الأصناف: {cart.reduce((sum, i) => sum + i.quantity, 0)}</p>
+              <h3 className="text-sm font-bold text-slate-900">{posTranslations[lang].cartTitle}</h3>
+              <p className="text-[10px] text-slate-500">{posTranslations[lang].totalItems}: {cart.reduce((sum, i) => sum + i.quantity, 0)}</p>
             </div>
           </div>
           
@@ -608,7 +879,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               className="text-xs text-rose-600 hover:text-rose-700 flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-rose-50 transition-colors font-bold border border-rose-200"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>مسح</span>
+              <span>{posTranslations[lang].clearBtn}</span>
             </button>
           )}
         </div>
@@ -625,7 +896,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               }`}
             >
               <UtensilsCrossed className="w-3.5 h-3.5" />
-              <span>طاولات</span>
+              <span>{posTranslations[lang].dineIn}</span>
             </button>
 
             <button
@@ -637,7 +908,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               }`}
             >
               <ShoppingBag className="w-3.5 h-3.5" />
-              <span>سفري</span>
+              <span>{posTranslations[lang].takeaway}</span>
             </button>
 
             <button
@@ -649,7 +920,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               }`}
             >
               <Bike className="w-3.5 h-3.5" />
-              <span>توصيل</span>
+              <span>{posTranslations[lang].delivery}</span>
             </button>
           </div>
 
@@ -657,9 +928,9 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           {orderType === "dine_in" ? (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
-                <span>اختر الطاولة:</span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
-                  {tables.filter(t => t.status === "available").length} طاولات متاحة
+                <span>{posTranslations[lang].selectTable}</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-sans">
+                  {tables.filter(t => t.status === "available").length} {posTranslations[lang].tablesAvailable}
                 </span>
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -678,7 +949,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                           : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-500"
                       }`}
                     >
-                      <span>طاولة {t.tableNumber}</span>
+                      <span>{posTranslations[lang].table} {t.tableNumber}</span>
                       <span className={`w-2 h-2 rounded-full ${isOccupied ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                     </button>
                   );
@@ -690,14 +961,14 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
-                  placeholder="اسم العميل (اختياري)"
+                  placeholder={posTranslations[lang].customerNamePlaceholder}
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="رقم الهاتف"
+                  placeholder={posTranslations[lang].phonePlaceholder}
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none"
@@ -706,7 +977,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               {orderType === "delivery" && (
                 <input
                   type="text"
-                  placeholder="عنوان التوصيل بالتفصيل *"
+                  placeholder={posTranslations[lang].addressPlaceholder}
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none"
@@ -722,57 +993,67 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 space-y-3">
               <ShoppingCart className="w-12 h-12 stroke-1 text-slate-300 dark:text-slate-700" />
               <div>
-                <p className="text-sm font-bold text-slate-600 dark:text-slate-300">السلة فارغة حالياً</p>
-                <p className="text-xs text-slate-400 mt-1">اضغط على أي صنف من قائمة المنيو لإضافته هنا</p>
+                <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                  {lang === 'ar' ? 'السلة فارغة حالياً' : lang === 'tr' ? 'Sepetiniz boş' : 'Cart is empty'}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  {lang === 'ar' ? 'اضغط على أي صنف من قائمة المنيو لإضافته هنا' : lang === 'tr' ? 'Eklemek için menüden bir ürüne tıklayın' : 'Click any item from the menu to add it here'}
+                </p>
               </div>
             </div>
           ) : (
-            cart.map((item) => (
-              <div key={item.id} className="pt-3 first:pt-0 flex items-center justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.nameAr}</h4>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                      {(item.price * item.quantity).toFixed(0)} {tenant.currency}
-                    </span>
+            cart.map((item) => {
+              const menuItem = items.find(i => i.id === item.itemId);
+              const itemName = menuItem 
+                ? (lang === 'en' && menuItem.nameEn ? menuItem.nameEn : lang === 'tr' && menuItem.nameTr ? menuItem.nameTr : menuItem.nameAr)
+                : item.nameAr;
+              return (
+                <div key={item.id} className="pt-3 first:pt-0 flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{itemName}</h4>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                        {(item.price * item.quantity).toFixed(0)} {tenant.currency}
+                      </span>
+                    </div>
+                    <p className={`text-[10px] text-slate-400 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{item.price} {tenant.currency} / {lang === 'ar' ? 'للصنف' : lang === 'tr' ? 'adet' : 'item'}</p>
+                    <input
+                      type="text"
+                      placeholder={lang === 'ar' ? 'ملاحظات (بدون بصل، إكسترا صوص...)' : lang === 'tr' ? 'Notlar (soğansız, ekstra sos...)' : 'Notes (no onions, extra sauce...)'}
+                      value={item.notes || ""}
+                      onChange={(e) => updateNotes(item.itemId, e.target.value)}
+                      className="w-full mt-1 px-2 py-0.5 text-[9px] rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    />
                   </div>
-                  <p className="text-[10px] text-slate-400">{item.price} {tenant.currency} / للصنف</p>
-                  <input
-                    type="text"
-                    placeholder="ملاحظات (بدون بصل، إكسترا صوص...)"
-                    value={item.notes || ""}
-                    onChange={(e) => updateNotes(item.itemId, e.target.value)}
-                    className="w-full mt-1 px-2 py-0.5 text-[9px] rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  />
-                </div>
 
-                {/* Quantity Control Buttons */}
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl shrink-0">
+                  {/* Quantity Control Buttons */}
+                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl shrink-0">
+                    <button
+                      onClick={() => updateQuantity(item.itemId, -1)}
+                      className="w-6 h-6 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-white flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm text-xs font-bold"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="w-6 text-center font-bold text-xs text-slate-900 dark:text-white">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateQuantity(item.itemId, 1)}
+                      className={`w-6 h-6 rounded-lg ${theme.primaryBg} text-white flex items-center justify-center hover:opacity-90 transition-colors shadow-sm text-xs font-bold`}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+
                   <button
-                    onClick={() => updateQuantity(item.itemId, -1)}
-                    className="w-6 h-6 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-white flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm text-xs font-bold"
+                    onClick={() => removeFromCart(item.itemId)}
+                    className="text-slate-400 hover:text-rose-500 p-1 rounded transition-colors"
                   >
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-6 text-center font-bold text-xs text-slate-900 dark:text-white">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.itemId, 1)}
-                    className={`w-6 h-6 rounded-lg ${theme.primaryBg} text-white flex items-center justify-center hover:opacity-90 transition-colors shadow-sm text-xs font-bold`}
-                  >
-                    <Plus className="w-3 h-3" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-
-                <button
-                  onClick={() => removeFromCart(item.itemId)}
-                  className="text-slate-400 hover:text-rose-500 p-1 rounded transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -782,15 +1063,15 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           {/* Summary Breakdown */}
           <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
             <div className="flex justify-between">
-              <span>المجموع الفرعي:</span>
+              <span>{posTranslations[lang].subtotal}</span>
               <span className="font-semibold">{subtotal.toFixed(2)} {tenant.currency}</span>
             </div>
             <div className="flex justify-between">
-              <span>ضريبة القيمة المضافة ({taxRate}%):</span>
+              <span>{posTranslations[lang].vat} ({taxRate}%):</span>
               <span className="font-semibold">{taxAmount.toFixed(2)} {tenant.currency}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span>الخصم:</span>
+              <span>{posTranslations[lang].discount}</span>
               <div className="flex items-center gap-1 w-24">
                 <input
                   type="number"
@@ -805,25 +1086,25 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               </div>
             </div>
             <div className="flex justify-between text-sm font-black text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-700">
-              <span>الإجمالي المطلوب:</span>
+              <span>{posTranslations[lang].totalRequired}</span>
               <span className="text-base text-emerald-600 dark:text-emerald-400">{total.toFixed(2)} {tenant.currency}</span>
             </div>
           </div>
 
           {/* Payment Method Tabs */}
           <div className="space-y-1.5">
-            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400">طريقة الدفع:</label>
+            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400">{posTranslations[lang].paymentMethod}</label>
             <div className="grid grid-cols-3 gap-1.5">
               <button
                 onClick={() => setPaymentMethod("cash")}
-                className={`flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold border transition-all ${
+                className={`flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                   paymentMethod === "cash"
                     ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
                     : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-500"
                 }`}
               >
                 <Banknote className="w-3.5 h-3.5" />
-                <span>كاش (نقدي)</span>
+                <span>{posTranslations[lang].cash}</span>
               </button>
 
               <button
@@ -835,7 +1116,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                 }`}
               >
                 <CreditCard className="w-3.5 h-3.5" />
-                <span>شبكة / بطاقة</span>
+                <span>{posTranslations[lang].card}</span>
               </button>
 
               <button
@@ -847,7 +1128,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                 }`}
               >
                 <Clock className="w-3.5 h-3.5" />
-                <span>آجل (معلق)</span>
+                <span>{posTranslations[lang].deferred}</span>
               </button>
             </div>
           </div>
@@ -858,20 +1139,20 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               onClick={handlePrintDraft}
               disabled={cart.length === 0 || isSubmitting}
               className="col-span-3 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-300 dark:border-slate-700 transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 disabled:opacity-40"
-              title="طباعة فاتورة للمراجعة قبل الدفع"
+              title={posTranslations[lang].draftInvoice}
             >
               <PrinterIcon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-              <span>فاتورة مبدئية</span>
+              <span>{posTranslations[lang].draftInvoice}</span>
             </button>
 
             <button
               onClick={() => handleCheckout('pending')}
               disabled={cart.length === 0 || isSubmitting}
               className="col-span-3 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 font-bold text-xs transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 disabled:opacity-40"
-              title="تعليق الفاتورة بدون دفع"
+              title={posTranslations[lang].holdInvoice}
             >
               <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span>تعليق</span>
+              <span>{posTranslations[lang].holdInvoice}</span>
             </button>
 
             <button
@@ -882,12 +1163,12 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               {isSubmitting ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>جاري الإتمام...</span>
+                  <span>{posTranslations[lang].completing}</span>
                 </>
               ) : (
                 <>
                   <Receipt className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="truncate">إتمام وطباعة ({total.toFixed(0)} {tenant.currency})</span>
+                  <span className="truncate">{posTranslations[lang].completeAndPrint} ({total.toFixed(0)} {tenant.currency})</span>
                 </>
               )}
             </button>
@@ -999,19 +1280,25 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
 
                   {/* Order items list */}
                   <div className="py-3 flex-1 divide-y divide-slate-100/60 dark:divide-slate-800/60">
-                    {order.items.map((item, idx) => (
-                      <div key={idx} className="py-2 first:pt-0 last:pb-0 text-xs">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold text-slate-800 dark:text-slate-200">{item.nameAr}</span>
-                          <span className="font-mono font-black text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded">x{item.quantity}</span>
+                    {order.items.map((item, idx) => {
+                      const dbItem = items.find(i => i.id === item.itemId);
+                      const itemName = dbItem
+                        ? (lang === 'en' && dbItem.nameEn ? dbItem.nameEn : lang === 'tr' && dbItem.nameTr ? dbItem.nameTr : dbItem.nameAr)
+                        : item.nameAr;
+                      return (
+                        <div key={idx} className="py-2 first:pt-0 last:pb-0 text-xs">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">{itemName}</span>
+                            <span className="font-mono font-black text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded">x{item.quantity}</span>
+                          </div>
+                          {item.notes && (
+                            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded border border-amber-100 dark:border-amber-900/30 mt-1">
+                              {lang === 'ar' ? '💡 ملاحظة:' : lang === 'tr' ? '💡 Not:' : '💡 Note:'} {item.notes}
+                            </p>
+                          )}
                         </div>
-                        {item.notes && (
-                          <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded border border-amber-100 dark:border-amber-900/30 mt-1">
-                            💡 ملاحظة: {item.notes}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Pricing and Actions */}
@@ -1162,7 +1449,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 font-sans print:hidden">
               <span className="font-bold text-xs text-slate-500 flex items-center gap-1.5">
                 <PrinterIcon className="w-4 h-4 text-emerald-600" />
-                <span>{isDraftPrint ? "معاينة الفاتورة المبدئية" : "معاينة الفاتورة للطباعة"}</span>
+                <span>{isDraftPrint ? posTranslations[lang].printPreviewDraftTitle : posTranslations[lang].printPreviewTitle}</span>
               </span>
               <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono">
                 {completedOrder.orderNumber}
@@ -1171,13 +1458,13 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
 
             {/* The Dedicated Printable Receipt Component */}
             <div className="max-h-[65vh] overflow-y-auto pr-1 print:max-h-none print:overflow-visible no-scrollbar">
-              <POSInvoiceReceipt tenant={tenant} order={completedOrder} isDraft={isDraftPrint} />
+               <POSInvoiceReceipt tenant={tenant} order={completedOrder} isDraft={isDraftPrint} lang={lang} />
             </div>
 
             {/* Printer Selection (Hidden during print) */}
             {printers.length > 0 && (
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-sans print:hidden" dir="rtl">
-                <span className="text-slate-500 font-bold whitespace-nowrap">الطابعة:</span>
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-sans print:hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                <span className="text-slate-500 font-bold whitespace-nowrap">{posTranslations[lang].printerLabel}</span>
                 <select
                   value={selectedPrinterId}
                   onChange={e => setSelectedPrinterId(e.target.value)}
@@ -1199,18 +1486,18 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   setCompletedOrder(null);
                   setIsDraftPrint(false);
                 }}
-                className="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+                className="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
               >
-                إغلاق وطلب جديد
+                {posTranslations[lang].closeAndNew}
               </button>
               <button
                 onClick={() => {
                   handlePrintOrder(completedOrder, 'receipt');
                 }}
-                className="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md"
+                className="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
               >
                 <PrinterIcon className="w-4 h-4" />
-                <span>طباعة الإيصال (🖨️)</span>
+                <span>{posTranslations[lang].printReceiptBtn}</span>
               </button>
             </div>
           </div>

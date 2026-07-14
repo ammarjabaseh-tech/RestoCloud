@@ -20,6 +20,57 @@ import {
   ChefHat
 } from "lucide-react";
 
+const navTranslations = {
+  ar: {
+    saDashboard: "لوحة تحكم السوبر أدمن",
+    pos: "كاشير POS",
+    admin: "لوحة الإدارة",
+    menu: "المنيو الرقمي (QR)",
+    ai: "المساعد الذكي",
+    kds: "شاشة المطبخ (KDS)",
+    saasOnboard: "🚀 حجز مطعم والدفع",
+    saasPortal: "بوابة SaaS",
+    saasSubs: "اشتراكات SaaS",
+    postgres: "PostgreSQL / VPS",
+    logout: "تسجيل الخروج",
+    registeredRestaurants: "المطاعم المسجلة (المستأجرون)",
+    restaurantsCount: "مطاعم",
+    addNewRestaurant: "إضافة مطعم جديد (SaaS Onboarding)"
+  },
+  en: {
+    saDashboard: "Super Admin Dashboard",
+    pos: "POS Cashier",
+    admin: "Admin Dashboard",
+    menu: "Digital Menu (QR)",
+    ai: "AI Assistant",
+    kds: "Kitchen Screen (KDS)",
+    saasOnboard: "🚀 Book Restaurant & Pay",
+    saasPortal: "SaaS Portal",
+    saasSubs: "SaaS Subscriptions",
+    postgres: "PostgreSQL / VPS",
+    logout: "Log Out",
+    registeredRestaurants: "Registered Restaurants (Tenants)",
+    restaurantsCount: "Restaurants",
+    addNewRestaurant: "Add New Restaurant (SaaS Onboarding)"
+  },
+  tr: {
+    saDashboard: "Süper Admin Paneli",
+    pos: "POS Kasa",
+    admin: "Yönetim Paneli",
+    menu: "Dijital Menü (QR)",
+    ai: "Yapay Zeka Asistanı",
+    kds: "Mutfak Ekranı (KDS)",
+    saasOnboard: "🚀 Rezervasyon & Ödeme",
+    saasPortal: "SaaS Portalı",
+    saasSubs: "SaaS Abonelikleri",
+    postgres: "PostgreSQL / VPS",
+    logout: "Çıkış Yap",
+    registeredRestaurants: "Kayıtlı Restoranlar (Kiracılar)",
+    restaurantsCount: "Restoranlar",
+    addNewRestaurant: "Yeni Restoran Ekle (SaaS Kayıt)"
+  }
+};
+
 interface NavbarProps {
   tenants: Tenant[];
   currentTenant: Tenant;
@@ -29,6 +80,8 @@ interface NavbarProps {
   onOpenNewTenantModal: () => void;
   currentUser: TenantUser | null;
   onLogout: () => void;
+  lang: 'ar' | 'en' | 'tr';
+  onLangChange: (lang: 'ar' | 'en' | 'tr') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -39,9 +92,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectView,
   onOpenNewTenantModal,
   currentUser,
-  onLogout
+  onLogout,
+  lang,
+  onLangChange
 }) => {
   const [showTenantDropdown, setShowTenantDropdown] = React.useState(false);
+  const [showLangDropdown, setShowLangDropdown] = React.useState(false);
   const theme = getThemeClasses(currentTenant.themeColor);
 
   const getRestaurantMenuUrl = () => {
@@ -79,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2 font-bold text-lg sm:text-xl tracking-tight text-slate-900">
               <Store className="w-5 h-5 text-indigo-600" />
-              لوحة تحكم السوبر أدمن
+              {navTranslations[lang].saDashboard}
             </div>
           </div>
         </div>
@@ -151,11 +207,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="fixed inset-0 z-10" 
                         onClick={() => setShowTenantDropdown(false)}
                       />
-                      <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-20 text-right animate-in fade-in zoom-in-95 duration-150">
+                      <div className={`absolute mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-20 animate-in fade-in zoom-in-95 duration-150 ${lang === 'ar' ? 'right-0 text-right' : 'left-0 text-left'}`}>
                         <div className="px-3 py-2 text-xs font-bold text-slate-500 border-b border-slate-100 mb-1 flex items-center justify-between">
-                          <span>المطاعم المسجلة (المستأجرون)</span>
+                          <span>{navTranslations[lang].registeredRestaurants}</span>
                           <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-[10px] font-semibold">
-                            {tenants.length} مطاعم
+                            {tenants.length} {navTranslations[lang].restaurantsCount}
                           </span>
                         </div>
 
@@ -193,7 +249,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors text-xs font-bold border border-indigo-200/60 cursor-pointer"
                           >
                             <PlusCircle className="w-3.5 h-3.5" />
-                            <span>إضافة مطعم جديد (SaaS Onboarding)</span>
+                            <span>{navTranslations[lang].addNewRestaurant}</span>
                           </button>
                         </div>
                       </div>
@@ -205,7 +261,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Left Section: Navigation Tabs */}
-          <nav className="flex items-center gap-1 overflow-x-auto py-1">
+          <nav className="flex items-center gap-1 overflow-x-auto py-1 no-scrollbar">
             {(!currentUser || currentUser.permissions.canManagePOS) && (
               <button
                 onClick={() => onSelectView("pos_dashboard")}
@@ -216,7 +272,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <CreditCard className="w-3.5 h-3.5" />
-                <span>كاشير POS</span>
+                <span>{navTranslations[lang].pos}</span>
               </button>
             )}
 
@@ -230,7 +286,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <Settings className="w-3.5 h-3.5" />
-                <span>لوحة الإدارة</span>
+                <span>{navTranslations[lang].admin}</span>
               </button>
             )}
 
@@ -244,7 +300,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span>المنيو الرقمي (QR)</span>
+              <span>{navTranslations[lang].menu}</span>
             </button>
 
             {(!currentUser || currentUser.permissions.canViewReports) && (
@@ -257,7 +313,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>المساعد الذكي</span>
+                <span>{navTranslations[lang].ai}</span>
               </button>
             )}
 
@@ -271,7 +327,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <ChefHat className="w-3.5 h-3.5 text-amber-500" />
-                <span>شاشة المطبخ (KDS)</span>
+                <span>{navTranslations[lang].kds}</span>
               </button>
             )}
 
@@ -285,7 +341,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300"
                   }`}
                 >
-                  <span>🚀 حجز مطعم والدفع</span>
+                  <span>{navTranslations[lang].saasOnboard}</span>
                 </button>
 
                 <button
@@ -297,7 +353,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   <Building2 className="w-3 h-3" />
-                  <span>بوابة SaaS</span>
+                  <span>{navTranslations[lang].saasPortal}</span>
                 </button>
 
                 <button
@@ -309,7 +365,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   <FileText className="w-3 h-3" />
-                  <span>اشتراكات SaaS</span>
+                  <span>{navTranslations[lang].saasSubs}</span>
                 </button>
 
                 <button
@@ -322,11 +378,78 @@ export const Navbar: React.FC<NavbarProps> = ({
                   title="تصدير قاعدة بيانات PostgreSQL لسيرفر VPS"
                 >
                   <Database className="w-3 h-3" />
-                  <span>PostgreSQL / VPS</span>
+                  <span>{navTranslations[lang].postgres}</span>
                 </button>
               </>
             )}
-            
+          </nav>
+
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Global Language Selector Dropdown */}
+            <div className="relative shrink-0 mx-1">
+              <button
+                type="button"
+                onClick={() => setShowLangDropdown(!showLangDropdown)}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-bold transition-all border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 shadow-xs cursor-pointer"
+              >
+                <Globe className="w-3.5 h-3.5 text-slate-500" />
+                <span>
+                  {lang === 'ar' ? '🇸🇦 العربية' : lang === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English'}
+                </span>
+                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showLangDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showLangDropdown && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setShowLangDropdown(false)}
+                  />
+                  <div className={`absolute mt-2 w-36 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-20 animate-in fade-in zoom-in-95 duration-150 ${lang === 'ar' ? 'left-0 text-left' : 'right-0 text-right'}`}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onLangChange('ar');
+                        setShowLangDropdown(false);
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-slate-50 cursor-pointer ${
+                        lang === 'ar' ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                      }`}
+                    >
+                      <span>🇸🇦</span>
+                      <span>العربية</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onLangChange('en');
+                        setShowLangDropdown(false);
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-slate-50 cursor-pointer ${
+                        lang === 'en' ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                      }`}
+                    >
+                      <span>🇬🇧</span>
+                      <span>English</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onLangChange('tr');
+                        setShowLangDropdown(false);
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-slate-50 cursor-pointer ${
+                        lang === 'tr' ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                      }`}
+                    >
+                      <span>🇹🇷</span>
+                      <span>Türkçe</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
             {currentUser && (
               <button
                 onClick={onLogout}
@@ -334,10 +457,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 title="تسجيل خروج المستخدم الحالي"
               >
                 <LogOut className="w-3 h-3" />
-                <span>تسجيل الخروج</span>
+                <span>{navTranslations[lang].logout}</span>
               </button>
             )}
-          </nav>
+          </div>
         </div>
       </div>
     </header>

@@ -110,6 +110,8 @@ function mapCategory(row: any) {
     id: row.id,
     tenantId: row.tenant_id,
     nameAr: row.name_ar,
+    nameEn: row.name_en,
+    nameTr: row.name_tr,
     icon: row.icon,
     orderIndex: row.order_index,
   };
@@ -121,7 +123,11 @@ function mapMenuItem(row: any) {
     tenantId: row.tenant_id,
     categoryId: row.category_id,
     nameAr: row.name_ar,
+    nameEn: row.name_en,
+    nameTr: row.name_tr,
     descriptionAr: row.description_ar,
+    descriptionEn: row.description_en,
+    descriptionTr: row.description_tr,
     price: parseFloat(row.price),
     costPrice: parseFloat(row.cost_price),
     calories: row.calories,
@@ -1022,13 +1028,13 @@ app.get("/api/tenants/:tenantId/categories", async (req, res) => {
 
 app.post("/api/tenants/:tenantId/categories", async (req, res) => {
   const { tenantId } = req.params;
-  const { nameAr, icon } = req.body;
+  const { nameAr, nameEn, nameTr, icon } = req.body;
   try {
     const countResult = await pool.query("SELECT COUNT(*) FROM categories WHERE tenant_id = $1", [tenantId]);
     const orderIndex = parseInt(countResult.rows[0].count) + 1;
     const result = await pool.query(
-      "INSERT INTO categories (id, tenant_id, name_ar, icon, order_index) VALUES ($1,$2,$3,$4,$5) RETURNING *",
-      [`cat-${Date.now()}`, tenantId, nameAr, icon || "🍴", orderIndex]
+      "INSERT INTO categories (id, tenant_id, name_ar, name_en, name_tr, icon, order_index) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *",
+      [`cat-${Date.now()}`, tenantId, nameAr, nameEn || null, nameTr || null, icon || "🍴", orderIndex]
     );
     res.status(201).json(mapCategory(result.rows[0]));
   } catch (err: any) {
@@ -1056,6 +1062,50 @@ app.put("/api/tenants/:tenantId/categories/reorder", async (req, res) => {
   }
 });
 
+app.put("/api/tenants/:tenantId/categories/:id", async (req, res) => {
+  const { tenantId, id } = req.params;
+  const { nameAr, nameEn, nameTr, icon } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE categories SET 
+        name_ar = COALESCE($1, name_ar), 
+        name_en = $2, 
+        name_tr = $3, 
+        icon = COALESCE($4, icon) 
+       WHERE id = $5 AND tenant_id = $6 RETURNING *`,
+      [nameAr, nameEn || null, nameTr || null, icon, id, tenantId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "القسم غير موجود" });
+    }
+    res.json(mapCategory(result.rows[0]));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/tenants/:tenantId/categories/:id", async (req, res) => {
+  const { tenantId, id } = req.params;
+  try {
+    const checkItems = await pool.query("SELECT COUNT(*) FROM menu_items WHERE category_id = $1 AND tenant_id = $2", [id, tenantId]);
+    const count = parseInt(checkItems.rows[0].count);
+    if (count > 0) {
+      return res.status(400).json({ error: "لا يمكن حذف هذا القسم لأنه يحتوي على أصناف. يرجى نقل الأصناف أو حذفها أولاً." });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM categories WHERE id = $1 AND tenant_id = $2 RETURNING *",
+      [id, tenantId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "القسم غير موجود" });
+    }
+    res.json({ success: true, message: "تم حذف القسم بنجاح" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ============================================================
 // MENU ITEMS
 // ============================================================
@@ -1078,10 +1128,10 @@ app.post("/api/tenants/:tenantId/items", async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO menu_items
-        (id, tenant_id, category_id, name_ar, description_ar, price, cost_price,
+        (id, tenant_id, category_id, name_ar, name_en, name_tr, description_ar, description_en, description_tr, price, cost_price,
          calories, image, is_available, is_best_seller, preparation_time_min)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
-      [id, tenantId, b.categoryId, b.nameAr, b.descriptionAr || "",
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
+      [id, tenantId, b.categoryId, b.nameAr, b.nameEn || null, b.nameTr || null, b.descriptionAr || "", b.descriptionEn || null, b.descriptionTr || null,
        Number(b.price) || 0, Number(b.costPrice) || Math.round((Number(b.price) || 0) * 0.4),
        Number(b.calories) || null,
        b.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
@@ -1096,18 +1146,47 @@ app.post("/api/tenants/:tenantId/items", async (req, res) => {
 app.put("/api/tenants/:tenantId/items/:id", async (req, res) => {
   const { id } = req.params;
   const b = req.body;
+  
+  const fields: string[] = [];
+  const values: any[] = [id];
+  let placeholderIndex = 2;
+  
+  const map: Record<string, string> = {
+    nameAr: "name_ar",
+    nameEn: "name_en",
+    nameTr: "name_tr",
+    descriptionAr: "description_ar",
+    descriptionEn: "description_en",
+    descriptionTr: "description_tr",
+    price: "price",
+    costPrice: "cost_price",
+    calories: "calories",
+    image: "image",
+    isAvailable: "is_available",
+    isBestSeller: "is_best_seller",
+    preparationTimeMin: "preparation_time_min",
+    categoryId: "category_id"
+  };
+  
+  for (const [key, dbCol] of Object.entries(map)) {
+    if (b[key] !== undefined) {
+      fields.push(`${dbCol} = $${placeholderIndex}`);
+      let val = b[key];
+      if (["price", "costPrice", "calories", "preparationTimeMin"].includes(key) && val !== null) {
+        val = Number(val);
+      }
+      values.push(val);
+      placeholderIndex++;
+    }
+  }
+  
+  if (fields.length === 0) {
+    return res.status(400).json({ error: "لا يوجد حقول للتعديل" });
+  }
+  
   try {
-    const result = await pool.query(
-      `UPDATE menu_items SET
-        name_ar = COALESCE($2, name_ar), description_ar = COALESCE($3, description_ar),
-        price = COALESCE($4, price), cost_price = COALESCE($5, cost_price),
-        calories = COALESCE($6, calories), image = COALESCE($7, image),
-        is_available = COALESCE($8, is_available), is_best_seller = COALESCE($9, is_best_seller),
-        preparation_time_min = COALESCE($10, preparation_time_min), category_id = COALESCE($11, category_id)
-       WHERE id = $1 RETURNING *`,
-      [id, b.nameAr, b.descriptionAr, b.price, b.costPrice, b.calories, b.image,
-       b.isAvailable, b.isBestSeller, b.preparationTimeMin, b.categoryId]
-    );
+    const query = `UPDATE menu_items SET ${fields.join(", ")} WHERE id = $1 RETURNING *`;
+    const result = await pool.query(query, values);
     if (!result.rows[0]) return res.status(404).json({ error: "الصنف غير موجود" });
     res.json(mapMenuItem(result.rows[0]));
   } catch (err: any) {
@@ -1335,8 +1414,8 @@ app.post("/api/ai/generate-description", async (req, res) => {
 });
 
 app.post("/api/ai/analyze-menu", async (req, res) => {
+  const { tenantId, lang = 'ar' } = req.body;
   try {
-    const { tenantId } = req.body;
     const tenantResult = await pool.query("SELECT * FROM tenants WHERE id = $1", [tenantId]);
     const itemsResult = await pool.query("SELECT * FROM menu_items WHERE tenant_id = $1", [tenantId]);
     const ordersResult = await pool.query("SELECT * FROM orders WHERE tenant_id = $1", [tenantId]);
@@ -1352,27 +1431,62 @@ app.post("/api/ai/analyze-menu", async (req, res) => {
     const avgOrderValue = orderCount > 0 ? (totalRevenue / orderCount).toFixed(1) : "0";
 
     if (!process.env.GEMINI_API_KEY) {
-      return res.json({
-        insights: [
-          `متوسط قيمة الفاتورة الحالي في مطعم (${tenant.nameAr}) هو ${avgOrderValue} ${tenant.currency}، وهو معدل جيد مقارنة بالمطاعم المشابهة.`,
-          `الأصناف الأكثر مبيعاً تساهم بنسبة 65% من إجمالي الإيرادات.`,
-          `هامش الربح التقريبي للأطباق يتراوح بين 55% و 65%، وهو ضمن النطاق الصحي.`
-        ],
-        suggestions: [
-          { title: "إطلاق وجبة كومبو التوفير", description: "دمج الطبق الأكثر مبيعاً مع مشروب ومقبلات بخصم 10%.", estimatedProfitBoost: "+18% نمو في المبيعات اليومية" },
-          { title: "تنشيط مبيعات وقت الظهيرة", description: "خصم خاص للطلبات بين 1:00 ظهراً و4:00 عصراً.", estimatedProfitBoost: "+25% زيادة في إشغال الطاولات" },
-          { title: "تسويق الأصناف ذات هامش الربح المرتفع", description: "تصنيف المشروبات والحلويات كـ توصيات الشيف.", estimatedProfitBoost: "+12% زيادة في صافي الأرباح" }
-        ],
-        pricingAdvice: `احرص على الحفاظ على هامش ربح لا يقل عن 60% في جميع الأصناف.`
-      });
+      if (lang === 'en') {
+        return res.json({
+          insights: [
+            `The current average ticket value at (${tenant.nameAr}) is ${avgOrderValue} ${tenant.currency}, which is a healthy average compared to similar restaurants.`,
+            `The best-selling items contribute 65% of the total revenue.`,
+            `The approximate profit margin for dishes ranges between 55% and 65%, which is within the healthy range.`
+          ],
+          suggestions: [
+            { title: "Launch Saver Combo", description: "Combine the best-selling dish with a drink and appetizer at a 10% discount.", estimatedProfitBoost: "+18% growth in daily sales" },
+            { title: "Boost Afternoon Sales", description: "Special discount for orders placed between 1:00 PM and 4:00 PM.", estimatedProfitBoost: "+25% increase in table occupancy" },
+            { title: "Promote High Margin Items", description: "Designate beverages and desserts as Chef recommendations.", estimatedProfitBoost: "+12% increase in net profits" }
+          ],
+          pricingAdvice: `Make sure to maintain a profit margin of at least 60% across all menu items.`
+        });
+      } else if (lang === 'tr') {
+        return res.json({
+          insights: [
+            `(${tenant.nameAr}) restoranının şu anki ortalama sipariş tutarı ${avgOrderValue} ${tenant.currency}, bu da benzer restoranlara göre sağlıklı bir ortalamadır.`,
+            `En çok satan ürünler toplam gelirin %65'ini oluşturmaktadır.`,
+            `Yemeklerin yaklaşık kâr marjı %55 ile %65 arasında değişmekte olup sağlıklı aralıktadır.`
+          ],
+          suggestions: [
+            { title: "Ekonomik Kombo Menü Başlat", description: "En çok satan yemeği bir içecek ve meze ile %10 indirimle birleştirin.", estimatedProfitBoost: "Günlük satışlarda +%18 büyüme" },
+            { title: "Öğleden Sonra Satışlarını Artır", description: "13:00 - 16:00 saatleri arasındaki siparişlere özel indirim.", estimatedProfitBoost: "Masa doluluğunda +%25 artış" },
+            { title: "Yüksek Marjlı Ürünleri Tanıt", description: "İçecekleri ve tatlıları Şefin Tavsiyeleri olarak belirleyin.", estimatedProfitBoost: "Net kârda +%12 artış" }
+          ],
+          pricingAdvice: `Tüm menü öğelerinde en az %60 kâr marjı koruduğunuzdan emin olun.`
+        });
+      } else {
+        return res.json({
+          insights: [
+            `متوسط قيمة الفاتورة الحالي في مطعم (${tenant.nameAr}) هو ${avgOrderValue} ${tenant.currency}، وهو معدل جيد مقارنة بالمطاعم المشابهة.`,
+            `الأصناف الأكثر مبيعاً تساهم بنسبة 65% من إجمالي الإيرادات.`,
+            `هامش الربح التقريبي للأطباق يتراوح بين 55% و 65%، وهو ضمن النطاق الصحي.`
+          ],
+          suggestions: [
+            { title: "إطلاق وجبة كومبو التوفير", description: "دمج الطبق الأكثر مبيعاً مع مشروب ومقبلات بخصم 10%.", estimatedProfitBoost: "+18% نمو في المبيعات اليومية" },
+            { title: "تنشيط مبيعات وقت الظهيرة", description: "خصم خاص للطلبات بين 1:00 ظهراً و4:00 عصراً.", estimatedProfitBoost: "+25% زيادة في إشغال الطاولات" },
+            { title: "تسويق الأصناف ذات هامش الربح المرتفع", description: "تصنيف المشروبات والحلويات كـ توصيات الشيف.", estimatedProfitBoost: "+12% زيادة في صافي الأرباح" }
+          ],
+          pricingAdvice: `احرص على الحفاظ على هامش ربح لا يقل عن 60% في جميع الأصناف.`
+        });
+      }
     }
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const itemsSummary = tenantItems.map(i => `${i.nameAr}: السعر ${i.price}، التكلفة ${i.costPrice}، الأكثر مبيعاً: ${i.isBestSeller ? 'نعم' : 'لا'}`).join('\n');
-    const prompt = `أنت مستشار استراتيجي متخصص في مطاعم SaaS. حلل بيانات مطعم "${tenant.nameAr}":
-إجمالي الإيرادات: ${totalRevenue} ${tenant.currency} (${orderCount} طلب، متوسط الفاتورة: ${avgOrderValue}).
-قائمة الطعام:\n${itemsSummary}\n
-أجب بـ JSON عربي يشمل: "insights" (3 استنتاجات)، "suggestions" (3 اقتراحات بـ title/description/estimatedProfitBoost)، "pricingAdvice" (نصيحة تسعير واحدة).`;
+    const targetLangName = lang === 'en' ? 'English' : lang === 'tr' ? 'Turkish' : 'Arabic';
+    const itemsSummary = tenantItems.map(i => {
+      const name = lang === 'ar' ? i.nameAr : (lang === 'tr' && i.nameTr ? i.nameTr : (i.nameEn || i.nameAr));
+      return `${name}: price ${i.price}, cost ${i.costPrice}, bestseller: ${i.isBestSeller ? 'yes' : 'no'}`;
+    }).join('\n');
+
+    const prompt = `You are a strategic SaaS restaurant consultant. Analyze "${tenant.nameAr}" restaurant data:
+Total revenue: ${totalRevenue} ${tenant.currency} (${orderCount} orders, average ticket: ${avgOrderValue}).
+Menu items:\n${itemsSummary}\n
+Respond in ${targetLangName} language JSON schema containing: "insights" (3 insights), "suggestions" (3 growth combo suggestions with title/description/estimatedProfitBoost), "pricingAdvice" (1 pricing advice text).`;
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash", contents: prompt,
       config: {
@@ -1392,7 +1506,13 @@ app.post("/api/ai/analyze-menu", async (req, res) => {
     if (fb !== -1 && lb !== -1) rawText = rawText.substring(fb, lb + 1);
     res.json(JSON.parse(rawText));
   } catch (error: any) {
-    res.json({ insights: ["تعذر التحليل حالياً."], suggestions: [], pricingAdvice: "تحقق من بيانات المطعم." });
+    if (lang === 'en') {
+      res.json({ insights: ["Analysis currently unavailable."], suggestions: [], pricingAdvice: "Check restaurant data." });
+    } else if (lang === 'tr') {
+      res.json({ insights: ["Analiz şu anda kullanılamıyor."], suggestions: [], pricingAdvice: "Restoran verilerini kontrol edin." });
+    } else {
+      res.json({ insights: ["تعذر التحليل حالياً."], suggestions: [], pricingAdvice: "تحقق من بيانات المطعم." });
+    }
   }
 });
 

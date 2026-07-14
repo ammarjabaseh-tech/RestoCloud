@@ -21,7 +21,12 @@ import { getThemeClasses } from "./utils/theme";
 import { Store, RefreshCw, AlertCircle } from "lucide-react";
 
 export default function App() {
+  const [lang, setLang] = useState<'ar' | 'en' | 'tr'>(() => (localStorage.getItem('appLanguage') as 'ar' | 'en' | 'tr') || 'ar');
   const [tenants, setTenants] = useState<Tenant[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem('appLanguage', lang);
+  }, [lang]);
   
   const [currentTenant, setCurrentTenant] = useState<Tenant | null>(() => {
     const saved = localStorage.getItem("currentTenant");
@@ -362,18 +367,63 @@ export default function App() {
     setCurrentTenant(updated);
   };
 
-  const handleAddCategory = async (nameAr: string, icon: string) => {
+  const handleAddCategory = async (nameAr: string, icon: string, nameEn?: string, nameTr?: string) => {
     if (!currentTenant) return;
     try {
       const res = await fetch(`/api/tenants/${currentTenant.id}/categories`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nameAr, icon })
+        body: JSON.stringify({ nameAr, icon, nameEn, nameTr })
       });
       const newCat = await res.json();
       setCategories((prev) => [...prev, newCat]);
     } catch (err) {
       alert("فشل في إضافة القسم");
+    }
+  };
+
+  const handleUpdateCategory = async (id: string, nameAr: string, icon: string, nameEn?: string, nameTr?: string) => {
+    if (!currentTenant) return;
+    try {
+      const res = await fetch(`/api/tenants/${currentTenant.id}/categories/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nameAr, icon, nameEn, nameTr })
+      });
+      if (res.ok) {
+        const updatedCat = await res.json();
+        setCategories((prev) => prev.map((c) => (c.id === id ? updatedCat : c)));
+      } else {
+        let errMsg = "فشل في تعديل القسم";
+        try {
+          const data = await res.json();
+          if (data && data.error) errMsg = data.error;
+        } catch (e) {}
+        alert(errMsg);
+      }
+    } catch (err) {
+      alert("فشل في تعديل القسم");
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!currentTenant) return;
+    try {
+      const res = await fetch(`/api/tenants/${currentTenant.id}/categories/${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setCategories((prev) => prev.filter((c) => c.id !== id));
+      } else {
+        let errMsg = "فشل في حذف القسم";
+        try {
+          const data = await res.json();
+          if (data && data.error) errMsg = data.error;
+        } catch (e) {}
+        alert(errMsg);
+      }
+    } catch (err) {
+      alert("فشل في حذف القسم");
     }
   };
 
@@ -515,22 +565,26 @@ export default function App() {
   if (activeView === 'digital_menu' && !currentUser) {
     if (loading) {
       return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans" dir="rtl">
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <Store className="w-16 h-16 text-indigo-500 animate-bounce mx-auto animate-pulse" />
-          <h2 className="text-lg font-bold text-slate-700">جاري تحميل منيو المطعم...</h2>
+          <h2 className="text-lg font-bold text-slate-700">
+            {lang === 'ar' ? 'جاري تحميل منيو المطعم...' : lang === 'tr' ? 'Restoran menüsü yükleniyor...' : 'Loading restaurant menu...'}
+          </h2>
         </div>
       );
     }
     if (!currentTenant) {
       return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-800 p-6 text-center space-y-4 font-sans" dir="rtl">
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-800 p-6 text-center space-y-4 font-sans" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <AlertCircle className="w-12 h-12 text-rose-500 mx-auto" />
-          <h2 className="text-xl font-bold">عذراً، لم نجد هذا المطعم</h2>
+          <h2 className="text-xl font-bold">
+            {lang === 'ar' ? 'عذراً، لم نجد هذا المطعم' : lang === 'tr' ? 'Üzgünüz, bu restoranı bulamadık' : 'Sorry, we could not find this restaurant'}
+          </h2>
         </div>
       );
     }
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans transition-colors duration-200 p-4" dir="rtl">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans transition-colors duration-200 p-4" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <main className="flex-1 max-w-4xl w-full mx-auto py-2">
           <DigitalMenuView
             tenant={currentTenant}
@@ -538,6 +592,7 @@ export default function App() {
             items={items}
             tables={tables}
             onOrderCreated={(ord) => {}}
+            lang={lang}
           />
         </main>
       </div>
@@ -546,27 +601,39 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-800 p-6 text-center space-y-4 font-sans" dir="rtl">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-800 p-6 text-center space-y-4 font-sans" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-3xl shadow-sm animate-pulse">
           <Store className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold">جاري تشغيل منصة ريستو كلاود (RestoCloud) (RestoCloud)...</h2>
-        <p className="text-xs text-slate-500">تحميل بيانات المستأجرين، لوحة الكاشير POS، وقوائم الطعام</p>
+        <h2 className="text-xl font-bold">
+          {lang === 'ar' ? 'جاري تشغيل منصة ريستو كلاود (RestoCloud)...' : lang === 'tr' ? 'RestoCloud platformu başlatılıyor...' : 'Launching RestoCloud platform...'}
+        </h2>
+        <p className="text-xs text-slate-500">
+          {lang === 'ar' ? 'تحميل بيانات المستأجرين، لوحة الكاشير POS، وقوائم الطعام' : lang === 'tr' ? 'Kiracı verileri, POS kasiyer paneli ve yemek menüleri yükleniyor' : 'Loading tenant data, POS cashier panel, and food menus'}
+        </p>
       </div>
     );
   }
 
   if (error || !currentTenant) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-800 p-6 text-center space-y-4 font-sans" dir="rtl">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-800 p-6 text-center space-y-4 font-sans" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <AlertCircle className="w-12 h-12 text-rose-500 mx-auto" />
-        <h2 className="text-xl font-bold">حدث خطأ في تحميل النظام</h2>
-        <p className="text-sm text-slate-500">{error || "تعذر العثور على مطاعم مسجلة"}</p>
+        <h2 className="text-xl font-bold">
+          {lang === 'ar' ? 'حدث خطأ في تحميل النظام' : lang === 'tr' ? 'Sistem yüklenirken bir hata oluştu' : 'An error occurred while loading the system'}
+        </h2>
+        <p className="text-sm text-slate-500">
+          {error ? (
+            lang === 'ar' ? error : lang === 'tr' ? 'Bağlantı hatası' : 'Connection error'
+          ) : (
+            lang === 'ar' ? 'تعذر العثور على مطاعم مسجلة' : lang === 'tr' ? 'Kayıtlı restoran bulunamadı' : 'No registered restaurants found'
+          )}
+        </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm"
+          className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm cursor-pointer"
         >
-          إعادة المحاولة
+          {lang === 'ar' ? 'إعادة المحاولة' : lang === 'tr' ? 'Tekrar Dene' : 'Retry'}
         </button>
       </div>
     );
@@ -575,7 +642,7 @@ export default function App() {
   const theme = getThemeClasses(currentTenant.themeColor);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans transition-colors duration-200" dir="rtl">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans transition-colors duration-200" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       {/* Top Header Bar */}
       <Navbar
@@ -587,6 +654,8 @@ export default function App() {
         onOpenNewTenantModal={() => setShowOnboardModal(true)}
         currentUser={currentUser}
         onLogout={handleLogout}
+        lang={lang}
+        onLangChange={setLang}
       />
 
       {/* Main Content Area */}
@@ -614,6 +683,7 @@ export default function App() {
             }}
             onSelectTenant={handlePortalSelectTenant}
             onNavigateToSaaSPortal={() => setActiveView("saas_portal")}
+            lang={lang}
           />
         )}
 
@@ -629,6 +699,7 @@ export default function App() {
             onUpdateTableStatus={(tblId, st) => {
               handleUpdateTable(tblId, { status: st });
             }}
+            lang={lang}
           />
         )}
 
@@ -644,7 +715,10 @@ export default function App() {
             onUpdateItem={handleUpdateItem}
             onDeleteItem={handleDeleteItem}
             onUpdateTable={handleUpdateTable}
+            onUpdateCategory={handleUpdateCategory}
+            onDeleteCategory={handleDeleteCategory}
             onReorderCategories={handleReorderCategories}
+            lang={lang}
           />
         )}
 
@@ -669,11 +743,12 @@ export default function App() {
             onOrderCreated={(ord) => {
               // Could alert POS or just display confirmation
             }}
+            lang={lang}
           />
         )}
 
         {activeView === "ai_assistant" && (
-          <AIAssistantView tenant={currentTenant} />
+          <AIAssistantView tenant={currentTenant} lang={lang} />
         )}
 
         {activeView === "postgres_export" && (
@@ -681,7 +756,7 @@ export default function App() {
         )}
 
         {activeView === "kitchen_display" && (
-          <KitchenDisplayView tenant={currentTenant} />
+          <KitchenDisplayView tenant={currentTenant} lang={lang} />
         )}
 
       </main>
@@ -690,20 +765,28 @@ export default function App() {
       <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto shadow-sm print:hidden">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800">ريستو كلاود (RestoCloud) (RestoCloud)</span>
+            <span className="font-bold text-slate-800">
+              {lang === 'ar' ? 'ريستو كلاود (RestoCloud)' : 'RestoCloud'}
+            </span>
             <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200 font-medium text-[10px]">
               SaaS Multi-Tenant
             </span>
-            <span>— نظام مبيعات وإدارة المطاعم متعدد المستأجرين (SaaS POS)</span>
+            <span>
+              {lang === 'ar' ? '— نظام مبيعات وإدارة المطاعم متعدد المستأجرين (SaaS POS)' : lang === 'tr' ? '— Çok Kiracılı Restoran Yönetim ve POS Sistemi (SaaS POS)' : '— Multi-Tenant Restaurant POS & Management System (SaaS POS)'}
+            </span>
           </div>
           <div className="flex items-center gap-4">
             {!currentUser && (
               <>
-                <button onClick={() => setActiveView("saas_portal")} className="hover:text-indigo-600 transition-colors">بوابة المستأجرين</button>
-                <button onClick={() => setActiveView("postgres_export")} className="hover:text-indigo-600 transition-colors">تصدير PostgreSQL / VPS</button>
+                <button onClick={() => setActiveView("saas_portal")} className="hover:text-indigo-600 transition-colors cursor-pointer">
+                  {lang === 'ar' ? 'بوابة المستأجرين' : lang === 'tr' ? 'Kiracı Portalı' : 'Tenants Portal'}
+                </button>
+                <button onClick={() => setActiveView("postgres_export")} className="hover:text-indigo-600 transition-colors cursor-pointer">
+                  {lang === 'ar' ? 'تصدير PostgreSQL / VPS' : lang === 'tr' ? 'PostgreSQL / VPS Dışa Aktar' : 'Export PostgreSQL / VPS'}
+                </button>
               </>
             )}
-            <span className="font-mono text-[11px]" dir="ltr">v2.5 Pro (RTL)</span>
+            <span className="font-mono text-[11px]" dir="ltr">v2.5 Pro</span>
           </div>
         </div>
       </footer>

@@ -27,12 +27,136 @@ import {
 } from "lucide-react";
 import { QRCodeModal } from "./QRCodeModal";
 
+const translations = {
+  ar: {
+    menuTitle: "قائمة الطعام الرقمية",
+    slogan: "أشهى المأكولات والمشروبات الطازجة",
+    searchPlaceholder: "البحث عن وجبة أو طبق...",
+    allCategories: "كل الأطباق",
+    cart: "سلة المشتريات",
+    emptyCart: "سلة المشتريات فارغة",
+    emptyCartDesc: "أضف بعض الأطباق الشهية للمتابعة",
+    subtotal: "المجموع الفرعي",
+    tax: "الضريبة والخدمة",
+    total: "الإجمالي النهائي",
+    orderType: "نوع الطلب",
+    dineIn: "🪑 تناول داخل المطعم",
+    takeaway: "🛍️ طلب خارجي / سفري",
+    tableNum: "رقم الطاولة",
+    notes: "ملاحظات خاصة (بدون بصل، إكسترا جبن...)",
+    notesPlaceholder: "مثال: بدون فلفل حار...",
+    customerName: "اسم الزبون (اختياري)",
+    customerNamePlaceholder: "اكتب اسمك هنا...",
+    customerPhone: "رقم الجوال (اختياري)",
+    customerPhonePlaceholder: "مثال: 05xxxxxxx",
+    sendOrder: "🚀 أرسل الطلب للمطبخ الآن",
+    activeOrderTitle: "متابعة طلبك الحالي في المطعم",
+    calories: "سعرة",
+    bestSeller: "الأكثر طلباً",
+    preparationTime: "دقيقة تحضير",
+    addToCart: "إضافة للسلة",
+    currency: "ر.س",
+    close: "إغلاق",
+    orderNumber: "رقم الطلب",
+    orderStatus: "حالة الطلب",
+    statusPending: "⏳ بانتظار التأكيد",
+    statusPreparing: "👨‍🍳 جاري التحضير",
+    statusReady: "✅ جاهز للاستلام",
+    statusDelivered: "🍽️ تم التوصيل",
+    statusCancelled: "❌ ملغي",
+    noItemsFound: "عذراً، لم نجد أصنافاً مطابقة",
+    noItemsFoundDesc: "جرب البحث بكلمات أخرى أو تصفح قسم آخر",
+    price: "السعر"
+  },
+  en: {
+    menuTitle: "Digital Menu",
+    slogan: "Delicious and fresh meals daily",
+    searchPlaceholder: "Search for a dish...",
+    allCategories: "All Dishes",
+    cart: "Shopping Cart",
+    emptyCart: "Your cart is empty",
+    emptyCartDesc: "Add some delicious dishes to proceed",
+    subtotal: "Subtotal",
+    tax: "Tax & Service",
+    total: "Total",
+    orderType: "Order Type",
+    dineIn: "🪑 Dine In",
+    takeaway: "🛍️ Takeaway",
+    tableNum: "Table Number",
+    notes: "Special Notes (no onions, extra cheese...)",
+    notesPlaceholder: "e.g. No spicy...",
+    customerName: "Customer Name (Optional)",
+    customerNamePlaceholder: "Enter your name...",
+    customerPhone: "Phone Number (Optional)",
+    customerPhonePlaceholder: "e.g. 05xxxxxxx",
+    sendOrder: "🚀 Send Order to Kitchen",
+    activeOrderTitle: "Track Your Current Order",
+    calories: "kcal",
+    bestSeller: "Best Seller",
+    preparationTime: "mins prep",
+    addToCart: "Add to Cart",
+    currency: "SAR",
+    close: "Close",
+    orderNumber: "Order No.",
+    orderStatus: "Status",
+    statusPending: "⏳ Pending Confirmation",
+    statusPreparing: "👨‍🍳 Preparing",
+    statusReady: "✅ Ready for Pickup",
+    statusDelivered: "🍽️ Delivered",
+    statusCancelled: "❌ Cancelled",
+    noItemsFound: "Sorry, no matching dishes found",
+    noItemsFoundDesc: "Try searching other keywords or sections",
+    price: "Price"
+  },
+  tr: {
+    menuTitle: "Dijital Menü",
+    slogan: "Günlük lezzetli ve taze yemekler",
+    searchPlaceholder: "Yemek ara...",
+    allCategories: "Tüm Yemekler",
+    cart: "Alışveriş Sepeti",
+    emptyCart: "Sepetiniz boş",
+    emptyCartDesc: "Devam etmek için lezzetli yemekler ekleyin",
+    subtotal: "Ara Toplam",
+    tax: "Vergi & Hizmet",
+    total: "Toplam",
+    orderType: "Sipariş Türü",
+    dineIn: "🪑 Masada Yemek",
+    takeaway: "🛍️ Paket Servis",
+    tableNum: "Masa Numarası",
+    notes: "Özel Notlar (soğansız, ekstra peynir...)",
+    notesPlaceholder: "Örn: Acısız olsun...",
+    customerName: "Müşteri Adı (İsteğe Bağlı)",
+    customerNamePlaceholder: "Adınızı girin...",
+    customerPhone: "Telefon Numarası (İsteğe Bağlı)",
+    customerPhonePlaceholder: "Örn: 05xxxxxxx",
+    sendOrder: "🚀 Siparişi Mutfağa Gönder",
+    activeOrderTitle: "Mevcut Siparişinizi Takip Edin",
+    calories: "kcal",
+    bestSeller: "En Çok Satan",
+    preparationTime: "dk hazırlık",
+    addToCart: "Sepete Ekle",
+    currency: "TL",
+    close: "Kapat",
+    orderNumber: "Sipariş No",
+    orderStatus: "Durum",
+    statusPending: "⏳ Onay Bekliyor",
+    statusPreparing: "👨‍🍳 Hazırlanıyor",
+    statusReady: "✅ Teslimata Hazır",
+    statusDelivered: "🍽️ Teslim Edildi",
+    statusCancelled: "❌ İptal Edildi",
+    noItemsFound: "Üzgünüz, eşleşen yemek bulunamadı",
+    noItemsFoundDesc: "Diğer anahtar kelimeleri veya bölümleri aramayı deneyin",
+    price: "Fiyat"
+  }
+};
+
 interface DigitalMenuViewProps {
   tenant: Tenant;
   categories: Category[];
   items: MenuItem[];
   tables: RestaurantTable[];
   onOrderCreated: (order: Order) => void;
+  lang?: 'ar' | 'en' | 'tr';
 }
 
 export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
@@ -40,8 +164,17 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
   categories,
   items,
   tables,
-  onOrderCreated
+  onOrderCreated,
+  lang: initialLang = 'ar'
 }) => {
+  const [lang, setLang] = useState<'ar' | 'en' | 'tr'>(initialLang);
+
+  React.useEffect(() => {
+    if (initialLang) {
+      setLang(initialLang);
+    }
+  }, [initialLang]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [cart, setCart] = useState<OrderItem[]>([]);
@@ -89,7 +222,11 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
     return items.filter((item) => {
       const matchCat = selectedCategory === "all" || item.categoryId === selectedCategory;
       const matchSearch = item.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase());
+                          item.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.nameEn || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.nameTr || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.descriptionEn || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.descriptionTr || "").toLowerCase().includes(searchQuery.toLowerCase());
       return item.isAvailable && matchCat && matchSearch;
     });
   }, [items, selectedCategory, searchQuery]);
@@ -194,7 +331,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
   const totalItemsCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300" dir="rtl">
+    <div className="max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
 
 
@@ -279,12 +416,12 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               {tenant.nameAr}
             </h1>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-              {tenant.slogan || "نرحب بكم في منيو الطعام الرقمي التفاعلي."}
+              {tenant.slogan || (lang === 'ar' ? "نرحب بكم في منيو الطعام الرقمي التفاعلي." : lang === 'tr' ? "İnteraktif dijital yemek menümüze hoş geldiniz." : "Welcome to our interactive digital food menu.")}
             </p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-400 pt-0.5 font-sans">
               {(tenant.wifiName || tenant.wifiPassword) && (
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">
-                  📶 WiFi: {tenant.wifiName || "عام"} {tenant.wifiPassword ? `(كلمة المرور: ${tenant.wifiPassword})` : "(بدون باسورد)"}
+                  📶 WiFi: {tenant.wifiName || (lang === 'ar' ? 'عام' : lang === 'tr' ? 'Genel' : 'General')} {tenant.wifiPassword ? `(${lang === 'ar' ? 'كلمة المرور' : lang === 'tr' ? 'Şifre' : 'Pass'}: ${tenant.wifiPassword})` : `(${lang === 'ar' ? 'بدون باسورد' : lang === 'tr' ? 'şifresiz' : 'no pass'})`}
                 </span>
               )}
               {(tenant.wifiName || tenant.wifiPassword) && <span>•</span>}
@@ -322,16 +459,18 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       <div className="sticky top-16 z-30 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md py-3 space-y-3">
         {/* Search Bar */}
         <div className="relative">
-          <Search className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className={`w-4 h-4 absolute top-1/2 -translate-y-1/2 text-slate-400 ${lang === 'ar' ? 'right-4' : 'left-4'}`} />
           <input
             type="text"
-            placeholder="ابحث في قائمة الطعام عن صنف أو مكون..."
+            placeholder={translations[lang].searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pr-11 pl-4 py-3 rounded-2xl text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className={`w-full py-3 rounded-2xl text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+              lang === 'ar' ? 'pr-11 pl-4' : 'pl-11 pr-4'
+            }`}
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <button onClick={() => setSearchQuery("")} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${lang === 'ar' ? 'left-4' : 'right-4'}`}>
               <X className="w-4 h-4" />
             </button>
           )}
@@ -348,12 +487,13 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
             }`}
           >
             <span>✨</span>
-            <span>كل الأصناف ({items.filter(i => i.isAvailable).length})</span>
+            <span>{translations[lang].allCategories} ({items.filter(i => i.isAvailable).length})</span>
           </button>
 
           {categories.map((cat) => {
             const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
             const isSelected = selectedCategory === cat.id;
+            const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
             return (
               <button
                 key={cat.id}
@@ -365,7 +505,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 }`}
               >
                 <span className="text-base">{cat.icon}</span>
-                <span>{cat.nameAr}</span>
+                <span>{catName}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
                   {count}
                 </span>
@@ -381,13 +521,15 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 mx-auto flex items-center justify-center text-3xl">
             🍽️
           </div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">عذراً، لم نجد أصنافاً مطابقة</h3>
-          <p className="text-xs text-slate-500">جرب البحث بكلمات أخرى أو تصفح قسم آخر من القائمة</p>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{translations[lang].noItemsFound}</h3>
+          <p className="text-xs text-slate-500">{translations[lang].noItemsFoundDesc}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {availableItems.map((item) => {
             const inCartQty = cart.find((i) => i.itemId === item.id)?.quantity || 0;
+            const itemName = lang === 'en' && item.nameEn ? item.nameEn : lang === 'tr' && item.nameTr ? item.nameTr : item.nameAr;
+            const itemDesc = lang === 'en' && item.descriptionEn ? item.descriptionEn : lang === 'tr' && item.descriptionTr ? item.descriptionTr : item.descriptionAr;
             return (
               <div
                 key={item.id}
@@ -398,22 +540,22 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 <div className="relative h-32 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-800">
                   <img
                     src={item.image}
-                    alt={item.nameAr}
+                    alt={itemName}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
 
                   {item.isBestSeller && (
-                    <span className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5">
+                    <span className={`absolute top-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5 ${lang === 'ar' ? 'right-2' : 'left-2'}`}>
                       <span>★</span>
-                      <span>الأكثر طلباً</span>
+                      <span>{translations[lang].bestSeller}</span>
                     </span>
                   )}
 
                   {item.calories && (
-                    <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className={`absolute top-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${lang === 'ar' ? 'left-2' : 'right-2'}`}>
                       <Flame className="w-3.5 h-3.5 text-orange-400" />
-                      <span>{item.calories} سعرة</span>
+                      <span>{item.calories} {translations[lang].calories}</span>
                     </span>
                   )}
                 </div>
@@ -422,21 +564,21 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
                   <div className="space-y-0.5">
                     <h3 className="text-xs font-black text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
-                      {item.nameAr}
+                      {itemName}
                     </h3>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
-                      {item.descriptionAr}
+                      {itemDesc}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
                     <div className="flex flex-col">
                       <span className="text-xs font-black text-slate-950 dark:text-white">
-                        {item.price} <span className="text-[9px] font-normal text-slate-500">{tenant.currency}</span>
+                        {item.price} <span className="text-[9px] font-normal text-slate-500">{translations[lang].currency}</span>
                       </span>
                       <span className="text-[9px] text-slate-400 flex items-center gap-0.5 mt-0.5">
                         <Clock className="w-2.5 h-2.5" />
-                        <span>تحضير: {item.preparationTimeMin || 15} د</span>
+                        <span>{item.preparationTimeMin || 15} {translations[lang].preparationTime}</span>
                       </span>
                     </div>
 
@@ -468,7 +610,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                         className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-extrabold transition-all ${theme.primaryBg} ${theme.primaryHover} text-white shadow-md hover:scale-103`}
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>أضف لطلبي</span>
+                        <span>{translations[lang].addToCart}</span>
                       </button>
                     )}
                   </div>
@@ -482,7 +624,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       {/* FLOATING BOTTOM CART BAR */}
       {totalItemsCount > 0 && (
         <div className="fixed bottom-6 left-0 right-0 z-40 px-4 pointer-events-none">
-          <div className="max-w-xl mx-auto bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-800 flex items-center justify-between gap-4 pointer-events-auto animate-in slide-in-from-bottom-5 duration-300">
+          <div className="max-w-xl mx-auto bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-800 flex items-center justify-between gap-4 pointer-events-auto animate-in slide-in-from-bottom-5 duration-300" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-xl ${theme.primaryBg} text-white flex items-center justify-center relative shadow-inner`}>
                 <ShoppingCart className="w-6 h-6" />
@@ -490,10 +632,10 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   {totalItemsCount}
                 </span>
               </div>
-              <div>
-                <h4 className="text-xs font-semibold text-slate-400">إجمالي سلة طلباتي</h4>
+              <div className={lang === 'ar' ? 'text-right' : 'text-left'}>
+                <h4 className="text-xs font-semibold text-slate-400">{translations[lang].cart}</h4>
                 <p className="text-lg font-black text-white">
-                  {total.toFixed(2)} <span className="text-xs font-normal text-emerald-400">{tenant.currency}</span>
+                  {total.toFixed(2)} <span className="text-xs font-normal text-emerald-400">{translations[lang].currency}</span>
                 </p>
               </div>
             </div>
@@ -502,8 +644,8 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               onClick={() => setShowCartModal(true)}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl ${theme.primaryBg} ${theme.primaryHover} text-white font-bold text-sm shadow-lg transition-all transform hover:scale-105`}
             >
-              <span>مراجعة الطلب وإرساله</span>
-              <ChevronRight className="w-4 h-4 rotate-180" />
+              <span>{lang === 'ar' ? 'مراجعة الطلب وإرساله' : lang === 'tr' ? 'Siparişi İncele' : 'Review & Send'}</span>
+              <ChevronRight className={`w-4 h-4 ${lang === 'ar' ? 'rotate-180' : ''}`} />
             </button>
           </div>
         </div>
@@ -512,12 +654,14 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       {/* CART & ORDER SUBMISSION MODAL */}
       {showCartModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-6 text-right" dir="rtl">
+          <div className={`bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-6 ${lang === 'ar' ? 'text-right' : 'text-left'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">مراجعة سلة الطلب ({totalItemsCount} أصناف)</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  {lang === 'ar' ? `مراجعة سلة الطلب (${totalItemsCount} أصناف)` : lang === 'tr' ? `Sepeti İncele (${totalItemsCount} ürün)` : `Review Cart (${totalItemsCount} items)`}
+                </h3>
               </div>
               <button onClick={() => setShowCartModal(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
@@ -528,7 +672,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               
               {/* Order Mode Selection */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">نوع الاستلام والطلب:</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">{translations[lang].orderType}:</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -540,7 +684,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                     }`}
                   >
                     <UtensilsCrossed className="w-4 h-4" />
-                    <span>طلب داخل المطعم (طاولة)</span>
+                    <span>{translations[lang].dineIn}</span>
                   </button>
 
                   <button
@@ -553,7 +697,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                     }`}
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    <span>سفري / استلام ذاتي</span>
+                    <span>{translations[lang].takeaway}</span>
                   </button>
                 </div>
               </div>
@@ -561,7 +705,9 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               {/* Table Number or Customer Details */}
               {orderType === "dine_in" ? (
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">حدد رقم الطاولة التي تجلس عليها *</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {lang === 'ar' ? 'حدد رقم الطاولة التي تجلس عليها *' : lang === 'tr' ? 'Oturduğunuz masa numarasını seçin *' : 'Select the table number you are sitting at *'}
+                  </label>
                   <div className="flex items-center gap-2 overflow-x-auto pb-1">
                     {tables.map((t) => (
                       <button
@@ -574,7 +720,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                             : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                         }`}
                       >
-                        طاولة {t.tableNumber}
+                        {lang === 'ar' ? 'طاولة' : lang === 'tr' ? 'Masa' : 'Table'} {t.tableNumber}
                       </button>
                     ))}
                   </div>
@@ -582,22 +728,19 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الاسم الكريم *</label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{translations[lang].customerName} *</label>
                     <input
                       type="text"
                       required
-                      placeholder="مثال: عبد الله"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
+                      placeholder={translations[lang].customerNamePlaceholder}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رقم الجوال *</label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{translations[lang].customerPhone} *</label>
                     <input
                       type="text"
                       required
-                      placeholder="05xxxxxxxx"
+                      placeholder={translations[lang].customerPhonePlaceholder}
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
@@ -608,46 +751,52 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
 
               {/* Items List */}
               <div className="space-y-2 max-h-52 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
-                {cart.map((item) => (
-                  <div key={item.id} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
-                    <div className="flex-1">
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">{item.nameAr}</h4>
-                      <p className="text-[10px] text-slate-400">{item.price} {tenant.currency} × {item.quantity}</p>
-                      <input
-                        type="text"
-                        placeholder="تعليق/ملاحظة للطلب..."
-                        value={item.notes || ""}
-                        onChange={(e) => updateNotes(item.itemId, e.target.value)}
-                        className="w-full mt-1 px-2 py-0.5 text-[9px] rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-transparent transition-all"
-                      />
-                    </div>
+                {cart.map((item) => {
+                  const menuItem = items.find(i => i.id === item.itemId);
+                  const itemName = menuItem 
+                    ? (lang === 'en' && menuItem.nameEn ? menuItem.nameEn : lang === 'tr' && menuItem.nameTr ? menuItem.nameTr : menuItem.nameAr)
+                    : item.nameAr;
+                  return (
+                    <div key={item.id} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">{itemName}</h4>
+                        <p className={`text-[10px] text-slate-400 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{item.price} {translations[lang].currency} × {item.quantity}</p>
+                        <input
+                          type="text"
+                          placeholder={lang === 'ar' ? 'تعليق/ملاحظة للطلب...' : lang === 'tr' ? 'Not ekle...' : 'Add request/note...'}
+                          value={item.notes || ""}
+                          onChange={(e) => updateNotes(item.itemId, e.target.value)}
+                          className="w-full mt-1 px-2 py-0.5 text-[9px] rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-transparent transition-all"
+                        />
+                      </div>
 
-                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-                      <button type="button" onClick={() => updateQuantity(item.itemId, -1)} className="w-5 h-5 rounded bg-white dark:bg-slate-700 text-xs font-bold flex items-center justify-center">-</button>
-                      <span className="w-5 text-center text-xs font-bold text-slate-900 dark:text-white">{item.quantity}</span>
-                      <button type="button" onClick={() => updateQuantity(item.itemId, 1)} className={`w-5 h-5 rounded ${theme.primaryBg} text-white text-xs font-bold flex items-center justify-center`}>+</button>
-                    </div>
+                      <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                        <button type="button" onClick={() => updateQuantity(item.itemId, -1)} className="w-5 h-5 rounded bg-white dark:bg-slate-700 text-xs font-bold flex items-center justify-center">-</button>
+                        <span className="w-5 text-center text-xs font-bold text-slate-900 dark:text-white">{item.quantity}</span>
+                        <button type="button" onClick={() => updateQuantity(item.itemId, 1)} className={`w-5 h-5 rounded ${theme.primaryBg} text-white text-xs font-bold flex items-center justify-center`}>+</button>
+                      </div>
 
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 w-16 text-left">
-                      {(item.price * item.quantity).toFixed(0)} {tenant.currency}
-                    </span>
-                  </div>
-                ))}
+                      <span className={`text-xs font-bold text-emerald-600 dark:text-emerald-400 w-16 ${lang === 'ar' ? 'text-left' : 'text-right'}`}>
+                        {(item.price * item.quantity).toFixed(0)} {translations[lang].currency}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Financial Summary */}
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5 text-xs">
                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>المجموع الفرعي:</span>
-                  <span>{subtotal.toFixed(2)} {tenant.currency}</span>
+                  <span>{translations[lang].subtotal}:</span>
+                  <span>{subtotal.toFixed(2)} {translations[lang].currency}</span>
                 </div>
                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>ضريبة القيمة المضافة ({taxRate}%):</span>
-                  <span>{taxAmount.toFixed(2)} {tenant.currency}</span>
+                  <span>{translations[lang].tax} ({taxRate}%):</span>
+                  <span>{taxAmount.toFixed(2)} {translations[lang].currency}</span>
                 </div>
                 <div className="flex justify-between font-black text-base pt-2 border-t border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                  <span>الإجمالي المطلوب:</span>
-                  <span className="text-emerald-600 dark:text-emerald-400">{total.toFixed(2)} {tenant.currency}</span>
+                  <span>{translations[lang].total}:</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">{total.toFixed(2)} {translations[lang].currency}</span>
                 </div>
               </div>
 
@@ -657,7 +806,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   onClick={() => setShowCartModal(false)}
                   className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
                 >
-                  الرجوع للمنيو
+                  {lang === 'ar' ? 'الرجوع للمنيو' : lang === 'tr' ? 'Menüye Dön' : 'Back to Menu'}
                 </button>
                 <button
                   type="submit"
@@ -665,11 +814,11 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   className={`flex-1 py-3 rounded-xl ${theme.primaryBg} ${theme.primaryHover} text-white font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}
                 >
                   {isSubmitting ? (
-                    <span>جاري إرسال الطلب للمطبخ...</span>
+                    <span>{lang === 'ar' ? 'جاري إرسال الطلب للمطبخ...' : lang === 'tr' ? 'Sipariş Gönderiliyor...' : 'Sending Order...'}</span>
                   ) : (
                     <>
                       <CheckCircle2 className="w-5 h-5" />
-                      <span>تأكيد وإرسال الطلب ({total.toFixed(0)} {tenant.currency})</span>
+                      <span>{translations[lang].sendOrder}</span>
                     </>
                   )}
                 </button>
@@ -680,62 +829,70 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       )}
 
       {/* DISH DETAIL MODAL */}
-      {selectedItemDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 relative text-right" dir="rtl">
-            <button
-              onClick={() => setSelectedItemDetail(null)}
-              className="absolute top-4 left-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      {selectedItemDetail && (() => {
+        const itemName = lang === 'en' && selectedItemDetail.nameEn ? selectedItemDetail.nameEn : lang === 'tr' && selectedItemDetail.nameTr ? selectedItemDetail.nameTr : selectedItemDetail.nameAr;
+        const itemDesc = lang === 'en' && selectedItemDetail.descriptionEn ? selectedItemDetail.descriptionEn : lang === 'tr' && selectedItemDetail.descriptionTr ? selectedItemDetail.descriptionTr : selectedItemDetail.descriptionAr;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className={`bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 relative ${lang === 'ar' ? 'text-right' : 'text-left'}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+              <button
+                onClick={() => setSelectedItemDetail(null)}
+                className={`absolute top-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors ${lang === 'ar' ? 'left-4' : 'right-4'}`}
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="h-56 w-full relative">
-              <img src={selectedItemDetail.image} alt={selectedItemDetail.nameAr} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
-              <div className="absolute bottom-4 right-4 text-white">
-                <h3 className="text-xl font-extrabold">{selectedItemDetail.nameAr}</h3>
-                <span className="text-emerald-400 font-black text-lg">{selectedItemDetail.price} {tenant.currency}</span>
+              <div className="h-56 w-full relative">
+                <img src={selectedItemDetail.image} alt={itemName} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
+                <div className={`absolute bottom-4 text-white ${lang === 'ar' ? 'right-4' : 'left-4'}`}>
+                  <h3 className="text-xl font-extrabold">{itemName}</h3>
+                  <span className="text-emerald-400 font-black text-lg">{selectedItemDetail.price} {translations[lang].currency}</span>
+                </div>
               </div>
-            </div>
 
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-4 text-xs text-slate-500">
-                <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl font-medium">
-                  <Clock className="w-4 h-4 text-emerald-500" />
-                  <span>مدة التحضير: {selectedItemDetail.preparationTimeMin || 15} دقيقة</span>
-                </span>
-                {selectedItemDetail.calories && (
+              <div className="p-6 space-y-4">
+                <div className="flex items-center gap-4 text-xs text-slate-500">
                   <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl font-medium">
-                    <Flame className="w-4 h-4 text-orange-500" />
-                    <span>{selectedItemDetail.calories} سعرة حرارية</span>
+                    <Clock className="w-4 h-4 text-emerald-500" />
+                    <span>
+                      {lang === 'ar' ? `مدة التحضير: ${selectedItemDetail.preparationTimeMin || 15} دقيقة` : lang === 'tr' ? `Hazırlık: ${selectedItemDetail.preparationTimeMin || 15} dk` : `Prep time: ${selectedItemDetail.preparationTimeMin || 15} mins`}
+                    </span>
                   </span>
-                )}
-              </div>
+                  {selectedItemDetail.calories && (
+                    <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl font-medium">
+                      <Flame className="w-4 h-4 text-orange-500" />
+                      <span>{selectedItemDetail.calories} {translations[lang].calories}</span>
+                    </span>
+                  )}
+                </div>
 
-              <div>
-                <h4 className="text-xs font-bold text-slate-400 uppercase mb-1">وصف الطبق والمكونات:</h4>
-                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {selectedItemDetail.descriptionAr}
-                </p>
-              </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase mb-1">
+                    {lang === 'ar' ? 'وصف الطبق والمكونات:' : lang === 'tr' ? 'Yemek Açıklaması:' : 'Description:'}
+                  </h4>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {itemDesc}
+                  </p>
+                </div>
 
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  onClick={() => {
-                    addToCart(selectedItemDetail);
-                    setSelectedItemDetail(null);
-                  }}
-                  className={`w-full py-3.5 rounded-2xl ${theme.primaryBg} ${theme.primaryHover} text-white font-bold text-sm shadow-xl flex items-center justify-center gap-2 transform hover:-translate-y-0.5 transition-all`}
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>إضافة للسلة ({selectedItemDetail.price} {tenant.currency})</span>
-                </button>
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    onClick={() => {
+                      addToCart(selectedItemDetail);
+                      setSelectedItemDetail(null);
+                    }}
+                    className={`w-full py-3.5 rounded-2xl ${theme.primaryBg} ${theme.primaryHover} text-white font-bold text-sm shadow-xl flex items-center justify-center gap-2 transform hover:-translate-y-0.5 transition-all`}
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>{translations[lang].addToCart} ({selectedItemDetail.price} {translations[lang].currency})</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* QR Code & Table Stand Modal */}
       {showQRModal && (
