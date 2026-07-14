@@ -499,6 +499,43 @@ export default function App() {
     }
   };
 
+  const handleAddTable = async (tableNumber: number, capacity: number = 4) => {
+    if (!currentTenant) return;
+    try {
+      const res = await fetch(`/api/tenants/${currentTenant.id}/tables`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tableNumber, capacity, status: "available" })
+      });
+      if (res.ok) {
+        const newTable = await res.json();
+        setTables((prev) => [...prev, newTable]);
+      } else {
+        const data = await res.json();
+        alert(data.error || "فشل في إضافة الطاولة");
+      }
+    } catch (err) {
+      alert("فشل في إضافة الطاولة");
+    }
+  };
+
+  const handleDeleteTable = async (id: string) => {
+    if (!currentTenant) return;
+    try {
+      const res = await fetch(`/api/tenants/${currentTenant.id}/tables/${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setTables((prev) => prev.filter((t) => t.id !== id));
+      } else {
+        const data = await res.json();
+        alert(data.error || "فشل في حذف الطاولة");
+      }
+    } catch (err) {
+      alert("فشل في حذف الطاولة");
+    }
+  };
+
   function handleLogout() {
     setCurrentUser(null);
     setCurrentTenant(null);
@@ -715,6 +752,8 @@ export default function App() {
             onUpdateItem={handleUpdateItem}
             onDeleteItem={handleDeleteItem}
             onUpdateTable={handleUpdateTable}
+            onAddTable={handleAddTable}
+            onDeleteTable={handleDeleteTable}
             onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
             onReorderCategories={handleReorderCategories}

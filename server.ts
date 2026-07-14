@@ -1216,6 +1216,34 @@ app.get("/api/tenants/:tenantId/tables", async (req, res) => {
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+});app.post("/api/tenants/:tenantId/tables", async (req, res) => {
+  const { tenantId } = req.params;
+  const { tableNumber, capacity = 4, status = "available" } = req.body;
+  try {
+    const result = await pool.query(
+      "INSERT INTO restaurant_tables (tenant_id, table_number, capacity, status) VALUES ($1, $2, $3, $4) RETURNING *",
+      [tenantId, tableNumber, capacity, status]
+    );
+    res.json(mapTable(result.rows[0]));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/tenants/:tenantId/tables/:id", async (req, res) => {
+  const { tenantId, id } = req.params;
+  try {
+    const result = await pool.query(
+      "DELETE FROM restaurant_tables WHERE id = $1 AND tenant_id = $2 RETURNING *",
+      [id, tenantId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "الطاولة غير موجودة" });
+    }
+    res.json({ success: true, message: "تم حذف الطاولة بنجاح" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.put("/api/tenants/:tenantId/tables/:id", async (req, res) => {
