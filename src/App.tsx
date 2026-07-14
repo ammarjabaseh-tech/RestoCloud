@@ -511,8 +511,12 @@ export default function App() {
         const newTable = await res.json();
         setTables((prev) => [...prev, newTable]);
       } else {
-        const data = await res.json();
-        alert(data.error || "فشل في إضافة الطاولة");
+        let errMsg = "فشل في إضافة الطاولة";
+        try {
+          const data = await res.json();
+          if (data && data.error) errMsg = data.error;
+        } catch (e) {}
+        alert(errMsg);
       }
     } catch (err) {
       alert("فشل في إضافة الطاولة");
@@ -528,8 +532,12 @@ export default function App() {
       if (res.ok) {
         setTables((prev) => prev.filter((t) => t.id !== id));
       } else {
-        const data = await res.json();
-        alert(data.error || "فشل في حذف الطاولة");
+        let errMsg = "فشل في حذف الطاولة";
+        try {
+          const data = await res.json();
+          if (data && data.error) errMsg = data.error;
+        } catch (e) {}
+        alert(errMsg);
       }
     } catch (err) {
       alert("فشل في حذف الطاولة");
