@@ -1122,13 +1122,34 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               return (
                 <div key={t.id} className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
-                        {lang === 'ar' ? `طاولة رقم ${t.tableNumber}` : lang === 'tr' ? `Masa No ${t.tableNumber}` : `Table No. ${t.tableNumber}`}
-                      </h3>
-                      <p className="text-xs text-slate-500 font-sans">
-                        {lang === 'ar' ? `السعة: ${t.capacity} أشخاص` : lang === 'tr' ? `Kapasite: ${t.capacity} Kişi` : `Capacity: ${t.capacity} People`}
-                      </p>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-slate-500">{lang === 'ar' ? 'رقم الطاولة:' : lang === 'tr' ? 'Masa No:' : 'Table No:'}</span>
+                        <input
+                          type="number"
+                          min="1"
+                          value={t.tableNumber}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (val > 0) onUpdateTable(t.id, { tableNumber: val });
+                          }}
+                          className="w-14 px-1.5 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-black text-center bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-slate-400">{lang === 'ar' ? 'السعة (أشخاص):' : lang === 'tr' ? 'Kapasite:' : 'Capacity:'}</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={t.capacity}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (val > 0) onUpdateTable(t.id, { capacity: val });
+                          }}
+                          className="w-14 px-1.5 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-bold text-center bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-350 outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`w-3 h-3 rounded-full ${statusColor} shadow-sm animate-pulse`} />
