@@ -327,6 +327,13 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [historyTab, setHistoryTab] = useState<"all" | "pending">("all");
   const [posMode, setPosMode] = useState<"sales" | "orders">("sales");
   const [posOrderTab, setPosOrderTab] = useState<"all" | "pending" | "preparing" | "ready" | "archived">("all");
+  const [showMobileCart, setShowMobileCart] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (cart.length === 0) {
+      setShowMobileCart(false);
+    }
+  }, [cart.length]);
 
   const pendingSelfOrders = useMemo(() => {
     return historyOrders.filter(o => o.orderStatus === "pending");
@@ -640,230 +647,20 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     }
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-in fade-in duration-200" dir="rtl">
-      
-      {/* POS Top Header Bar (12 Cols) */}
-      <div className="lg:col-span-12 bg-white p-3.5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center text-lg border border-slate-200 overflow-hidden">
-              <RestaurantLogo logo={tenant.logo} />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <span>{posTranslations[lang].posTitle}</span>
-                {tenant.status === 'trial' && (
-                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-855 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
-                    {posTranslations[lang].trialAlert} {getTrialDaysLeft()} {posTranslations[lang].days}
-                  </span>
-                )}
-              </h2>
-              <p className="text-[10px] text-slate-500">{lang === 'ar' ? tenant.nameAr : (tenant.nameEn || tenant.nameAr)} - {posTranslations[lang].activeCashier}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto border border-slate-200 no-scrollbar">
-              <button
-                onClick={() => setPosMode("sales")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                  posMode === "sales"
-                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
-                    : "text-slate-600 hover:bg-white/70"
-                }`}
-              >
-                {posTranslations[lang].newSale}
-              </button>
-              <button
-                onClick={() => {
-                  setPosMode("orders");
-                  fetchHistoryOrders();
-                }}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                  posMode === "orders"
-                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
-                    : "text-slate-600 hover:bg-white/70"
-                }`}
-              >
-                <span>{posTranslations[lang].ordersList}</span>
-                {pendingSelfOrders.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center animate-pulse">
-                    {pendingSelfOrders.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={() => {
-                  fetchHistoryOrders();
-                  setHistoryTab("all");
-                  setShowOrderHistoryModal(true);
-                }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] border border-slate-200 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
-                title={posTranslations[lang].invoiceHistory}
-              >
-                <History className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{posTranslations[lang].invoiceHistory}</span>
-                <span className="sm:hidden">{lang === 'ar' ? 'الفواتير' : lang === 'tr' ? 'Faturalar' : 'Invoices'}</span>
-              </button>
-
-              {posMode === "sales" && (
-                <div className="relative w-full sm:w-48">
-                  <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder={posTranslations[lang].searchPlaceholder}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pr-8 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                  {searchQuery && (
-                    <button 
-                      onClick={() => setSearchQuery("")}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Categories horizontal tabs (sales only) */}
-          {posMode === "sales" && (
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 border-t pt-3 border-slate-100 no-scrollbar">
-              <button
-                onClick={() => setSelectedCategory("all")}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-300 border shadow-3xs cursor-pointer ${
-                  selectedCategory === "all"
-                    ? `${theme.primaryBg} text-white border-transparent shadow-xs`
-                    : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
-                }`}
-              >
-                <span>🔥</span>
-                <span>{lang === 'ar' ? 'الكل' : lang === 'tr' ? 'Tümü' : 'All'} ({items.filter(i => i.isAvailable).length})</span>
-              </button>
-
-              {categories.map((cat) => {
-                const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
-                const isSelected = selectedCategory === cat.id;
-                const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-300 border shadow-3xs cursor-pointer ${
-                      isSelected
-                        ? `${theme.primaryBg} text-white border-transparent shadow-xs`
-                        : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
-                    }`}
-                  >
-                    <span className="text-[10px]">{cat.icon}</span>
-                    <span>{catName}</span>
-                    <span className={`text-[8px] font-mono px-1 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-      {/* Right Column (8 Cols): Menu Grid (sales mode only) */}
-      {posMode === "sales" && (
-        <div className="lg:col-span-8 space-y-4 pos-menu-column animate-in fade-in duration-200">
-
-        {/* Meal Items Grid */}
-        {filteredItems.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm space-y-3">
-            <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-3xl">
-              🔍
-            </div>
-            <h3 className="text-sm font-bold text-slate-800">
-              {lang === 'ar' ? 'لا توجد أصناف تطابق البحث' : lang === 'tr' ? 'Arama sonucu bulunamadı' : 'No items match search'}
-            </h3>
-            <p className="text-xs text-slate-500">
-              {lang === 'ar' ? 'جرب البحث بكلمات أخرى أو اختر قسماً مختلفاً من المنيو' : lang === 'tr' ? 'Farklı kelimelerle aramayı deneyin veya başka kategori seçin' : 'Try searching with other keywords or choose another category'}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
-            {filteredItems.map((item) => {
-              const inCartQty = cart.find((i) => i.itemId === item.id)?.quantity || 0;
-              const itemName = lang === 'en' && item.nameEn ? item.nameEn : lang === 'tr' && item.nameTr ? item.nameTr : item.nameAr;
-              const itemDesc = lang === 'en' && item.descriptionEn ? item.descriptionEn : lang === 'tr' && item.descriptionTr ? item.descriptionTr : item.descriptionAr;
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => addToCart(item)}
-                  className={`bg-white rounded-lg border transition-all duration-200 cursor-pointer overflow-hidden flex flex-col justify-between group hover:shadow-xs transform hover:-translate-y-0.5 ${
-                    inCartQty > 0 
-                      ? "border-indigo-500 ring-2 ring-indigo-500/10 bg-indigo-50/20" 
-                      : "border-slate-200 hover:border-slate-300 shadow-3xs"
-                  }`}
-                >
-                  {/* Image & Badges */}
-                  <div className="relative h-14 w-full overflow-hidden bg-slate-50 border-b border-slate-100">
-                    <img
-                      src={item.image}
-                      alt={itemName}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
-                    
-                    {item.isBestSeller && (
-                      <span className={`absolute top-1 bg-amber-500 text-white text-[7px] font-black px-1.5 py-0.1 rounded-full shadow-sm flex items-center gap-0.5 ${lang === 'ar' ? 'right-1' : 'left-1'}`}>
-                        <span>★</span>
-                        <span>{lang === 'ar' ? 'مميز' : lang === 'tr' ? 'Popüler' : 'Featured'}</span>
-                      </span>
-                    )}
-
-                    {inCartQty > 0 && (
-                      <span className={`absolute top-1 ${lang === 'ar' ? 'left-1' : 'right-1'} ${theme.primaryBg} text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-sm animate-pulse`}>
-                        {inCartQty}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Text Details & Price */}
-                  <div className="p-1.5 flex-1 flex flex-col justify-between space-y-1">
-                    <div className="space-y-0.5">
-                      <h4 className="text-[10px] font-black text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                        {itemName}
-                      </h4>
-                      <p className="text-[8px] text-slate-400 line-clamp-1 leading-snug">
-                        {itemDesc}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-50">
-                      <span className="text-[10px] font-black text-slate-950">
-                        {item.price} <span className="text-[8px] font-normal text-slate-400">{tenant.currency}</span>
-                      </span>
-                      <span className="text-[8px] font-medium text-slate-400 bg-slate-50 px-1 py-0.1 rounded border border-slate-100">
-                        {item.preparationTimeMin || 15} {lang === 'ar' ? 'د' : lang === 'tr' ? 'dk' : 'min'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-      )}
-
-      {/* Left Column (4 Cols): Cart & POS Invoice Register */}
-      {posMode === "sales" && (
-        <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[calc(100vh-180px)] sticky top-20 overflow-hidden pos-cart-column">
-        
+  const renderCart = (isMobile = false) => {
+    return (
+      <div className={`flex flex-col h-full overflow-hidden ${isMobile ? 'bg-white' : ''}`}>
         {/* Cart Header */}
         <div className="p-4 bg-slate-100 text-slate-800 flex items-center justify-between border-b border-slate-200">
           <div className="flex items-center gap-2">
+            {isMobile && (
+              <button
+                onClick={() => setShowMobileCart(false)}
+                className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-700 cursor-pointer ml-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
             <div className="w-8 h-8 rounded-lg bg-white text-indigo-600 border border-slate-200 flex items-center justify-center shadow-2xs">
               <ShoppingCart className="w-4 h-4" />
             </div>
@@ -883,7 +680,6 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             </button>
           )}
         </div>
-
         {/* Order Type Selector Tabs */}
         <div className="p-3 bg-slate-50 border-b border-slate-200 space-y-3">
           <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-200/70 rounded-xl">
@@ -1175,6 +971,233 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           </div>
         </div>
       </div>
+    );
+  };
+
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-in fade-in duration-200" dir="rtl">
+      
+      {/* POS Top Header Bar (12 Cols) */}
+      <div className="lg:col-span-12 bg-white p-3.5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center text-lg border border-slate-200 overflow-hidden">
+              <RestaurantLogo logo={tenant.logo} />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span>{posTranslations[lang].posTitle}</span>
+                {tenant.status === 'trial' && (
+                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-855 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
+                    {posTranslations[lang].trialAlert} {getTrialDaysLeft()} {posTranslations[lang].days}
+                  </span>
+                )}
+              </h2>
+              <p className="text-[10px] text-slate-500">{lang === 'ar' ? tenant.nameAr : (tenant.nameEn || tenant.nameAr)} - {posTranslations[lang].activeCashier}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto border border-slate-200 no-scrollbar">
+              <button
+                onClick={() => setPosMode("sales")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  posMode === "sales"
+                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
+                    : "text-slate-600 hover:bg-white/70"
+                }`}
+              >
+                {posTranslations[lang].newSale}
+              </button>
+              <button
+                onClick={() => {
+                  setPosMode("orders");
+                  fetchHistoryOrders();
+                }}
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  posMode === "orders"
+                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
+                    : "text-slate-600 hover:bg-white/70"
+                }`}
+              >
+                <span>{posTranslations[lang].ordersList}</span>
+                {pendingSelfOrders.length > 0 && (
+                  <span className="absolute -top-1.5 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center animate-pulse">
+                    {pendingSelfOrders.length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => {
+                  fetchHistoryOrders();
+                  setHistoryTab("all");
+                  setShowOrderHistoryModal(true);
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] border border-slate-200 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
+                title={posTranslations[lang].invoiceHistory}
+              >
+                <History className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{posTranslations[lang].invoiceHistory}</span>
+                <span className="sm:hidden">{lang === 'ar' ? 'الفواتير' : lang === 'tr' ? 'Faturalar' : 'Invoices'}</span>
+              </button>
+
+              {posMode === "sales" && (
+                <div className="relative w-full sm:w-48">
+                  <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder={posTranslations[lang].searchPlaceholder}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pr-8 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery("")}
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Categories horizontal tabs (sales only) */}
+          {posMode === "sales" && (
+            <div className="flex items-center gap-1 overflow-x-auto pb-1 border-t pt-3 border-slate-100 no-scrollbar">
+              <button
+                onClick={() => setSelectedCategory("all")}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-300 border shadow-3xs cursor-pointer ${
+                  selectedCategory === "all"
+                    ? `${theme.primaryBg} text-white border-transparent shadow-xs`
+                    : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
+                }`}
+              >
+                <span>🔥</span>
+                <span>{lang === 'ar' ? 'الكل' : lang === 'tr' ? 'Tümü' : 'All'} ({items.filter(i => i.isAvailable).length})</span>
+              </button>
+
+              {categories.map((cat) => {
+                const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
+                const isSelected = selectedCategory === cat.id;
+                const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-300 border shadow-3xs cursor-pointer ${
+                      isSelected
+                        ? `${theme.primaryBg} text-white border-transparent shadow-xs`
+                        : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
+                    }`}
+                  >
+                    <span className="text-[10px]">{cat.icon}</span>
+                    <span>{catName}</span>
+                    <span className={`text-[8px] font-mono px-1 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+      {/* Right Column (8 Cols): Menu Grid (sales mode only) */}
+      {posMode === "sales" && (
+        <div className="lg:col-span-8 space-y-4 pos-menu-column animate-in fade-in duration-200">
+
+        {/* Meal Items Grid */}
+        {filteredItems.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm space-y-3">
+            <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-3xl">
+              🔍
+            </div>
+            <h3 className="text-sm font-bold text-slate-800">
+              {lang === 'ar' ? 'لا توجد أصناف تطابق البحث' : lang === 'tr' ? 'Arama sonucu bulunamadı' : 'No items match search'}
+            </h3>
+            <p className="text-xs text-slate-500">
+              {lang === 'ar' ? 'جرب البحث بكلمات أخرى أو اختر قسماً مختلفاً من المنيو' : lang === 'tr' ? 'Farklı kelimelerle aramayı deneyin veya başka kategori seçin' : 'Try searching with other keywords or choose another category'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
+            {filteredItems.map((item) => {
+              const inCartQty = cart.find((i) => i.itemId === item.id)?.quantity || 0;
+              const itemName = lang === 'en' && item.nameEn ? item.nameEn : lang === 'tr' && item.nameTr ? item.nameTr : item.nameAr;
+              const itemDesc = lang === 'en' && item.descriptionEn ? item.descriptionEn : lang === 'tr' && item.descriptionTr ? item.descriptionTr : item.descriptionAr;
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => addToCart(item)}
+                  className={`bg-white rounded-lg border transition-all duration-200 cursor-pointer overflow-hidden flex flex-col justify-between group hover:shadow-xs transform hover:-translate-y-0.5 ${
+                    inCartQty > 0 
+                      ? "border-indigo-500 ring-2 ring-indigo-500/10 bg-indigo-50/20" 
+                      : "border-slate-200 hover:border-slate-300 shadow-3xs"
+                  }`}
+                >
+                  {/* Image & Badges */}
+                  <div className="relative h-14 w-full overflow-hidden bg-slate-50 border-b border-slate-100">
+                    <img
+                      src={item.image}
+                      alt={itemName}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
+                    
+                    {item.isBestSeller && (
+                      <span className={`absolute top-1 bg-amber-500 text-white text-[7px] font-black px-1.5 py-0.1 rounded-full shadow-sm flex items-center gap-0.5 ${lang === 'ar' ? 'right-1' : 'left-1'}`}>
+                        <span>★</span>
+                        <span>{lang === 'ar' ? 'مميز' : lang === 'tr' ? 'Popüler' : 'Featured'}</span>
+                      </span>
+                    )}
+
+                    {inCartQty > 0 && (
+                      <span className={`absolute top-1 ${lang === 'ar' ? 'left-1' : 'right-1'} ${theme.primaryBg} text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-sm animate-pulse`}>
+                        {inCartQty}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Text Details & Price */}
+                  <div className="p-1.5 flex-1 flex flex-col justify-between space-y-1">
+                    <div className="space-y-0.5">
+                      <h4 className="text-[10px] font-black text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                        {itemName}
+                      </h4>
+                      <p className="text-[8px] text-slate-400 line-clamp-1 leading-snug">
+                        {itemDesc}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-50">
+                      <span className="text-[10px] font-black text-slate-950">
+                        {item.price} <span className="text-[8px] font-normal text-slate-400">{tenant.currency}</span>
+                      </span>
+                      <span className="text-[8px] font-medium text-slate-400 bg-slate-50 px-1 py-0.1 rounded border border-slate-100">
+                        {item.preparationTimeMin || 15} {lang === 'ar' ? 'د' : lang === 'tr' ? 'dk' : 'min'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      )}
+
+
+      {/* Left Column (4 Cols): Cart & POS Invoice Register */}
+      {posMode === "sales" && (
+        <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[calc(100vh-180px)] sticky top-20 overflow-hidden pos-cart-column hidden lg:flex">
+          {renderCart(false)}
+        </div>
       )}
 
       {/* Live Orders Management Page (orders mode only) */}
@@ -1692,6 +1715,39 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           </div>
         </div>
       )}
-    </div>
+    
+      {/* Mobile Cart Floating Action Button */}
+      {posMode === "sales" && cart.length > 0 && (
+        <div className="lg:hidden fixed bottom-6 left-6 right-6 z-45">
+          <button
+            onClick={() => setShowMobileCart(true)}
+            className="w-full flex items-center justify-between px-6 py-4 bg-indigo-650 hover:bg-indigo-700 text-white rounded-2xl shadow-xl font-bold animate-bounce cursor-pointer border border-indigo-500/30"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-xl">
+                <ShoppingCart className="w-5 h-5" />
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-indigo-200 leading-none">{lang === 'ar' ? 'عرض السلة' : lang === 'tr' ? 'Sepeti Göster' : 'View Cart'}</p>
+                <p className="text-xs font-black mt-0.5">{cart.reduce((sum, i) => sum + i.quantity, 0)} {lang === 'ar' ? 'أصناف' : lang === 'tr' ? 'Ürün' : 'items'}</p>
+              </div>
+            </div>
+            <div className="text-lg font-black font-sans">
+              {total.toFixed(0)} {tenant.currency}
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Cart Drawer Overlay */}
+      {showMobileCart && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex justify-end animate-in fade-in duration-200" dir="rtl">
+          <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl slide-in-from-left duration-300">
+            {renderCart(true)}
+          </div>
+        </div>
+      )}
+
+</div>
   );
 };
