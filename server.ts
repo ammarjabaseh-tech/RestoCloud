@@ -1252,12 +1252,9 @@ app.put("/api/tenants/:tenantId/tables/:id", async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE restaurant_tables SET
-        status = COALESCE($2, status), 
-        current_order_id = $3, 
-        capacity = COALESCE($4, capacity),
-        table_number = COALESCE($5, table_number)
+        status = COALESCE($2, status), current_order_id = $3, capacity = COALESCE($4, capacity)
        WHERE id = $1 RETURNING *`,
-      [id, b.status, b.currentOrderId ?? null, b.capacity, b.tableNumber]
+      [id, b.status, b.currentOrderId ?? null, b.capacity]
     );
     if (!result.rows[0]) return res.status(404).json({ error: "الطاولة غير موجودة" });
     res.json(mapTable(result.rows[0]));
