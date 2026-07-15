@@ -225,6 +225,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   const [wifiPass, setWifiPass] = useState(tenant.wifiPassword || "");
   const [wifiName, setWifiName] = useState(tenant.wifiName || "");
   const [currency, setCurrency] = useState(tenant.currency || "ر.س");
+  const [bannerImage, setBannerImage] = useState(tenant.bannerImage || "");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Sync state when tenant prop changes (e.g. on save or tenant switch)
@@ -239,6 +240,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     setWifiPass(tenant.wifiPassword || "");
     setWifiName(tenant.wifiName || "");
     setCurrency(tenant.currency || "ر.س");
+    setBannerImage(tenant.bannerImage || "");
   }, [tenant]);
 
   // New Category State
@@ -379,7 +381,8 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
       taxRate: Number(taxRate) || 15,
       wifiPassword: wifiPass,
       wifiName: wifiName,
-      currency
+      currency,
+      bannerImage
     };
 
     try {
@@ -600,7 +603,11 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
             {categories.map((cat, idx) => (
               <div key={cat.id} className="bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 shrink-0">
-                <span className="text-lg">{cat.icon}</span>
+                {cat.icon.startsWith("http") ? (
+                  <img src={cat.icon} alt="" className="w-5 h-5 object-cover rounded-md shrink-0" />
+                ) : (
+                  <span className="text-lg shrink-0">{cat.icon}</span>
+                )}
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                   {lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr}
                 </span>
@@ -979,6 +986,89 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     }`}
                   >
                     <RestaurantLogo logo={em} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Cover Photo / Banner Customization */}
+          <div className="space-y-4 p-5 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700">
+            <div>
+              <label className="block text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Image className="w-5 h-5 text-emerald-600" />
+                <span>{lang === 'ar' ? 'صورة الغلاف للمنيو الرقمي (Digital Menu Cover Banner)' : lang === 'tr' ? 'Dijital Menü Kapak Resmi (Digital Menu Cover Banner)' : 'Digital Menu Cover Photo (Digital Menu Cover Banner)'}</span>
+              </label>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {lang === 'ar' ? 'اختر صورة غلاف تظهر في أعلى المنيو الرقمي لعملائك (مثل صفحات الفيسبوك والانستغرام).' : lang === 'tr' ? 'Facebook ve Instagram profillerinde olduğu gibi, müşterileriniz için dijital menünün üst kısmında görünecek bir kapak resmi seçin.' : 'Choose a cover banner to display at the top of your digital menu for your customers (like Facebook/Instagram profiles).'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  {lang === 'ar' ? 'رابط صورة الغلاف (https://...)' : lang === 'tr' ? 'Kapak Resmi URLsi (https://...)' : 'Cover Image URL (https://...)'}
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://images.unsplash.com/photo-..."
+                  value={bannerImage}
+                  onChange={(e) => setBannerImage(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  dir="ltr"
+                />
+              </div>
+
+              {/* Cover Live Preview */}
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden h-24 relative bg-slate-100 dark:bg-slate-800">
+                {bannerImage ? (
+                  <img src={bannerImage} alt="Cover Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 font-bold">
+                    {lang === 'ar' ? 'لا توجد صورة غلاف حالية' : lang === 'tr' ? 'Mevcut kapak resmi yok' : 'No current cover image'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Curated Unsplash Cover Options */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                {lang === 'ar' ? 'أو اختر صورة غلاف جاهزة وعالية الجودة بنقرة واحدة:' : lang === 'tr' ? 'Veya tek tıkla hazır yüksek kaliteli kapak resimlerinden seçin:' : 'Or choose a ready-to-use high-quality cover photo with one click:'}
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  {
+                    name: lang === 'ar' ? '🍔 برجر وأكلات سريعة' : 'Burgers',
+                    url: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=600'
+                  },
+                  {
+                    name: lang === 'ar' ? '🍕 بيتزا ومعجنات' : 'Pizza',
+                    url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600'
+                  },
+                  {
+                    name: lang === 'ar' ? '☕ كافيه وحلويات' : 'Cafe & Bakery',
+                    url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=600'
+                  },
+                  {
+                    name: lang === 'ar' ? '🥩 مشاوي ولحوم' : 'Steakhouse',
+                    url: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600'
+                  },
+                  {
+                    name: lang === 'ar' ? '🥗 أكلات صحية وسلطات' : 'Salads & Healthy',
+                    url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600'
+                  }
+                ].map((option) => (
+                  <button
+                    key={option.url}
+                    type="button"
+                    onClick={() => setBannerImage(option.url)}
+                    className={`rounded-xl border overflow-hidden p-1.5 flex flex-col items-center justify-center gap-1.5 transition-all text-center hover:opacity-95 cursor-pointer ${
+                      bannerImage === option.url ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 ring-2 ring-emerald-500/25' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
+                    }`}
+                  >
+                    <img src={option.url} alt={option.name} className="w-full h-12 rounded-lg object-cover animate-fade-in" />
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate w-full">{option.name}</span>
                   </button>
                 ))}
               </div>
@@ -1553,6 +1643,37 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     onChange={(e) => setItemImage(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white outline-none"
                   />
+                  
+                  {/* Curated Dish Image Templates */}
+                  <div className="mt-2 space-y-1.5">
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                      {lang === 'ar' ? 'أو اختر صورة طبق جاهزة بنقرة واحدة:' : 'Veya tek tıkla hazır yemek resimlerinden seçin:'}
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 max-h-36 overflow-y-auto">
+                      {[
+                        { name: lang === 'ar' ? '🍔 برجر' : 'Burger', url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍕 بيتزا' : 'Pizza', url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥩 شاورما/كباب' : 'Kebab', url: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍝 باستا' : 'Pasta', url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍟 بطاطس' : 'Fries', url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥗 سلطة' : 'Salad', url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍰 كيك/حلى' : 'Cake', url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥤 كولا/مشروب' : 'Soda', url: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=400' }
+                      ].map((option) => (
+                        <button
+                          key={option.url}
+                          type="button"
+                          onClick={() => setItemImage(option.url)}
+                          className={`rounded-lg p-1 border overflow-hidden flex flex-col items-center justify-center gap-1 transition-all text-center hover:opacity-95 cursor-pointer h-16 ${
+                            itemImage === option.url ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 ring-2 ring-emerald-500/25' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'
+                          }`}
+                        >
+                          <img src={option.url} alt="" className="w-full h-8 object-cover rounded animate-fade-in" />
+                          <span className="text-[8px] font-bold text-slate-700 dark:text-slate-300 truncate w-full">{option.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -1660,13 +1781,52 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'أيقونة القسم (Emoji)' : lang === 'tr' ? 'Kategori Simgesi (Emoji)' : 'Category Icon (Emoji)'}</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  {lang === 'ar' ? 'رمز أو رابط صورة القسم' : lang === 'tr' ? 'Kategori Simgesi veya URLsi' : 'Category Icon or Image URL'}
+                </label>
                 <input
                   type="text"
                   value={newCatIcon}
                   onChange={(e) => setNewCatIcon(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-lg font-bold text-center outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold outline-none"
+                  placeholder={lang === 'ar' ? "مثال: 🍔 أو رابط صورة..." : "E.g. 🍔 or image URL..."}
                 />
+              </div>
+            </div>
+
+            {/* Category Icon/Image Quick Selection Gallery */}
+            <div className="space-y-2">
+              <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                {lang === 'ar' ? 'اختر رمزاً أو صورة جاهزة للقسم بنقرة واحدة:' : 'Hazır simgelerden veya resimlerden birini seçin:'}
+              </label>
+              <div className="grid grid-cols-5 gap-2 p-2 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 max-h-36 overflow-y-auto">
+                {[
+                  { name: "🔥", val: "🔥" },
+                  { name: "🍔", val: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200" },
+                  { name: "🍕", val: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=200" },
+                  { name: "🥩", val: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=200" },
+                  { name: "🍝", val: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=200" },
+                  { name: "☕", val: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=200" },
+                  { name: "🍰", val: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=200" },
+                  { name: "🥗", val: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=200" },
+                  { name: "🥤", val: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=200" },
+                  { name: "🍽️", val: "🍽️" }
+                ].map((option) => (
+                  <button
+                    key={option.val}
+                    type="button"
+                    onClick={() => setNewCatIcon(option.val)}
+                    className={`rounded-lg p-1 border overflow-hidden flex flex-col items-center justify-center gap-0.5 transition-all text-center hover:opacity-95 cursor-pointer h-12 ${
+                      newCatIcon === option.val ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 ring-2 ring-emerald-500/25' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'
+                    }`}
+                  >
+                    {option.val.startsWith("http") ? (
+                      <img src={option.val} alt="" className="w-full h-8 object-cover rounded animate-fade-in" />
+                    ) : (
+                      <span className="text-xl">{option.val}</span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">

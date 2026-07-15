@@ -1096,7 +1096,11 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                         : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
                     }`}
                   >
-                    <span className="text-[10px]">{cat.icon}</span>
+                    {cat.icon.startsWith("http") ? (
+                      <img src={cat.icon} alt="" className="w-4.5 h-4.5 object-cover rounded shrink-0" />
+                    ) : (
+                      <span className="text-[10px] shrink-0">{cat.icon}</span>
+                    )}
                     <span>{catName}</span>
                     <span className={`text-[8px] font-mono px-1 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
                       {count}

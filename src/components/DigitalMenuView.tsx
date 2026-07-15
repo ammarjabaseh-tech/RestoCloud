@@ -403,31 +403,62 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
         </div>
       )}
 
-      {/* Restaurant Sleek Compact Header */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-lg p-5 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
-        <div className={`absolute top-0 left-0 right-0 h-1.5 ${theme.primaryBg}`} />
-        
-        <div className="flex items-center gap-4 w-full md:w-auto text-right">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-3xl flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
+      {/* Restaurant Facebook/Instagram Style Profile Header */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-lg overflow-hidden relative">
+        {/* Cover Photo Banner */}
+        <div className="h-40 sm:h-56 w-full relative bg-slate-100 dark:bg-slate-800">
+          {tenant.bannerImage ? (
+            <img src={tenant.bannerImage} alt="Cover Banner" className="w-full h-full object-cover" />
+          ) : (
+            <div className={`w-full h-full bg-gradient-to-r from-indigo-650 via-purple-650 to-pink-600 opacity-80`} />
+          )}
+          {/* Overlay gradient to ensure text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+        </div>
+
+        {/* Restaurant Profile Content (Avatar + Info) */}
+        <div className="px-6 pb-6 pt-16 relative flex flex-col items-center md:items-start text-center">
+          {/* Circular Restaurant Logo (Profile Photo) */}
+          <div className={`absolute -top-12 md:-top-16 ${lang === 'ar' ? 'right-6 md:right-10' : 'left-6 md:left-10'} w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white dark:border-slate-900 bg-white dark:bg-slate-800 text-4xl md:text-5xl flex items-center justify-center shadow-md overflow-hidden z-10`}>
             <RestaurantLogo logo={tenant.logo} />
           </div>
-          <div className="space-y-0.5">
-            <h1 className="text-xl font-black text-slate-900 dark:text-white leading-tight">
-              {tenant.nameAr}
-            </h1>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-              {tenant.slogan || (lang === 'ar' ? "نرحب بكم في منيو الطعام الرقمي التفاعلي." : lang === 'tr' ? "İnteraktif dijital yemek menümüze hoş geldiniz." : "Welcome to our interactive digital food menu.")}
-            </p>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-400 pt-0.5 font-sans">
+
+          {/* Restaurant Details Info */}
+          <div className={`w-full ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-3`}>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="space-y-1">
+                <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight">
+                  {tenant.nameAr}
+                </h1>
+                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                  {tenant.slogan || (lang === 'ar' ? "نرحب بكم في منيو الطعام الرقمي التفاعلي." : lang === 'tr' ? "İnteraktif dijital yemek menümüze hoş geldiniz." : "Welcome to our interactive digital food menu.")}
+                </p>
+              </div>
+
+              {/* Badges / Quick details */}
+              <div className={`flex flex-wrap gap-2 text-xs ${lang === 'ar' ? 'justify-start' : 'justify-start md:justify-end'}`}>
+                <span className="px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200/60 dark:border-slate-750 flex items-center gap-1">
+                  ⭐ 4.9
+                </span>
+                <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-250/60 dark:border-emerald-900/60 flex items-center gap-1">
+                  🟢 {lang === 'ar' ? 'مفتوح الآن' : lang === 'tr' ? 'Açık' : 'Open'}
+                </span>
+              </div>
+            </div>
+
+            {/* Address, Phone, Wifi detailed row */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/80 font-sans">
+              <span className="flex items-center gap-1 shrink-0">
+                📍 {tenant.address}
+              </span>
+              <span className="flex items-center gap-1 shrink-0">
+                📞 {tenant.phone}
+              </span>
               {(tenant.wifiName || tenant.wifiPassword) && (
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">
-                  📶 WiFi: {tenant.wifiName || (lang === 'ar' ? 'عام' : lang === 'tr' ? 'Genel' : 'General')} {tenant.wifiPassword ? `(${lang === 'ar' ? 'كلمة المرور' : lang === 'tr' ? 'Şifre' : 'Pass'}: ${tenant.wifiPassword})` : `(${lang === 'ar' ? 'بدون باسورد' : lang === 'tr' ? 'şifresiz' : 'no pass'})`}
+                <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold font-mono shrink-0">
+                  📶 WiFi: {tenant.wifiName || (lang === 'ar' ? 'عام' : lang === 'tr' ? 'Genel' : 'General')} {tenant.wifiPassword ? `(${tenant.wifiPassword})` : ''}
                 </span>
               )}
-              {(tenant.wifiName || tenant.wifiPassword) && <span>•</span>}
-              <span>📞 {tenant.phone}</span>
-              <span>•</span>
-              <span>📍 {tenant.address}</span>
             </div>
           </div>
         </div>
@@ -504,7 +535,11 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                     : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
                 }`}
               >
-                <span className="text-base">{cat.icon}</span>
+                {cat.icon.startsWith("http") ? (
+                  <img src={cat.icon} alt="" className="w-5 h-5 object-cover rounded-lg shrink-0" />
+                ) : (
+                  <span className="text-base shrink-0">{cat.icon}</span>
+                )}
                 <span>{catName}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
                   {count}
