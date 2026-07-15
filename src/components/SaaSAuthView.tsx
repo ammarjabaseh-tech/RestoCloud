@@ -407,7 +407,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({
           </div>
         </div>
 
-        <div className="w-full max-w-md mt-12">
+        <div className="w-full max-w-md mt-24 sm:mt-12">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20 mb-8">
             <UtensilsCrossed className="w-8 h-8" />
           </div>
