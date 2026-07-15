@@ -420,6 +420,40 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     }
   };
 
+  const handleItemImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert(lang === 'ar' ? 'حجم الصورة كبير جداً، يرجى اختيار صورة أقل من 2 ميجابايت.' : 'Image size is too large. Please select an image under 2MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setItemImage(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCategoryIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert(lang === 'ar' ? 'حجم الصورة كبير جداً، يرجى اختيار صورة أقل من 2 ميجابايت.' : 'Image size is too large. Please select an image under 2MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setNewCatIcon(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Analytics Data
   const categoryChartData = categories.map((cat) => {
     const catItems = items.filter(i => i.categoryId === cat.id);
@@ -1671,7 +1705,19 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رابط صورة الطبق (Image URL)</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">رابط صورة الطبق (Image URL)</label>
+                    <label className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold cursor-pointer flex items-center gap-1 hover:underline">
+                      <Upload className="w-3 h-3" />
+                      <span>{lang === 'ar' ? '📂 رفع من جهازك' : '📂 Upload File'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleItemImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                   <input
                     type="url"
                     placeholder="https://images.unsplash.com/..."
@@ -1817,9 +1863,21 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {lang === 'ar' ? 'رمز أو رابط صورة القسم' : lang === 'tr' ? 'Kategori Simgesi veya URLsi' : 'Category Icon or Image URL'}
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {lang === 'ar' ? 'رمز أو رابط صورة القسم' : lang === 'tr' ? 'Kategori Simgesi veya URLsi' : 'Category Icon or Image URL'}
+                  </label>
+                  <label className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold cursor-pointer flex items-center gap-1 hover:underline">
+                    <Upload className="w-3 h-3" />
+                    <span>{lang === 'ar' ? '📂 رفع صورة' : '📂 Upload'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCategoryIconUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
                 <input
                   type="text"
                   value={newCatIcon}
