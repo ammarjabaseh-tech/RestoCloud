@@ -295,6 +295,7 @@ interface POSDashboardViewProps {
   tables: RestaurantTable[];
   onOrderCreated: (order: Order) => void;
   onUpdateTableStatus: (tableId: string, status: any) => void;
+  onUpdateTenant?: (tenant: Tenant) => void;
   lang?: 'ar' | 'en' | 'tr';
 }
 
@@ -305,6 +306,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   tables,
   onOrderCreated,
   onUpdateTableStatus,
+  onUpdateTenant,
   lang = 'ar'
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -334,6 +336,27 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       setShowMobileCart(false);
     }
   }, [cart.length]);
+
+  const toggleRestaurantStatus = async () => {
+    const updatedStatus = tenant.isOpen === false;
+    const updated: Tenant = {
+      ...tenant,
+      isOpen: updatedStatus
+    };
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onUpdateTenant && onUpdateTenant(data);
+      }
+    } catch (err) {
+      console.error("Failed to update restaurant status:", err);
+    }
+  };
 
   const pendingSelfOrders = useMemo(() => {
     return historyOrders.filter(o => o.orderStatus === "pending");
@@ -981,20 +1004,44 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       {/* POS Top Header Bar (12 Cols) */}
       <div className="lg:col-span-12 bg-white p-3.5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center text-lg border border-slate-200 overflow-hidden">
-              <RestaurantLogo logo={tenant.logo} />
+          <div className="flex flex-wrap items-center gap-4 flex-1 justify-between md:justify-start">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center text-lg border border-slate-200 overflow-hidden">
+                <RestaurantLogo logo={tenant.logo} />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span>{posTranslations[lang].posTitle}</span>
+                  {tenant.status === 'trial' && (
+                    <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-855 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
+                      {posTranslations[lang].trialAlert} {getTrialDaysLeft()} {posTranslations[lang].days}
+                    </span>
+                  )}
+                </h2>
+                <p className="text-[10px] text-slate-500">{lang === 'ar' ? tenant.nameAr : (tenant.nameEn || tenant.nameAr)} - {posTranslations[lang].activeCashier}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <span>{posTranslations[lang].posTitle}</span>
-                {tenant.status === 'trial' && (
-                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-855 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
-                    {posTranslations[lang].trialAlert} {getTrialDaysLeft()} {posTranslations[lang].days}
-                  </span>
-                )}
-              </h2>
-              <p className="text-[10px] text-slate-500">{lang === 'ar' ? tenant.nameAr : (tenant.nameEn || tenant.nameAr)} - {posTranslations[lang].activeCashier}</p>
+
+            {/* Cashier Quick Restaurant Status Toggle */}
+            <div className="flex items-center gap-2 border-r border-slate-200 pr-3 mr-1 font-sans">
+              <button
+                type="button"
+                onClick={toggleRestaurantStatus}
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 transition-all shadow-3xs cursor-pointer border ${
+                  tenant.isOpen !== false
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-250/70 hover:bg-emerald-100/70"
+                    : "bg-rose-50 text-rose-700 border-rose-250/70 hover:bg-rose-100/70"
+                }`}
+                title={lang === 'ar' ? 'تغيير حالة استقبال الطلبات للمنيو' : 'Toggle online ordering status'}
+              >
+                <span className={`w-2 h-2 rounded-full ${tenant.isOpen !== false ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                <span>
+                  {tenant.isOpen !== false
+                    ? (lang === 'ar' ? 'المنيو: مفتوح' : lang === 'tr' ? 'Menü: Açık' : 'Menu: Open')
+                    : (lang === 'ar' ? 'المنيو: مغلق' : lang === 'tr' ? 'Menü: Kapalı' : 'Menu: Closed')
+                  }
+                </span>
+              </button>
             </div>
           </div>
 

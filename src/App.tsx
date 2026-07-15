@@ -745,6 +745,7 @@ export default function App() {
             onUpdateTableStatus={(tblId, st) => {
               handleUpdateTable(tblId, { status: st });
             }}
+            onUpdateTenant={handleUpdateTenant}
             lang={lang}
           />
         )}
