@@ -101,6 +101,7 @@ function mapTenant(row: any) {
     subscriptionPlan: row.subscription_plan,
     subscriptionAmount: row.subscription_amount ? parseFloat(row.subscription_amount) : undefined,
     subscriptionDate: row.subscription_date,
+    isOpen: row.is_open !== false,
     createdAt: row.created_at ? row.created_at.toISOString().split("T")[0] : "",
   };
 }
@@ -379,6 +380,7 @@ app.put("/api/tenants/:id", async (req, res) => {
       wifiName: "wifi_name",
       bannerImage: "banner_image", subscriptionPlan: "subscription_plan",
       subscriptionAmount: "subscription_amount", subscriptionDate: "subscription_date",
+      isOpen: "is_open",
     };
     
     // Filter to keys that are either mapped or represent valid columns

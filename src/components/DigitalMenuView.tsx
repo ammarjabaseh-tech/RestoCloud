@@ -440,9 +440,15 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 <span className="px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200/60 dark:border-slate-750 flex items-center gap-1">
                   ⭐ 4.9
                 </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-250/60 dark:border-emerald-900/60 flex items-center gap-1">
-                  🟢 {lang === 'ar' ? 'مفتوح الآن' : lang === 'tr' ? 'Açık' : 'Open'}
-                </span>
+                {tenant.isOpen !== false ? (
+                  <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-250/60 dark:border-emerald-900/60 flex items-center gap-1 animate-pulse">
+                    🟢 {lang === 'ar' ? 'مفتوح الآن' : lang === 'tr' ? 'Açık' : 'Open'}
+                  </span>
+                ) : (
+                  <span className="px-3.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 font-bold border border-rose-250/60 dark:border-rose-900/60 flex items-center gap-1">
+                    🔴 {lang === 'ar' ? 'مغلق حالياً' : lang === 'tr' ? 'Kapalı' : 'Closed'}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -483,6 +489,21 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           >
             متابعة تصفح المنيو
           </button>
+        </div>
+      )}
+
+      {/* Restaurant Closed Notice Banner */}
+      {tenant.isOpen === false && (
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-3xl p-5 text-center space-y-2 shadow-sm animate-in fade-in duration-300">
+          <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-450 rounded-full flex items-center justify-center mx-auto text-xl">
+            🔒
+          </div>
+          <h3 className="text-base font-extrabold text-rose-900 dark:text-rose-100">
+            {lang === 'ar' ? 'المطعم لا يستقبل طلبات حالياً' : lang === 'tr' ? 'Restoran şu anda sipariş kabul etmiyor' : 'Restaurant is not accepting orders right now'}
+          </h3>
+          <p className="text-xs text-rose-700 dark:text-rose-350">
+            {lang === 'ar' ? 'يمكنك تصفح قائمة الطعام والوجبات، ولكن تم إيقاف استقبال الطلبات الرقمية مؤقتاً.' : lang === 'tr' ? 'Menüye göz atabilirsiniz, ancak sipariş alımı geçici olarak durdurulmuştur.' : 'You can browse the menu and dishes, but digital ordering has been temporarily disabled.'}
+          </p>
         </div>
       )}
 
@@ -635,6 +656,10 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
+                    ) : tenant.isOpen === false ? (
+                      <span className="text-[10px] font-extrabold text-rose-500 dark:text-rose-450 bg-rose-50 dark:bg-rose-950/20 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/40">
+                        {lang === 'ar' ? 'مغلق' : lang === 'tr' ? 'Kapalı' : 'Closed'}
+                      </span>
                     ) : (
                       <button
                         type="button"

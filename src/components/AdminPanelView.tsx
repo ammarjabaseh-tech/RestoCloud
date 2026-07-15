@@ -226,6 +226,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   const [wifiName, setWifiName] = useState(tenant.wifiName || "");
   const [currency, setCurrency] = useState(tenant.currency || "ر.س");
   const [bannerImage, setBannerImage] = useState(tenant.bannerImage || "");
+  const [isOpen, setIsOpen] = useState(tenant.isOpen !== false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Sync state when tenant prop changes (e.g. on save or tenant switch)
@@ -241,6 +242,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     setWifiName(tenant.wifiName || "");
     setCurrency(tenant.currency || "ر.س");
     setBannerImage(tenant.bannerImage || "");
+    setIsOpen(tenant.isOpen !== false);
   }, [tenant]);
 
   // New Category State
@@ -382,7 +384,8 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
       wifiPassword: wifiPass,
       wifiName: wifiName,
       currency,
-      bannerImage
+      bannerImage,
+      isOpen
     };
 
     try {
@@ -798,6 +801,39 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 <span>{lang === 'ar' ? 'تم حفظ الإعدادات بنجاح!' : lang === 'tr' ? 'Ayarlar başarıyla kaydedildi!' : 'Settings saved successfully!'}</span>
               </span>
             )}
+          </div>
+
+          {/* Restaurant Status (Open / Closed) Switcher */}
+          <div className="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-0.5 text-center sm:text-right">
+              <label className="block text-base font-bold text-slate-900 dark:text-white flex items-center justify-center sm:justify-start gap-2">
+                <span>🔔 {lang === 'ar' ? 'حالة استقبال الطلبات (Restaurant Status)' : lang === 'tr' ? 'Restoran Durumu (Restaurant Status)' : 'Restaurant Order Status (Restaurant Status)'}</span>
+              </label>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {lang === 'ar' ? 'تحكم في إمكانية استقبال الطلبات عبر المنيو الرقمي (مفتوح / مغلق).' : 'Dijital menü üzerinden sipariş alımını kontrol edin (Açık / Kapalı).'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className={`text-xs font-black ${isOpen ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
+                {isOpen 
+                  ? (lang === 'ar' ? '🟢 مفتوح الآن ويستقبل طلبات' : lang === 'tr' ? '🟢 Açık - Sipariş Alıyor' : '🟢 Open - Taking Orders')
+                  : (lang === 'ar' ? '🔴 مغلق ولا يستقبل طلبات' : lang === 'tr' ? '🔴 Kapalı - Sipariş Almıyor' : '🔴 Closed - No Orders')
+                }
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-14 h-8 rounded-full p-1 transition-colors duration-300 focus:outline-none relative shadow-inner cursor-pointer bg-slate-250 dark:bg-slate-700"
+                style={{ backgroundColor: isOpen ? '#10b981' : undefined }}
+              >
+                <div
+                  className={`w-6 h-6 rounded-full bg-white shadow-md transition-all duration-300 absolute top-1 ${
+                    isOpen ? 'left-7' : 'left-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

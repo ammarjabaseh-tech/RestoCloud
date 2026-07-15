@@ -23,6 +23,7 @@ export interface Tenant {
   subscriptionPlan?: 'starter' | 'pro' | 'enterprise';
   subscriptionAmount?: number;
   subscriptionDate?: string;
+  isOpen?: boolean;
 }
 
 export interface Category {
