@@ -18,6 +18,7 @@ import {
   Upload,
   Image,
   ArrowRight,
+  ArrowLeft,
   Check,
   Sparkles,
   AlertCircle,
@@ -26,21 +27,218 @@ import {
   QrCode,
   Zap,
   HelpCircle,
-  MapPin
+  MapPin,
+  ChevronDown
 } from "lucide-react";
+
+const checkoutTranslations = {
+  ar: {
+    portalBadge: "بوابة العملاء وأصحاب المطاعم (SaaS Client Portal)",
+    portalTitle: "حجز مطعمك على دومينك الخاص وتفعيل الاشتراكات",
+    portalDesc: "أنشئ مطعمك السحابي، اختر باقتك المفضلة، وادفع إلكترونياً بأمان عبر مدى أو فيزا. سيتم حجز دومينك الخاص (yourname.restocloud.app) ومراجعة طلبك من قبل إدارة المنصة لتفعليه فوراً.",
+    btnRegisterTab: "حجز مطعم جديد والاشتراك",
+    btnLoginTab: "تسجيل دخول أصحاب المطاعم",
+    step1Title: "بيانات المطعم والدومين",
+    step2Title: "اختيار باقة الاشتراك",
+    step3Title: "الدفع الإلكتروني",
+    step4Title: "تأكيد وتفعيل الحساب",
+    subdomainLabel: "النطاق الفرعي المطلوب للمطعم (Subdomain) *",
+    subdomainDesc: "سيكون هذا عنوان منيو زبائنك وموقع مطعمك الإلكتروني.",
+    subdomainPlaceholder: "my-restaurant",
+    subdomainTaken: "هذا الدومين الفرعي مستخدم بالفعل، يرجى اختيار دومين آخر",
+    subdomainAvailable: "النطاق متاح للتعيين!",
+    restaurantNameLabel: "اسم المطعم باللغة العربية *",
+    restaurantNamePlaceholder: "شاورما المذاق الأصيل",
+    phoneLabel: "رقم هاتف التواصل *",
+    addressLabel: "عنوان المركز الرئيسي للمطعم *",
+    addressPlaceholder: "الرياض، حي الملز، طريق صلاح الدين",
+    logoLabel: "شعار المطعم (Emoji أو صورة) *",
+    logoChooseFile: "أو اختر ملف شعار مخصص (PNG/JPG)",
+    logoThemeColor: "لون المظهر العام (Branding Theme Color) *",
+    logoCurrency: "عملة التعامل الافتراضية *",
+    btnNext: "المتابعة للخطوة التالية",
+    planChooseTitle: "اختر باقة الاشتراك المناسبة لمطعمك",
+    planChooseDesc: "جميع الباقات تشمل تجربة مجانية لمدة 7 أيام. يمكنك الإلغاء أو الترقية في أي وقت.",
+    btnPlanNext: "المتابعة لبيانات الدفع",
+    btnPrev: "العودة للخطوة السابقة",
+    billingTitle: "تفاصيل الفاتورة والدفع الآمن",
+    billingStarter: "فاتورة حجز مطعم جديد واشتراك سحابي",
+    billingPrice: "قيمة الباقة:",
+    billingTax: "ضريبة القيمة المضافة (15%):",
+    billingTotal: "المبلغ الإجمالي المستحق:",
+    cardPaymentTitle: "الدفع الإلكتروني عبر بطاقة الائتمان أو مدى",
+    cardHolderName: "اسم حامل البطاقة *",
+    cardHolderPlaceholder: "أحمد بن عبد الله",
+    cardNumber: "رقم البطاقة (16 رقم) *",
+    cardExpiry: "تاريخ الانتهاء *",
+    btnPay: "تأكيد الدفع والاشتراك الآن",
+    btnPaying: "جاري معالجة الدفع بأمان...",
+    successTitle: "تهانينا! تم إنشاء مطعمك بنجاح 🎉",
+    successDesc: "لقد حجزنا نطاقك المخصص وجاري تشغيل سيرفر مطعمك الآن على العنوان التالي:",
+    successCta: "الدخول للوحة التحكم ونقاط البيع الخاصة بمطعمك 🚀",
+    loginTitle: "تسجيل الدخول للوحة تحكم مطعمك",
+    loginDesc: "أدخل اسم النطاق الفرعي (Subdomain) أو البريد الإلكتروني لصاحب المطعم مع كلمة المرور للدخول.",
+    loginInputLabel: "اسم الدومين الفرعي أو البريد الإلكتروني *",
+    loginInputPlaceholder: "my-restaurant أو mail@domain.com",
+    loginPasswordLabel: "كلمة المرور *",
+    loginBtn: "دخول النظام",
+    loginErr: "البريد الإلكتروني (أو النطاق) أو كلمة المرور غير صحيحة.",
+    suspendedErr: "⚠️ هذا المطعم موقوف مؤقتاً من قبل الإدارة العامة. يرجى التواصل مع الدعم الفني.",
+    pendingApproveTitle: "⏳ بانتظار موافقة الإدارة وتفعيل الدفع",
+    pendingApproveDesc: "مطعمك مسجل بالفعل ولكن بانتظار تفعيل الدفع أو مراجعة الطلب من الإدارة. يرجى الانتظار أو مراجعة الدعم.",
+    ownerNameLabel: "اسم مالك المطعم / المدير المسؤول *",
+    ownerNamePlaceholder: "أحمد بن عبد الله",
+    ownerEmailLabel: "البريد الإلكتروني للمالك (يستخدم لتسجيل الدخول) *",
+    ownerEmailPlaceholder: "owner@restocloud.app",
+    ownerPasswordLabel: "كلمة مرور المالك (لحماية حسابك) *",
+    ownerPasswordPlaceholder: "أدخل كلمة مرور قوية",
+    fillAllAlert: "يرجى تعبئة جميع الحقول المطلوبة للمتابعة",
+    connectErr: "تعذر الاتصال بالخادم لإتمام العملية"
+  },
+  en: {
+    portalBadge: "SaaS Client Portal",
+    portalTitle: "Reserve Your Restaurant Subdomain & Activate Subscriptions",
+    portalDesc: "Create your cloud restaurant, choose your plan, and pay securely via Mada or Visa. Your subdomain (yourname.restocloud.app) will be reserved and activated immediately.",
+    btnRegisterTab: "Book New Restaurant & Subscribe",
+    btnLoginTab: "Restaurant Owner Login",
+    step1Title: "Restaurant Info & Subdomain",
+    step2Title: "Select Subscription Plan",
+    step3Title: "Electronic Payment",
+    step4Title: "Confirm & Activate",
+    subdomainLabel: "Requested Subdomain for Restaurant *",
+    subdomainDesc: "This will be the web address for your customer menu and POS dashboard.",
+    subdomainPlaceholder: "my-restaurant",
+    subdomainTaken: "This subdomain is already taken, please choose another name",
+    subdomainAvailable: "Subdomain is available for reservation!",
+    restaurantNameLabel: "Restaurant Name *",
+    restaurantNamePlaceholder: "Original Taste Gourmet",
+    phoneLabel: "Contact Phone Number *",
+    addressLabel: "Headquarters Address *",
+    addressPlaceholder: "Riyadh, Al Malaz, Salah Al Din Rd",
+    logoLabel: "Restaurant Logo (Emoji or Image) *",
+    logoChooseFile: "Or choose a custom logo file (PNG/JPG)",
+    logoThemeColor: "Branding Theme Color *",
+    logoCurrency: "Default Currency *",
+    btnNext: "Proceed to Next Step",
+    planChooseTitle: "Choose the Perfect Plan for Your Venue",
+    planChooseDesc: "All packages include a 7-day free trial. Cancel or upgrade anytime.",
+    btnPlanNext: "Proceed to Payment",
+    btnPrev: "Back to Previous Step",
+    billingTitle: "Invoice Details & Secure Payment",
+    billingStarter: "Invoice for cloud restaurant reservation and setup",
+    billingPrice: "Plan price:",
+    billingTax: "VAT (15%):",
+    billingTotal: "Total Due:",
+    cardPaymentTitle: "Pay Securely with Credit Card or Mada",
+    cardHolderName: "Cardholder Name *",
+    cardHolderPlaceholder: "John Doe",
+    cardNumber: "Card Number (16 digits) *",
+    cardExpiry: "Expiry Date *",
+    btnPay: "Confirm Payment & Subscribe Now",
+    btnPaying: "Processing secure payment...",
+    successTitle: "Congratulations! Restaurant Setup Completed 🎉",
+    successDesc: "We have reserved your domain name and your cloud restaurant is live at:",
+    successCta: "Go to Control Panel & POS Dashboard 🚀",
+    loginTitle: "Log In to Your Restaurant Panel",
+    loginDesc: "Enter your restaurant subdomain name or owner email and password to log in.",
+    loginInputLabel: "Subdomain Name or Owner Email *",
+    loginInputPlaceholder: "my-restaurant or mail@domain.com",
+    loginPasswordLabel: "Password *",
+    loginBtn: "Enter Dashboard",
+    loginErr: "Incorrect email, subdomain or password.",
+    suspendedErr: "⚠️ This restaurant is suspended by the Platform Administrator. Contact support.",
+    pendingApproveTitle: "⏳ Awaiting Approval & Activation",
+    pendingApproveDesc: "Your restaurant is registered but awaits payment verification or management approval. Please contact support.",
+    ownerNameLabel: "Restaurant Owner / Account Manager *",
+    ownerNamePlaceholder: "John Doe",
+    ownerEmailLabel: "Owner Email (Used for Login) *",
+    ownerEmailPlaceholder: "owner@restocloud.app",
+    ownerPasswordLabel: "Owner Password (To protect your account) *",
+    ownerPasswordPlaceholder: "Enter a strong password",
+    fillAllAlert: "Please fill out all required fields to proceed",
+    connectErr: "Cannot connect to server to complete operation"
+  },
+  tr: {
+    portalBadge: "SaaS Müşteri Paneli",
+    portalTitle: "Restoranınızı Rezerv Edin & Aboneliği Etkinleştirin",
+    portalDesc: "Bulut restoranınızı oluşturun, paketinizi seçin ve Mada/Visa ile güvenle ödeyin. Alt alan adınız (adiniz.restocloud.app) ayrılacak ve onay sonrası hemen kurulacaktır.",
+    btnRegisterTab: "Yeni Restoran Kaydı & Ödeme",
+    btnLoginTab: "Restoran Sahibi Girişi",
+    step1Title: "Restoran Bilgileri & Domain",
+    step2Title: "Abonelik Paketi Seçimi",
+    step3Title: "Elektronik Ödeme",
+    step4Title: "Doğrula & Etkinleştir",
+    subdomainLabel: "Talep Edilen Restoran Alt Alan Adı (Subdomain) *",
+    subdomainDesc: "Bu adres, müşterilerinizin dijital QR menüsü ve POS panel adresi olacaktır.",
+    subdomainPlaceholder: "lezzet-sarayi",
+    subdomainTaken: "Bu alt alan adı zaten kullanımda, lütfen başka bir isim seçin",
+    subdomainAvailable: "Alan adı müsait!",
+    restaurantNameLabel: "Restoran Adı *",
+    restaurantNamePlaceholder: "Lezzet Sarayı Izgara",
+    phoneLabel: "İletişim Telefon Numarası *",
+    addressLabel: "Merkez Restoran Adresi *",
+    addressPlaceholder: "İstanbul, Kadıköy, Merkez Cad.",
+    logoLabel: "Restoran Logosu (Emoji veya Görsel) *",
+    logoChooseFile: "Veya özel logo yükleyin (PNG/JPG)",
+    logoThemeColor: "Kurumsal Tema Rengi *",
+    logoCurrency: "Varsayılan Para Birimi *",
+    btnNext: "Sonraki Adıma Geç",
+    planChooseTitle: "Restoranınız için En Uygun Paketi Seçin",
+    planChooseDesc: "Tüm paketler 7 günlük ücretsiz deneme sürümünü içerir. İstediğiniz zaman iptal edin veya yükseltin.",
+    btnPlanNext: "Ödeme Bilgilerine Geç",
+    btnPrev: "Önceki Adıma Dön",
+    billingTitle: "Fatura Detayları & Güvenli Ödeme",
+    billingStarter: "Yeni restoran bulut kurulumu ve faturalandırması",
+    billingPrice: "Paket ücreti:",
+    billingTax: "KDV (15%):",
+    billingTotal: "Toplam Tutar:",
+    cardPaymentTitle: "Kredi Kartı veya Banka Kartı ile Güvenli Ödeme",
+    cardHolderName: "Kart Üzerindeki İsim *",
+    cardHolderPlaceholder: "Ahmet Yılmaz",
+    cardNumber: "Kart Numarası (16 Hane) *",
+    cardExpiry: "Son Kullanma Tarihi *",
+    btnPay: "Ödemeyi Onayla & Abone Ol",
+    btnPaying: "Güvenli ödeme işleniyor...",
+    successTitle: "Tebrikler! Restoran Kurulumu Tamamlandı 🎉",
+    successDesc: "Özel alan adınız başarıyla ayrıldı ve restoranınız şu adreste yayında:",
+    successCta: "Yönetim Paneline ve POS Kasasına Git 🚀",
+    loginTitle: "Restoran Paneline Giriş Yapın",
+    loginDesc: "Giriş yapmak için alt alan adınızı (subdomain) veya sahibi e-posta adresini ve şifrenizi girin.",
+    loginInputLabel: "Domain Adı veya Sahibi E-postası *",
+    loginInputPlaceholder: "restoran-adi veya eposta@domain.com",
+    loginPasswordLabel: "Şifre *",
+    loginBtn: "Sisteme Giriş Yap",
+    loginErr: "E-posta, alan adı veya şifre hatalı.",
+    suspendedErr: "⚠️ Bu restoran Genel Yönetim tarafından askıya alınmıştır. Lütfen destekle iletişime geçin.",
+    pendingApproveTitle: "⏳ Onay ve Ödeme Etkinleştirme Bekleniyor",
+    pendingApproveDesc: "Restoranınız kayıtlı ancak ödeme onayı veya yönetim onayı bekleniyor. Lütfen destekle irtibat kurun.",
+    ownerNameLabel: "Restoran Sahibi / Sorumlu Yönetici *",
+    ownerNamePlaceholder: "Ahmet Yılmaz",
+    ownerEmailLabel: "Sahibinin E-posta Adresi (Giriş için kullanılır) *",
+    ownerEmailPlaceholder: "sahip@restocloud.app",
+    ownerPasswordLabel: "Yönetici Şifresi (Hesap koruması için) *",
+    ownerPasswordPlaceholder: "Güçlü bir şifre girin",
+    fillAllAlert: "Lütfen devam etmek için tüm zorunlu alanları doldurun",
+    connectErr: "İşlemi tamamlamak için sunucuya bağlanılamadı"
+  }
+};
 
 interface TenantLoginCheckoutViewProps {
   tenants: Tenant[];
   onTenantCreated: (newTenant: Tenant) => void;
   onSelectTenant: (tenant: Tenant) => void;
   onNavigateToSaaSPortal: () => void;
+  lang: 'ar' | 'en' | 'tr';
+  onLangChange?: (lang: 'ar' | 'en' | 'tr') => void;
 }
 
 export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = ({
   tenants,
   onTenantCreated,
   onSelectTenant,
-  onNavigateToSaaSPortal
+  onNavigateToSaaSPortal,
+  lang,
+  onLangChange
 }) => {
   const [activeTab, setActiveTab] = useState<"register" | "login">("register");
   
@@ -56,6 +254,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   const [logo, setLogo] = useState("🍽️");
   const [themeColor, setThemeColor] = useState<ThemeColor>("emerald");
   const [currency, setCurrency] = useState("ر.س");
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
   
   // Plan Selection
   const [selectedPlan, setSelectedPlan] = useState<"starter" | "pro" | "enterprise">("pro");
@@ -75,64 +274,104 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   const [loginError, setLoginError] = useState("");
   const [loggedInPendingTenant, setLoggedInPendingTenant] = useState<Tenant | null>(null);
 
+  const t = checkoutTranslations[lang];
+
   // Subdomain Validation
   const cleanSubdomain = subdomain.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const isSubdomainTaken = tenants.some(t => t.subdomain.toLowerCase() === cleanSubdomain && cleanSubdomain !== "");
+  const isSubdomainTaken = tenants.some(tenantObj => tenantObj.subdomain.toLowerCase() === cleanSubdomain && cleanSubdomain !== "");
 
   const emojis = ["🍽️", "🥙", "🍔", "🍕", "☕", "🍗", "🌮", "🍣", "🥗", "🍰", "🍩", "🍜", "🦞", "🥩", "🥐", "👑", "🔥", "🌟", "🍷", "🍹", "🍦", "🧁"];
   
   const colors: { id: ThemeColor; name: string; bg: string }[] = [
-    { id: "emerald", name: "زمردي", bg: "bg-emerald-600" },
-    { id: "amber", name: "ذهبي", bg: "bg-amber-600" },
-    { id: "rose", name: "وردي", bg: "bg-rose-600" },
-    { id: "indigo", name: "نيلي", bg: "bg-indigo-600" },
-    { id: "violet", name: "بنفسجي", bg: "bg-violet-600" },
-    { id: "slate", name: "فحمي", bg: "bg-slate-700" },
-    { id: "cyan", name: "سماوي", bg: "bg-cyan-600" },
-    { id: "orange", name: "برتقالي", bg: "bg-orange-600" }
+    { id: "emerald", name: lang === 'ar' ? "زمردي" : lang === 'tr' ? "Zümrüt" : "Emerald", bg: "bg-emerald-600" },
+    { id: "amber", name: lang === 'ar' ? "ذهبي" : lang === 'tr' ? "Altın" : "Amber", bg: "bg-amber-600" },
+    { id: "rose", name: lang === 'ar' ? "وردي" : lang === 'tr' ? "Gül" : "Rose", bg: "bg-rose-600" },
+    { id: "indigo", name: lang === 'ar' ? "نيلي" : lang === 'tr' ? "İndigo" : "Indigo", bg: "bg-indigo-600" },
+    { id: "violet", name: lang === 'ar' ? "بنفسجي" : lang === 'tr' ? "Menekşe" : "Violet", bg: "bg-violet-600" },
+    { id: "slate", name: lang === 'ar' ? "فحمي" : lang === 'tr' ? "Kömür" : "Slate", bg: "bg-slate-700" },
+    { id: "cyan", name: lang === 'ar' ? "سماوي" : lang === 'tr' ? "Camgöbeği" : "Cyan", bg: "bg-cyan-600" },
+    { id: "orange", name: lang === 'ar' ? "برتقالي" : lang === 'tr' ? "Turuncu" : "Orange", bg: "bg-orange-600" }
   ];
 
   const plans = {
     starter: {
-      name: "باقة المنطلق (Starter)",
-      price: 199,
-      features: [
+      name: lang === 'ar' ? "باقة المنطلق (Starter)" : lang === 'tr' ? "Başlangıç Paketi (Starter)" : "Starter Plan",
+      price: lang === 'ar' ? 199 : lang === 'tr' ? 1490 : 59,
+      features: lang === 'ar' ? [
         "منيو إلكتروني رقمي مع باركود QR",
         "حتى 500 طلب شهرياً",
         "استضافة على نطاق فرعي (*.restocloud.app)",
         "لوحة تحكم أساسية للمنتجات والأقسام",
         "دعم فني عبر البريد الإلكتروني"
+      ] : lang === 'tr' ? [
+        "Dijital QR Kod Menü Standı",
+        "Aylık 500 siparişe kadar",
+        "Alt alan adı üzerinde barındırma (*.restocloud.app)",
+        "Ürünler ve kategoriler için temel panel",
+        "E-posta ile teknik destek"
+      ] : [
+        "Digital QR code menu with tables standee",
+        "Up to 500 orders monthly",
+        "Hosting on subdomain (*.restocloud.app)",
+        "Basic control panel for products & categories",
+        "Email customer support"
       ],
-      badge: "مناسب للبوفيهات والكافيهات الصغيرة",
+      badge: lang === 'ar' ? "مناسب للبوفيهات والكافيهات الصغيرة" : lang === 'tr' ? "Küçük kafeler ve büfeler için ideal" : "Best for small coffee spots & startups",
       color: "from-blue-500 to-cyan-600",
       popular: false
     },
     pro: {
-      name: "باقة المحترف (Pro)",
-      price: 399,
-      features: [
+      name: lang === 'ar' ? "باقة المحترف (Pro)" : lang === 'tr' ? "Profesyonel Paket (Pro)" : "Pro Plan",
+      price: lang === 'ar' ? 399 : lang === 'tr' ? 2990 : 119,
+      features: lang === 'ar' ? [
         "نظام كاشير ونقطة بيع متكاملة (POS)",
         "طلبات وفواتير غير محدودة",
         "إدارة الطاولات الصالات والصيانة",
         "ستوديو طباعة باركود وستاندات الطاولات",
         "تقارير المبيعات والأرباح اليومية",
         "دعم فني سريع عبر الواتساب"
+      ] : lang === 'tr' ? [
+        "Gelişmiş POS Kasa Terminali",
+        "Sınırsız sipariş ve faturalandırma",
+        "Salon ve masa düzeni yönetimi",
+        "Masa standı QR barkod tasarım stüdyosu",
+        "Günlük satış ve kâr analiz raporları",
+        "WhatsApp üzerinden hızlı teknik destek"
+      ] : [
+        "Cashier POS terminal integration",
+        "Unlimited orders & invoicing",
+        "Tables, halls & maintenance layout",
+        "Table QR stands & barcode designer studio",
+        "Daily sales & profit analytics reporting",
+        "Fast WhatsApp customer support"
       ],
-      badge: "🔥 الباقة الأكثر طلباً للمطاعم",
+      badge: lang === 'ar' ? "🔥 الباقة الأكثر طلباً للمطاعم" : lang === 'tr' ? "🔥 En çok tercih edilen restoran paketi" : "🔥 Most popular for active restaurants",
       color: "from-emerald-500 to-teal-600",
       popular: true
     },
     enterprise: {
-      name: "باقة الشركات (Enterprise)",
-      price: 799,
-      features: [
+      name: lang === 'ar' ? "باقة الشركات (Enterprise)" : lang === 'tr' ? "Kurumsal Paket (Enterprise)" : "Enterprise Plan",
+      price: lang === 'ar' ? 799 : lang === 'tr' ? 5990 : 239,
+      features: lang === 'ar' ? [
         "جميع مميزات باقة المحترف (Pro)",
         "مساعد الذكاء الاصطناعي AI لتقليل التكاليف",
         "تصدير قواطع بيانات PostgreSQL وسيرفرات VPS",
         "ربط بوابات دفع مخصصة ومحاسبة",
         "مدير حساب مخصص ودعم 24/7 VIP"
+      ] : lang === 'tr' ? [
+        "Profesyonel (Pro) paketinin tüm özellikleri",
+        "Yapay zeka asistanı ile maliyet düşürme",
+        "PostgreSQL veri tabanı dışa aktarma & VPS sunucu",
+        "Özel ödeme geçitleri entegrasyonu",
+        "Size özel hesap temsilcisi & 7/24 VIP Destek"
+      ] : [
+        "All features of the Pro plan",
+        "AI assistant insights for cost reduction",
+        "Export PostgreSQL database to your own VPS",
+        "Custom payment gateways & accounting sync",
+        "Dedicated account manager & 24/7 VIP support"
       ],
-      badge: "للسلاسل والمطاعم الكبرى",
+      badge: lang === 'ar' ? "للسلاسل والمطاعم الكبرى" : lang === 'tr' ? "Büyük zincir restoranlar için" : "For chains & large restaurants",
       color: "from-purple-600 to-indigo-600",
       popular: false
     }
@@ -142,7 +381,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert("حجم الصورة كبير جداً، يرجى اختيار صورة أقل من 2 ميجابايت.");
+        alert(lang === 'ar' ? "حجم الصورة كبير جداً، يرجى اختيار صورة أقل من 2 ميجابايت." : "Image size too large, please select an image under 2MB.");
         return;
       }
       const reader = new FileReader();
@@ -158,11 +397,11 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   const handleProceedToPayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameAr || !cleanSubdomain || !phone || !address || !ownerName || !ownerEmail || !password) {
-      alert("يرجى تعبئة جميع الحقول المطلوبة للمتابعة");
+      alert(t.fillAllAlert);
       return;
     }
     if (isSubdomainTaken) {
-      alert("هذا الدومين الفرعي مستخدم بالفعل، يرجى اختيار دومين آخر");
+      alert(t.subdomainTaken);
       return;
     }
     setStep(3);
@@ -172,7 +411,6 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
     e.preventDefault();
     setIsProcessingPayment(true);
 
-    // Simulate secure payment processing via Mada/Visa/Apple Pay
     setTimeout(async () => {
       try {
         const selectedPlanObj = plans[selectedPlan];
@@ -187,8 +425,8 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
             phone,
             address,
             ownerName,
-            slogan: "مطعم مسجل حديثاً عبر بوابة الاشتراك والدفع",
-            status: "trial", // Activated free trial on signup
+            slogan: lang === 'ar' ? "مطعم مسجل حديثاً عبر بوابة الاشتراك والدفع" : "New restaurant registered via Portal",
+            status: "trial", 
             ownerEmail,
             password,
             subscriptionPlan: selectedPlan,
@@ -201,7 +439,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
 
         if (!res.ok) {
           const err = await res.json();
-          alert(err.error || "حدث خطأ أثناء حجز المطعم");
+          alert(err.error || (lang === 'ar' ? "حدث خطأ أثناء حجز المطعم" : "Error booking restaurant"));
           setIsProcessingPayment(false);
           return;
         }
@@ -211,7 +449,6 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
         setCreatedTenantResult(newTenant);
         setStep(4);
         
-        // Trigger celebratory confetti
         confetti({
           particleCount: 100,
           spread: 70,
@@ -220,7 +457,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
 
         onTenantCreated(newTenant);
       } catch (err) {
-        alert("تعذر الاتصال بالخادم لإتمام العملية");
+        alert(t.connectErr);
         setIsProcessingPayment(false);
       }
     }, 1800);
@@ -232,35 +469,33 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
     setLoggedInPendingTenant(null);
 
     if (!loginIdentifier || !loginPassword) {
-      setLoginError("يرجى إدخال البريد الإلكتروني (أو النطاق) وكلمة المرور.");
+      setLoginError(lang === 'ar' ? "يرجى إدخال البريد الإلكتروني (أو النطاق) وكلمة المرور." : "Please enter subdomain or email and password.");
       return;
     }
 
     const cleanId = loginIdentifier.trim().toLowerCase();
     const found = tenants.find(
-      t => t.subdomain.toLowerCase() === cleanId || 
-           (t.ownerEmail && t.ownerEmail.toLowerCase() === cleanId) ||
-           t.ownerName.toLowerCase().includes(cleanId) ||
-           t.nameAr.toLowerCase().includes(cleanId)
+      tenantObj => tenantObj.subdomain.toLowerCase() === cleanId || 
+            (tenantObj.ownerEmail && tenantObj.ownerEmail.toLowerCase() === cleanId) ||
+            tenantObj.ownerName.toLowerCase().includes(cleanId) ||
+            tenantObj.nameAr.toLowerCase().includes(cleanId)
     );
 
     if (!found) {
-      setLoginError("لم يتم العثور على مطعم مسجل بهذا النطاق أو البريد الإلكتروني.");
+      setLoginError(t.loginErr);
       return;
     }
 
-    // Verify status
     if (found.status === "pending_approval" || found.status === "pending_payment") {
       setLoggedInPendingTenant(found);
       return;
     }
 
     if (found.status === "suspended") {
-      setLoginError("⚠️ هذا المطعم موقوف مؤقتاً من قبل الإدارة العامة. يرجى التواصل مع الدعم الفني.");
+      setLoginError(t.suspendedErr);
       return;
     }
 
-    // Active -> Sign in and switch to tenant!
     onSelectTenant(found);
   };
 
@@ -269,22 +504,80 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   const totalWithVat = Number((currentPlanObj.price + vatAmount).toFixed(2));
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20 animate-in fade-in duration-300" dir="rtl">
+    <div className="max-w-5xl mx-auto space-y-8 pb-20 animate-in fade-in duration-300" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       {/* Top Welcome Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         
+        {/* Floating Language dropdown inside checkout top left */}
+        {onLangChange && (
+          <div className={`absolute top-4 ${lang === 'ar' ? 'left-4' : 'right-4'} z-20`}>
+            <button
+              type="button"
+              onClick={() => setShowLangDropdown(!showLangDropdown)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all border border-white/20 bg-white/5 hover:bg-white/10 text-white cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>
+                {lang === 'ar' ? '🇸🇦 العربية' : lang === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English'}
+              </span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
+            </button>
+
+            {showLangDropdown && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowLangDropdown(false)}
+                />
+                <div className={`absolute mt-2 w-32 bg-slate-900 rounded-xl border border-white/10 py-1 z-20 text-xs ${lang === 'ar' ? 'left-0 text-right' : 'right-0 text-left'}`}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLangChange('ar');
+                      setShowLangDropdown(false);
+                    }}
+                    className="w-full px-3 py-1.5 text-slate-300 hover:bg-slate-800 text-right cursor-pointer"
+                  >
+                    🇸🇦 العربية
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLangChange('en');
+                      setShowLangDropdown(false);
+                    }}
+                    className="w-full px-3 py-1.5 text-slate-300 hover:bg-slate-800 text-left cursor-pointer"
+                  >
+                    🇬🇧 English
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLangChange('tr');
+                      setShowLangDropdown(false);
+                    }}
+                    className="w-full px-3 py-1.5 text-slate-300 hover:bg-slate-800 text-left cursor-pointer"
+                  >
+                    🇹🇷 Türkçe
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>بوابة العملاء وأصحاب المطاعم (SaaS Client Portal)</span>
+            <span>{t.portalBadge}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
-            حجز مطعمك على دومينك الخاص وتفعيل الاشتراكات
+            {t.portalTitle}
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-            أنشئ مطعمك السحابي، اختر باقتك المفضلة، وادفع إلكترونياً بأمان عبر مدى أو فيزا. سيتم حجز دومينك الخاص (<span className="font-mono text-emerald-400">yourname.restocloud.app</span>) ومراجعة طلبك من قبل إدارة المنصة لتفعليه فوراً.
+            {t.portalDesc}
           </p>
         </div>
 
@@ -294,21 +587,21 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
               setActiveTab("register");
               setStep(1);
             }}
-            className={`px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm ${
+            className={`px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
               activeTab === "register" ? "bg-emerald-500 text-white shadow-emerald-500/30 scale-105 ring-2 ring-white/20" : "bg-white/10 hover:bg-white/20 text-white"
             }`}
           >
             <Store className="w-4 h-4" />
-            <span>حجز مطعم جديد والاشتراك</span>
+            <span>{t.btnRegisterTab}</span>
           </button>
           <button
             onClick={() => setActiveTab("login")}
-            className={`px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm ${
+            className={`px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
               activeTab === "login" ? "bg-indigo-600 text-white shadow-indigo-500/30 scale-105 ring-2 ring-white/20" : "bg-white/10 hover:bg-white/20 text-white"
             }`}
           >
             <Lock className="w-4 h-4" />
-            <span>تسجيل دخول أصحاب المطاعم</span>
+            <span>{t.btnLoginTab}</span>
           </button>
         </div>
       </div>
@@ -325,7 +618,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${step >= 1 ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20" : "bg-slate-200 text-slate-600"}`}>
                     {step > 1 ? <Check className="w-4 h-4" /> : "1"}
                   </div>
-                  <span className="text-xs sm:text-sm">بيانات المطعم والدومين</span>
+                  <span className="text-xs sm:text-sm">{t.step1Title}</span>
                 </div>
                 
                 <div className={`h-1 flex-1 mx-4 rounded ${step >= 2 ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"}`} />
@@ -334,7 +627,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${step >= 2 ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20" : "bg-slate-200 text-slate-600"}`}>
                     {step > 2 ? <Check className="w-4 h-4" /> : "2"}
                   </div>
-                  <span className="text-xs sm:text-sm">اختيار باقة الاشتراك</span>
+                  <span className="text-xs sm:text-sm">{t.step2Title}</span>
                 </div>
 
                 <div className={`h-1 flex-1 mx-4 rounded ${step >= 3 ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"}`} />
@@ -343,730 +636,582 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${step >= 3 ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20" : "bg-slate-200 text-slate-600"}`}>
                     3
                   </div>
-                  <span className="text-xs sm:text-sm">الدفع الإلكتروني</span>
+                  <span className="text-xs sm:text-sm">{t.step3Title}</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* STEP 1: RESTAURANT & DOMAIN DETAILS FORM */}
+          {/* STEP 1: Restaurant Info & Owner Details */}
           {step === 1 && (
-            <form onSubmit={handleProceedToPayment} className="space-y-6 max-w-3xl mx-auto">
-              <div className="text-center space-y-1">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">الخطوة 1: أدخل بيانات مطعمك واحجز دومينك الخاص</h2>
-                <p className="text-xs text-slate-500">سيكون الدومين الخاص بك متاحاً فوراً لعملائك لطلب الطعام وعرض المنيو الرقمي</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+            <form onSubmit={handleProceedToPayment} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Right Side: Restaurant Brand details */}
+                <div className="space-y-5">
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white border-b pb-2 flex items-center gap-2">
                     <Store className="w-4 h-4 text-emerald-600" />
-                    <span>اسم المطعم باللغة العربية *</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="مثال: مطعم بيتزا رويال"
-                    value={nameAr}
-                    onChange={(e) => setNameAr(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                    <Globe className="w-4 h-4 text-indigo-600" />
-                    <span>النطاق الفرعي (Subdomain) بالإنجليزية *</span>
-                  </label>
-                  <div className="relative flex items-center">
-                    <input
-                      type="text"
-                      required
-                      placeholder="pizzaroyal"
-                      value={subdomain}
-                      onChange={(e) => setSubdomain(e.target.value)}
-                      className={`w-full pl-28 pr-4 py-3 rounded-xl border text-sm font-mono font-bold focus:outline-none ${
-                        isSubdomainTaken 
-                          ? "border-rose-500 bg-rose-50/50 text-rose-900 dark:text-rose-200" 
-                          : cleanSubdomain ? "border-emerald-500 bg-emerald-50/30 text-emerald-900 dark:text-emerald-200" : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
-                      }`}
-                      dir="ltr"
-                    />
-                    <span className="absolute left-3 text-xs font-mono text-slate-400 pointer-events-none">.restocloud.app</span>
-                  </div>
-                  {cleanSubdomain && (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold">
-                      {isSubdomainTaken ? (
-                        <span className="text-rose-600 flex items-center gap-1">❌ هذا الدومين محجوز مسبقاً، اختر اسماً آخر</span>
-                      ) : (
-                        <span className="text-emerald-600 flex items-center gap-1">✅ دومين رائع ومتاح للحجز الفوري! (https://{cleanSubdomain}.restocloud.app)</span>
-                      )}
+                    <span>{lang === 'ar' ? 'تفاصيل هوية المطعم' : 'Restaurant Brand Details'}</span>
+                  </h3>
+                  
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.subdomainLabel}</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        value={subdomain}
+                        onChange={(e) => setSubdomain(e.target.value)}
+                        placeholder={t.subdomainPlaceholder}
+                        className={`w-full py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono font-bold ${lang === 'ar' ? 'pl-24 pr-4 text-left' : 'pr-24 pl-4 text-left'}`}
+                      />
+                      <span className={`absolute top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 font-mono ${lang === 'ar' ? 'left-4' : 'right-4'}`}>
+                        .restocloud.app
+                      </span>
                     </div>
-                  )}
-                </div>
+                    <p className="text-[10px] text-slate-400 mt-1">{t.subdomainDesc}</p>
+                    {cleanSubdomain && (
+                      <div className="mt-1 text-xs font-bold">
+                        {isSubdomainTaken ? (
+                          <span className="text-rose-600">❌ {t.subdomainTaken}</span>
+                        ) : (
+                          <span className="text-emerald-600">✅ {t.subdomainAvailable}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                    <User className="w-4 h-4 text-slate-500" />
-                    <span>اسم مالك المطعم / المسؤول *</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="مثال: عبد الله السعيد"
-                    value={ownerName}
-                    onChange={(e) => setOwnerName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                    <Phone className="w-4 h-4 text-slate-500" />
-                    <span>رقم الجوال (للتواصل وإرسال الإشعارات) *</span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="0500000000"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    dir="ltr"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-slate-500" />
-                      <span>عنوان المطعم بالتفصيل *</span>
-                    </label>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.restaurantNameLabel}</label>
                     <input
                       type="text"
                       required
-                      placeholder="مثال: الرياض، حي العليا، طريق الملك فهد"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      value={nameAr}
+                      onChange={(e) => setNameAr(e.target.value)}
+                      placeholder={t.restaurantNamePlaceholder}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-semibold"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                      <DollarSign className="w-4 h-4 text-emerald-600" />
-                      <span>البلد والعملة الافتراضية *</span>
-                    </label>
-                    <select
-                      value={currency}
-                      onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="ر.س">المملكة العربية السعودية (ر.س)</option>
-                      <option value="د.إ">الإمارات العربية المتحدة (د.إ)</option>
-                      <option value="د.ك">الكويت (د.ك)</option>
-                      <option value="ر.ق">قطر (ر.ق)</option>
-                      <option value="د.ب">البحرين (د.ب)</option>
-                      <option value="ر.ع">سلطنة عمان (ر.ع)</option>
-                      <option value="ج.م">جمهورية مصر العربية (ج.م)</option>
-                      <option value="د.أ">المملكة الأردنية الهاشمية (د.أ)</option>
-                      <option value="د.ع">العراق (د.ع)</option>
-                      <option value="$">الولايات المتحدة / عملة دولية ($)</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.phoneLabel}</label>
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="05xxxxxxx"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-left font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.logoCurrency}</label>
+                      <select
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold"
+                      >
+                        <option value="ر.س">ر.س (SAR)</option>
+                        <option value="₺">₺ (TRY)</option>
+                        <option value="$">$ (USD)</option>
+                        <option value="€">€ (EUR)</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                    <Mail className="w-4 h-4 text-slate-500" />
-                    <span>البريد الإلكتروني لتسجيل الدخول *</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="admin@pizzaroyal.com"
-                    value={ownerEmail}
-                    onChange={(e) => setOwnerEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                    <Key className="w-4 h-4 text-slate-500" />
-                    <span>كلمة المرور (لحساب صاحب المطعم) *</span>
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    dir="ltr"
-                  />
-                </div>
-              </div>
-
-              {/* Logo Selection Box */}
-              <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <Image className="w-4 h-4 text-emerald-600" />
-                      <span>شعار المطعم (Logo Options)</span>
-                    </label>
-                    <p className="text-[11px] text-slate-500 mt-0.5">اختر رمز تعبيري أو ارفع صورة شعارك الخاص.</p>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
-                    <span className="text-xs text-slate-500 font-bold">المعاينة:</span>
-                    <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-700 border flex items-center justify-center text-lg overflow-hidden">
-                      <RestaurantLogo logo={logo} />
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.addressLabel}</label>
+                    <div className="relative">
+                      <MapPin className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400`} />
+                      <input
+                        type="text"
+                        required
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder={t.addressPlaceholder}
+                        className={`w-full py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-semibold ${lang === 'ar' ? 'pl-4 pr-10' : 'pr-4 pl-10'}`}
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                  <div className="sm:col-span-7">
+                {/* Left Side: Owner Profile Details */}
+                <div className="space-y-5">
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white border-b pb-2 flex items-center gap-2">
+                    <User className="w-4 h-4 text-emerald-600" />
+                    <span>{lang === 'ar' ? 'بيانات مالك ومسؤول المطعم' : 'Restaurant Owner Profile'}</span>
+                  </h3>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.ownerNameLabel}</label>
                     <input
                       type="text"
-                      placeholder="رابط صورة أو اكتب رمز (مثال: ✨ أو PR)"
-                      value={logo}
-                      onChange={(e) => setLogo(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs font-mono"
-                      dir="ltr"
+                      required
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      placeholder={t.ownerNamePlaceholder}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-semibold"
                     />
                   </div>
-                  <div className="sm:col-span-5 flex items-end">
-                    <label className="w-full cursor-pointer bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition-all text-center">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>📂 رفع صورة من جهازك</span>
-                      <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                    </label>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.ownerEmailLabel}</label>
+                    <input
+                      type="email"
+                      required
+                      value={ownerEmail}
+                      onChange={(e) => setOwnerEmail(e.target.value)}
+                      placeholder={t.ownerEmailPlaceholder}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-left font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.ownerPasswordLabel}</label>
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t.ownerPasswordPlaceholder}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                    />
+                  </div>
+
+                  {/* Logo Selector */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.logoLabel}</label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl border flex items-center justify-center text-2xl shrink-0">
+                        {logo.startsWith("data:") ? (
+                          <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-xl" />
+                        ) : (
+                          logo
+                        )}
+                      </div>
+                      
+                      <div className="flex-1">
+                        {/* Emojis selection banner */}
+                        <div className="flex gap-1 overflow-x-auto pb-1.5 max-w-[280px] no-scrollbar">
+                          {emojis.map((em) => (
+                            <button
+                              key={em}
+                              type="button"
+                              onClick={() => setLogo(em)}
+                              className="text-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors shrink-0"
+                            >
+                              {em}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <label className="block text-[10px] text-slate-500 hover:text-emerald-600 font-bold cursor-pointer">
+                          <span>{t.logoChooseFile}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Branding Color selector */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.logoThemeColor}</label>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {colors.map((c) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setThemeColor(c.id)}
+                          className={`w-6 h-6 rounded-full ${c.bg} hover:scale-110 transition-transform relative`}
+                          title={c.name}
+                        >
+                          {themeColor === c.id && (
+                            <Check className="w-3.5 h-3.5 text-white absolute inset-0 m-auto" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex flex-wrap gap-1.5 pt-1 max-h-28 overflow-y-auto">
-                  {emojis.map((em) => (
-                    <button
-                      key={em}
-                      type="button"
-                      onClick={() => setLogo(em)}
-                      className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-transform hover:scale-110 overflow-hidden shrink-0 ${
-                        logo === em ? "bg-emerald-500 text-white shadow-md ring-2 ring-emerald-600 scale-110" : "bg-white dark:bg-slate-700 hover:bg-slate-100 shadow-2xs"
-                      }`}
-                    >
-                      <RestaurantLogo logo={em} />
-                    </button>
-                  ))}
-                </div>
               </div>
 
-              {/* Theme Color Picker */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">اختر لون السمة البصرية الأساسي للمطعم</label>
-                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                  {colors.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setThemeColor(c.id)}
-                      className={`py-2 px-2 rounded-xl text-center font-bold text-xs transition-all flex flex-col items-center gap-1.5 border ${
-                        themeColor === c.id ? "border-slate-900 dark:border-white ring-2 ring-emerald-500 shadow-sm bg-slate-100 dark:bg-slate-800 scale-105" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50"
-                      }`}
-                    >
-                      <span className={`w-5 h-5 rounded-full ${c.bg} shadow-2xs`} />
-                      <span className="text-[11px] truncate w-full">{c.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4 flex justify-end">
+              <div className="pt-4 border-t flex justify-end">
                 <button
                   type="submit"
-                  disabled={isSubdomainTaken || !cleanSubdomain || !nameAr}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 transition-all"
+                  className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl hover:shadow-lg hover:shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>التالي: اختيار باقة الاشتراك</span>
-                  <ArrowRight className="w-4 h-4 rotate-180" />
+                  <span>{t.btnNext}</span>
+                  {lang === 'ar' ? <ArrowLeft className="w-4.5 h-4.5" /> : <ArrowRight className="w-4.5 h-4.5" />}
                 </button>
               </div>
             </form>
           )}
 
-          {/* STEP 2: CHOOSE SUBSCRIPTION PLAN */}
+          {/* STEP 2: Subscription Plans Selector */}
           {step === 2 && (
-            <div className="space-y-6 max-w-4xl mx-auto">
-              <div className="text-center space-y-1">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">الخطوة 2: اختر باقة الاشتراك الأنسب لاحتياجك</h2>
-                <p className="text-xs text-slate-500">اختر الباقة، يمكنك ترقية اشتراكك في أي وقت من لوحة التحكم بعد التفعيل</p>
+            <div className="space-y-6">
+              <div className="text-center max-w-xl mx-auto space-y-2">
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">{t.planChooseTitle}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t.planChooseDesc}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(Object.keys(plans) as Array<keyof typeof plans>).map((planKey) => {
+                {(Object.keys(plans) as Array<"starter" | "pro" | "enterprise">).map((planKey) => {
                   const p = plans[planKey];
                   const isSelected = selectedPlan === planKey;
                   return (
                     <div
                       key={planKey}
                       onClick={() => setSelectedPlan(planKey)}
-                      className={`relative cursor-pointer rounded-3xl p-6 border-2 transition-all flex flex-col justify-between ${
+                      className={`relative bg-slate-50 dark:bg-slate-950/40 rounded-3xl p-6 border-2 transition-all cursor-pointer flex flex-col ${
                         isSelected
-                          ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-xl scale-105 ring-2 ring-emerald-500/30"
-                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md"
+                          ? "border-emerald-500 bg-white dark:bg-slate-900 shadow-lg ring-2 ring-emerald-500/20"
+                          : "border-slate-200 dark:border-slate-800 hover:border-slate-400"
                       }`}
                     >
                       {p.popular && (
-                        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[11px] font-black px-3.5 py-1 rounded-full shadow-sm">
-                          🔥 الباقة الأكثر طلباً
+                        <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
+                          {p.badge}
                         </div>
                       )}
-
-                      <div className="space-y-4">
-                        <div className="space-y-1">
-                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">{p.badge}</span>
-                          <h3 className="text-lg font-black text-slate-900 dark:text-white">{p.name}</h3>
-                        </div>
-
-                        <div className="flex items-baseline gap-1 py-2 border-y border-slate-100 dark:border-slate-800">
-                          <span className="text-3xl font-black text-slate-900 dark:text-white">{p.price}</span>
-                          <span className="text-xs font-bold text-slate-500">ر.س / شهرياً</span>
-                        </div>
-
-                        <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                          {p.features.map((f, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
+                      
+                      <div className="mb-4">
+                        <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-350 px-2 py-0.5 rounded font-black uppercase">
+                          {planKey}
+                        </span>
+                        <h4 className="text-base font-black text-slate-950 dark:text-white mt-2">{p.name}</h4>
+                        <p className="text-[10px] text-slate-400 mt-1">{!p.popular ? p.badge : ""}</p>
                       </div>
 
-                      <div className="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
-                        <button
-                          type="button"
-                          className={`w-full py-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
-                            isSelected
-                              ? "bg-emerald-600 text-white shadow-md"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
-                          }`}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="w-4 h-4" />
-                              <span>الباقة المختارة حالياً</span>
-                            </>
-                          ) : (
-                            <span>اختيار هذه الباقة</span>
-                          )}
-                        </button>
+                      <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <span className="text-3xl font-black text-slate-950 dark:text-white">{p.price}</span>
+                        <span className="text-xs text-slate-400"> {currency} / {lang === 'ar' ? 'شهرياً' : lang === 'tr' ? 'aylık' : 'month'}</span>
+                      </div>
+
+                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 font-medium mb-6 flex-1">
+                        {p.features.map((feat, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <span className="text-xs font-bold text-slate-400">
+                          {isSelected ? (lang === 'ar' ? 'تم اختيار الباقة' : 'Selected') : (lang === 'ar' ? 'اضغط لاختيار الباقة' : 'Click to select')}
+                        </span>
+                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-300"}`}>
+                          {isSelected && <Check className="w-3 h-3 text-white" />}
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="pt-6 border-t flex justify-between">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-all w-full sm:w-auto text-center"
+                  className="px-6 py-3 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
                 >
-                  الرجوع للخطوة السابقة
+                  {t.btnPrev}
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(3)}
-                  className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 transition-all w-full sm:w-auto"
+                  className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl hover:shadow-lg hover:shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>التالي: الدفع الإلكتروني وتأكيد الحجز</span>
-                  <ArrowRight className="w-4 h-4 rotate-180" />
+                  <span>{t.btnPlanNext}</span>
+                  {lang === 'ar' ? <ArrowLeft className="w-4.5 h-4.5" /> : <ArrowRight className="w-4.5 h-4.5" />}
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 3: ONLINE PAYMENT CHECKOUT */}
+          {/* STEP 3: Invoice Summary & Payment processing */}
           {step === 3 && (
-            <form onSubmit={handleCompletePaymentAndSubscribe} className="space-y-6 max-w-3xl mx-auto">
-              <div className="text-center space-y-1">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
-                  <CreditCard className="w-5 h-5 text-emerald-600" />
-                  <span>الخطوة 3: إتمام الدفع الإلكتروني وحجز النطاق</span>
-                </h2>
-                <p className="text-xs text-slate-500">بوابة دفع مشفرة وآمنة 100% متوافقة مع معايير البنك المركزي ومؤسسة النقد</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                
-                {/* Left: Invoice Summary */}
-                <div className="md:col-span-5 bg-slate-50 dark:bg-slate-800/60 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-4 h-fit">
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <Store className="w-4 h-4 text-indigo-600" />
-                    <span>ملخص طلب حجز المطعم</span>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+              
+              {/* Left Column: Bill details */}
+              <div className="md:col-span-5 bg-slate-50 dark:bg-slate-950/40 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-6">
+                <div className="space-y-1">
+                  <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-indigo-600" />
+                    <span>{t.billingTitle}</span>
                   </h3>
+                  <p className="text-xs text-slate-400">{t.billingStarter}</p>
+                </div>
 
-                  <div className="space-y-2 text-xs border-b border-slate-200 dark:border-slate-700 pb-3">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">اسم المطعم:</span>
-                      <span className="font-bold text-slate-900 dark:text-white">{nameAr}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">النطاق المحجوز:</span>
-                      <span className="font-mono font-bold text-emerald-600" dir="ltr">{cleanSubdomain}.restocloud.app</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">المسؤول:</span>
-                      <span className="font-bold text-slate-900 dark:text-white">{ownerName}</span>
-                    </div>
+                <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-150 dark:border-slate-850 space-y-2">
+                  <div className="text-xs font-bold text-slate-800 dark:text-white">{nameAr}</div>
+                  <div className="text-[10px] text-slate-400 font-mono">{cleanSubdomain}.restocloud.app</div>
+                </div>
+
+                <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                  <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    <span>{t.billingPrice}</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{currentPlanObj.price} {currency}</span>
                   </div>
-
-                  <div className="space-y-2 text-xs border-b border-slate-200 dark:border-slate-700 pb-3">
-                    <div className="flex justify-between font-bold text-slate-800 dark:text-slate-200">
-                      <span>{currentPlanObj.name}</span>
-                      <span>{currentPlanObj.price} ر.س</span>
-                    </div>
-                    <div className="flex justify-between text-slate-500">
-                      <span>ضريبة القيمة المضافة (15%):</span>
-                      <span>{vatAmount} ر.س</span>
-                    </div>
+                  <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    <span>{t.billingTax}</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{vatAmount} {currency}</span>
                   </div>
-
-                  <div className="flex justify-between items-baseline pt-1">
-                    <span className="font-bold text-sm text-slate-900 dark:text-white">الإجمالي المستحق:</span>
-                    <span className="text-xl font-black text-emerald-600">{totalWithVat} ر.س</span>
-                  </div>
-
-                  <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-2xl p-3 text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed flex items-start gap-2">
-                    <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
-                    <span>
-                      بعد إتمام الدفع، سيكون مطعمك في حالة <strong>بانتظار موافقة الإدارة العامة</strong> حتى يتم مراجعة الحجز واعتماده من مالك المنصة.
-                    </span>
+                  
+                  <div className="h-px bg-slate-200 dark:bg-slate-800 my-2" />
+                  
+                  <div className="flex justify-between text-sm font-black text-slate-900 dark:text-white">
+                    <span>{t.billingTotal}</span>
+                    <span className="font-mono text-emerald-600 text-base">{totalWithVat} {currency}</span>
                   </div>
                 </div>
 
-                {/* Right: Payment Method & Credit Card Form */}
-                <div className="md:col-span-7 space-y-4">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">اختر وسيلة الدفع</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    {[
-                      { id: "mada", name: "مدى mada", icon: "💳", color: "border-emerald-500 bg-emerald-50/30" },
-                      { id: "visa", name: "فيزا / ماستر", icon: "🌐", color: "border-blue-500 bg-blue-50/30" },
-                      { id: "apple", name: "Apple Pay", icon: "🍏", color: "border-slate-800 bg-slate-100 dark:bg-slate-800" },
-                      { id: "stc", name: "STC Pay", icon: "📱", color: "border-purple-500 bg-purple-50/30" }
-                    ].map((m) => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => setPaymentMethod(m.id as any)}
-                        className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1 ${
-                          paymentMethod === m.id ? `${m.color} ring-2 ring-emerald-500 font-black shadow-sm` : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 font-medium text-slate-600"
-                        }`}
-                      >
-                        <span className="text-xl">{m.icon}</span>
-                        <span className="text-xs">{m.name}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {paymentMethod === "apple" ? (
-                    <div className="p-6 bg-slate-900 text-white rounded-3xl text-center space-y-3 border border-slate-700">
-                      <div className="text-3xl">🍏 Pay</div>
-                      <p className="text-xs text-slate-300">اضغط على زر إتمام الدفع أدناه للمصادقة عبر Apple Pay بصمة الوجه أو الإصبع</p>
-                    </div>
-                  ) : paymentMethod === "stc" ? (
-                    <div className="p-6 bg-purple-900 text-white rounded-3xl text-center space-y-3 border border-purple-700">
-                      <div className="text-3xl">📱 STC Pay</div>
-                      <p className="text-xs text-purple-200">سيتم إرسال طلب دفع إلى رقم الجوال المسجل في الخطوة الأولى: <span className="font-mono font-bold">{phone}</span></p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رقم البطاقة (Card Number)</label>
-                        <input
-                          type="text"
-                          required
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(e.target.value)}
-                          placeholder="4588 •••• •••• ••••"
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                          dir="ltr"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">تاريخ الانتهاء (MM/YY)</label>
-                          <input
-                            type="text"
-                            required
-                            value={cardExpiry}
-                            onChange={(e) => setCardExpiry(e.target.value)}
-                            placeholder="08/28"
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono text-center focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                            dir="ltr"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رمز الأمان (CVV)</label>
-                          <input
-                            type="password"
-                            required
-                            maxLength={4}
-                            value={cardCvv}
-                            onChange={(e) => setCardCvv(e.target.value)}
-                            placeholder="•••"
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono text-center focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                            dir="ltr"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم حامل البطاقة (Cardholder Name)</label>
-                        <input
-                          type="text"
-                          required
-                          value={cardName || ownerName}
-                          onChange={(e) => setCardName(e.target.value)}
-                          placeholder="ABDULLAH ALSAEED"
-                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-bold uppercase focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                          dir="ltr"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <button
-                      type="button"
-                      disabled={isProcessingPayment}
-                      onClick={() => setStep(2)}
-                      className="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-50 transition-all w-full sm:w-auto text-center"
-                    >
-                      الرجوع
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isProcessingPayment}
-                      className="w-full sm:w-auto flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 transition-all"
-                    >
-                      {isProcessingPayment ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>جاري خصم المبلغ وتأكيد الحجز...</span>
-                        </>
-                      ) : (
-                        <>
-                          <ShieldCheck className="w-5 h-5 text-white" />
-                          <span>إتمام الدفع ({totalWithVat} ر.س) وإرسال طلب الاعتماد</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+                <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 p-4 flex gap-2.5">
+                  <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0" />
+                  <p className="text-[10px] text-amber-800 dark:text-amber-300 leading-relaxed font-semibold">
+                    {lang === 'ar' ? '🔒 هذا الدفع آمن كلياً ومشفر 256-بت. لا يتم حفظ بيانات بطاقتك أبداً على سيرفراتنا ويتم معالجتها مباشرة عبر وسيط دفع محلي معتمد.' : '🔒 Payments are 256-bit encrypted and processed directly via accredited regional gateways.'}
+                  </p>
                 </div>
-
               </div>
-            </form>
+
+              {/* Right Column: Cards info */}
+              <form onSubmit={handleCompletePaymentAndSubscribe} className="md:col-span-7 space-y-5">
+                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 border-b pb-2">
+                  <CreditCard className="w-5 h-5 text-emerald-600" />
+                  <span>{t.cardPaymentTitle}</span>
+                </h3>
+
+                {/* Gateway buttons */}
+                <div className="grid grid-cols-4 gap-3">
+                  {(["mada", "visa", "apple", "stc"] as const).map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => setPaymentMethod(method)}
+                      className={`py-3.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        paymentMethod === method
+                          ? "border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 shadow-2xs"
+                          : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950"
+                      }`}
+                    >
+                      <span className="text-base">
+                        {method === "mada" ? "💳 Mada" : method === "visa" ? "💳 Visa" : method === "apple" ? "🍎 Apple" : "📱 STC"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.cardHolderName}</label>
+                    <input
+                      type="text"
+                      required
+                      value={cardName}
+                      onChange={(e) => setCardName(e.target.value)}
+                      placeholder={t.cardHolderPlaceholder}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.cardNumber}</label>
+                    <input
+                      type="text"
+                      required
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold font-mono tracking-wider text-left"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.cardExpiry}</label>
+                      <input
+                        type="text"
+                        required
+                        value={cardExpiry}
+                        onChange={(e) => setCardExpiry(e.target.value)}
+                        placeholder="MM/YY"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-center font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">CVV *</label>
+                      <input
+                        type="password"
+                        required
+                        maxLength={3}
+                        value={cardCvv}
+                        onChange={(e) => setCardCvv(e.target.value)}
+                        placeholder="•••"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-center font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t flex justify-between items-center gap-4">
+                  <button
+                    type="button"
+                    disabled={isProcessingPayment}
+                    onClick={() => setStep(2)}
+                    className="px-6 py-3 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {t.btnPrev}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isProcessingPayment}
+                    className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl hover:shadow-lg hover:shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {isProcessingPayment ? (
+                      <>
+                        <Clock className="w-4 h-4 animate-spin" />
+                        <span>{t.btnPaying}</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>{t.btnPay}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
 
-          {/* STEP 4: SUCCESS & PENDING APPROVAL STATUS */}
+          {/* STEP 4: Success confirmation screen */}
           {step === 4 && createdTenantResult && (
-            <div className="max-w-2xl mx-auto text-center space-y-6 py-4">
-              <div className="w-20 h-20 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl mx-auto shadow-lg border-2 border-emerald-500 animate-bounce">
-                ✅
+            <div className="text-center max-w-xl mx-auto space-y-6 py-12 animate-in zoom-in-95 duration-300">
+              <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto text-4xl shadow-xl shadow-emerald-500/10">
+                🎉
               </div>
-
+              
               <div className="space-y-2">
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-                  🎉 تم دفع الرسوم وحجز مطعمك بنجاح!
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  لقد تم إنشاء حساب مطعم <span className="font-bold text-indigo-600">{createdTenantResult.nameAr}</span> وحجز النطاق الفرعي <span className="font-mono font-bold text-emerald-600" dir="ltr">{createdTenantResult.subdomain}.restocloud.app</span> بنجاح.
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white">{t.successTitle}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {t.successDesc}
                 </p>
               </div>
 
-              {/* Status Alert Badge */}
-              <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700 p-6 rounded-3xl text-right space-y-3 shadow-sm">
-                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-black text-sm">
-                  <Clock className="w-5 h-5 text-amber-600 shrink-0 animate-pulse" />
-                  <span>حالة حسابك الآن: بانتظار موافقة الإدارة العامة (Pending Approval) ⏳</span>
-                </div>
-                <p className="text-xs text-amber-900/80 dark:text-amber-200 leading-relaxed">
-                  حسب نظام المنصة، يتطلب تشغيل المطعم وبث المنيو للعملاء موافقة مالك المنصة (Super Admin). لقد وصل إشعار بحجزك ودفعك للإدارة، وبمجرد الضغط على زر "موافقة وتفعيل" من لوحة الإدارة العامة، سيعمل كاشيرك ودومينك فوراً!
-                </p>
+              <div className="p-5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-center font-mono">
+                <a
+                  href={`http://${createdTenantResult.subdomain}.resto-cloud.com`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline"
+                >
+                  🔗 {createdTenantResult.subdomain}.resto-cloud.com
+                </a>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs space-y-2 text-right">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">البريد الإلكتروني المسجل:</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white" dir="ltr">{ownerEmail}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">رقم طلب الاشتراك:</span>
-                  <span className="font-mono font-bold text-indigo-600">#SUB-{Date.now().toString().slice(-4)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">المبلغ المدفوع:</span>
-                  <span className="font-bold text-emerald-600">{totalWithVat} ر.س ({plans[selectedPlan].name})</span>
-                </div>
-              </div>
-
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="pt-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    setActiveTab("login");
-                    setLoginIdentifier(ownerEmail || cleanSubdomain);
-                  }}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2"
+                  onClick={() => onSelectTenant(createdTenantResult)}
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Lock className="w-4 h-4" />
-                  <span>الذهاب لصفحة تسجيل الدخول لمتابعة حالة الحساب</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={onNavigateToSaaSPortal}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2"
-                >
-                  <Store className="w-4 h-4" />
-                  <span>دخول الإدارة العامة (Super Admin) لتفعيل المطعم</span>
+                  <span>{t.successCta}</span>
+                  {lang === 'ar' ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                 </button>
               </div>
             </div>
           )}
-
         </div>
       )}
 
       {/* TAB 2: RESTAURANT OWNER LOGIN */}
       {activeTab === "login" && (
-        <div className="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 sm:p-8 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-3xl mx-auto border border-indigo-100 dark:border-indigo-800 shadow-xs">
-              🔐
-            </div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">تسجيل دخول أصحاب المطاعم</h2>
-            <p className="text-xs text-slate-500">أدخل البريد الإلكتروني أو الدومين الخاص بمطعمك وكلمة المرور</p>
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-lg p-6 sm:p-8 max-w-xl mx-auto space-y-6">
+          
+          <div className="space-y-1">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Lock className="w-5 h-5 text-indigo-600" />
+              <span>{t.loginTitle}</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {t.loginDesc}
+            </p>
           </div>
 
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
-            {loginError && (
-              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{loginError}</span>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Mail className="w-4 h-4 text-indigo-600" />
-                <span>البريد الإلكتروني أو الدومين الفرعي *</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="مثال: tarek@tulum-sushi.com أو sushi"
-                value={loginIdentifier}
-                onChange={(e) => setLoginIdentifier(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                dir="ltr"
-              />
+          {loginError && (
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-150 text-rose-600 text-xs font-bold text-center">
+              {loginError}
             </div>
+          )}
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Key className="w-4 h-4 text-indigo-600" />
-                <span>كلمة المرور *</span>
-              </label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                dir="ltr"
-              />
+          {loggedInPendingTenant ? (
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-6 text-center space-y-4">
+              <Clock className="w-12 h-12 text-amber-600 mx-auto animate-pulse" />
+              <h4 className="font-black text-amber-800 dark:text-amber-300">{t.pendingApproveTitle}</h4>
+              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed font-semibold">
+                {t.pendingApproveDesc}
+                <br />
+                <span className="font-bold font-mono">({loggedInPendingTenant.subdomain}.resto-cloud.com)</span>
+              </p>
+              <button
+                type="button"
+                onClick={() => setLoggedInPendingTenant(null)}
+                className="px-4 py-2 bg-white dark:bg-slate-900 border text-xs font-bold rounded-lg cursor-pointer"
+              >
+                {lang === 'ar' ? 'العودة للمحاولة مجدداً' : 'Try Again'}
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
-            >
-              <span>تسجيل الدخول للمطعم</span>
-              <ArrowRight className="w-4 h-4 rotate-180" />
-            </button>
-          </form>
-
-          {/* If Logged into a PENDING APPROVAL TENANT */}
-          {loggedInPendingTenant && (
-            <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 dark:border-amber-700 p-5 rounded-3xl space-y-3 text-right animate-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300 font-black text-sm">
-                <Clock className="w-5 h-5 text-amber-600 shrink-0 animate-spin" />
-                <span>مطعمك بانتظار موافقة الإدارة العامة ⏳</span>
+          ) : (
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.loginInputLabel}</label>
+                <div className="relative">
+                  <Mail className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400`} />
+                  <input
+                    type="text"
+                    required
+                    value={loginIdentifier}
+                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    placeholder={t.loginInputPlaceholder}
+                    className={`w-full py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold ${lang === 'ar' ? 'pl-4 pr-10 text-right' : 'pr-4 pl-10 text-left'}`}
+                  />
+                </div>
               </div>
 
-              <div className="text-xs text-amber-900/90 dark:text-amber-200 space-y-1.5 leading-relaxed">
-                <p>أهلاً بك <strong>{loggedInPendingTenant.ownerName}</strong> في مطعم <strong>{loggedInPendingTenant.nameAr}</strong>.</p>
-                <p>لقد تم استلام دفعة الاشتراك بنجاح وحجز الدومين <span className="font-mono font-bold" dir="ltr">{loggedInPendingTenant.subdomain}.restocloud.app</span>.</p>
-                <p className="font-bold text-indigo-700 dark:text-indigo-400">حسابك الآن قيد المراجعة والموافقة من الإدارة العامة (Super Admin). بمجرد الضغط على زر "موافقة وتفعيل المطعم" من لوحة الإدارة، سيتم فتح الكاشير والمنيو الفوري لك!</p>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5">{t.loginPasswordLabel}</label>
+                <div className="relative">
+                  <Key className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400`} />
+                  <input
+                    type="password"
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className={`w-full py-3 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono ${lang === 'ar' ? 'pl-4 pr-10' : 'pr-4 pl-10'}`}
+                  />
+                </div>
               </div>
 
               <div className="pt-2">
                 <button
-                  type="button"
-                  onClick={onNavigateToSaaSPortal}
-                  className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm"
+                  type="submit"
+                  className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm rounded-xl shadow-md hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Store className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>👉 تجربة الموافقة الآن من شاشة الإدارة العامة (Super Admin)</span>
+                  <span>{t.loginBtn}</span>
+                  {lang === 'ar' ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                 </button>
               </div>
-            </div>
+            </form>
           )}
-
-          {/* Quick Demo Accounts Helper */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
-            <span className="text-[11px] font-bold text-slate-400 block text-center">أو اختر حساب تجريبي جاهز للمعاينة السريعة:</span>
-            <div className="space-y-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginIdentifier("tarek@tulum-sushi.com");
-                  setLoginPassword("12345678");
-                }}
-                className="w-full p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-300 text-xs font-bold flex items-center justify-between transition-all"
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="text-base">🍣</span>
-                  <span>تولوم سوشي (م. طارق)</span>
-                </span>
-                <span className="bg-amber-500 text-white px-2 py-0.5 rounded text-[10px]">بانتظار الموافقة ⏳</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginIdentifier("shami");
-                  setLoginPassword("shami123");
-                }}
-                className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-between transition-all"
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="text-base">🥙</span>
-                  <span>مذاق الشام (أبو وليد)</span>
-                </span>
-                <span className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px]">مطعم نشط ومفعل ✅</span>
-              </button>
-            </div>
-          </div>
         </div>
       )}
-
     </div>
   );
 };

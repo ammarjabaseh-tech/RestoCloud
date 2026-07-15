@@ -582,12 +582,12 @@ export default function App() {
   };
 
   // Standalone Marketing / Auth Views (No Navbar/Layout)
-  if (activeView === 'landing_page') return <LandingPageView onSelectView={setActiveView} />;
+  if (activeView === 'landing_page') return <LandingPageView onSelectView={setActiveView} lang={lang} onLangChange={setLang} />;
   if (activeView === 'auth_login') return (
-    <SaaSAuthView mode="login" onSelectView={setActiveView} onLoginSuccess={handleLoginSuccess} />
+    <SaaSAuthView mode="login" onSelectView={setActiveView} onLoginSuccess={handleLoginSuccess} lang={lang} onLangChange={setLang} />
   );
   if (activeView === 'auth_signup') return (
-    <SaaSAuthView mode="signup" onSelectView={setActiveView} onLoginSuccess={handleLoginSuccess} />
+    <SaaSAuthView mode="signup" onSelectView={setActiveView} onLoginSuccess={handleLoginSuccess} lang={lang} onLangChange={setLang} />
   );
   if (activeView === 'terms') return <TermsView onSelectView={setActiveView} />;
   if (activeView === 'super_admin_dashboard') return (
@@ -729,6 +729,7 @@ export default function App() {
             onSelectTenant={handlePortalSelectTenant}
             onNavigateToSaaSPortal={() => setActiveView("saas_portal")}
             lang={lang}
+            onLangChange={setLang}
           />
         )}
 

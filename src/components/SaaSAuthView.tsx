@@ -1,15 +1,198 @@
 import React, { useState } from "react";
 import { ActivePortalView } from "../types";
-import { ArrowRight, UtensilsCrossed, Store, Mail, Lock, User, ChevronRight, Phone, MapPin, X } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  UtensilsCrossed, 
+  Store, 
+  Mail, 
+  Lock, 
+  User, 
+  ChevronLeft,
+  ChevronRight, 
+  Phone, 
+  MapPin, 
+  X,
+  Globe,
+  ChevronDown
+} from "lucide-react";
+
+const authTranslations = {
+  ar: {
+    backToHome: "العودة للرئيسية",
+    loginTitle: "مرحباً بعودتك!",
+    signupTitle: "ابدأ رحلة النجاح لمطعمك",
+    loginDesc: "سجل دخولك لإدارة مطعمك ونقاط البيع",
+    signupDesc: "أنشئ حسابك الآن وجرب ريستو كلاود (RestoCloud) مجاناً",
+    fullnameLabel: "اسمك الكامل",
+    fullnamePlaceholder: "أحمد محمد",
+    restaurantLabel: "اسم المطعم",
+    restaurantPlaceholder: "مطعم مذاق الشام",
+    phoneLabel: "رقم الهاتف",
+    phonePlaceholder: "0500000000",
+    addressLabel: "عنوان المطعم بالتفصيل",
+    addressPlaceholder: "الرياض، حي العليا، طريق الملك فهد",
+    emailLabel: "البريد الإلكتروني",
+    emailPlaceholder: "admin@restaurant.com",
+    passwordLabel: "كلمة المرور",
+    passwordPlaceholder: "••••••••",
+    changeEmail: "تغيير البريد",
+    forgotPass: "نسيت كلمة المرور؟",
+    forgotPassAlert: "🔑 لاستعادة كلمة المرور أو إعادة تعيينها، يرجى التواصل مع الإدارة العامة للمنصة (Super Admin) أو مدير النظام الخاص بمطعمك لإعادة تعيين كلمة مرور جديدة.",
+    otpLabel: "رمز التحقق (OTP) من الإيميل",
+    resendOtp: "إعادة إرسال رمز التحقق 🔄",
+    btnProcessing: "جاري المعالجة...",
+    btnVerifySignup: "تأكيد وإرسال رمز التحقق للبريد",
+    btnLogin: "تسجيل الدخول",
+    btnSendOtp: "إرسال رمز الدخول السريع",
+    btnVerifyLogin: "تأكيد وتسجيل الدخول",
+    noAccount: "ليس لديك حساب؟ ",
+    haveAccount: "لديك حساب بالفعل؟ ",
+    createAccountNow: "أنشئ حسابك الآن",
+    loginNow: "سجل دخولك",
+    agreeText: "بإنشائك للحساب، فأنت توافق على شروط الاستخدام وسياسة الخصوصية الخاصة بريستو كلاود (RestoCloud).",
+    terms: "شروط الاستخدام",
+    privacy: "سياسة الخصوصية",
+    visualTitle: "أدِر مطعمك بذكاء، بأحدث تقنيات الـ SaaS السحابية",
+    visualDesc: "انضم لمئات المطاعم التي غيرت طريقة عملها باستخدام نقطة البيع الأسرع والمدعومة بالذكاء الاصطناعي مع توافق تام لمتطلبات الفاتورة الإلكترونية ZATCA.",
+    usersCount: "+100 مطعم نشط",
+    methodPassword: "🔑 تسجيل بكلمة المرور",
+    methodOtp: "✉️ التحقق عبر الإيميل (OTP)",
+    enterEmailErr: "يرجى إدخال البريد الإلكتروني أولاً",
+    pendingTitle: "تم استلام طلبك بنجاح!",
+    pendingDesc: "حساب مطعمك الآن قيد المراجعة من قبل الإدارة. سيتم إرسال بريد إلكتروني لك فور الموافقة وتفعيل الحساب.",
+    btnBackHome: "العودة للصفحة الرئيسية",
+    verifyRegisterOtpTitle: "التحقق من البريد الإلكتروني",
+    verifyRegisterOtpDesc: "لقد أرسلنا رمز تحقق (OTP) مكون من 6 أرقام إلى البريد الإلكتروني:",
+    btnConfirmRegister: "تأكيد وتفعيل الحساب",
+    otpSendFail: "فشل إرسال رمز التحقق",
+    otpVerifyFail: "رمز التحقق غير صحيح",
+    loginFail: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    registerFail: "خطأ أثناء إنشاء حساب المطعم"
+  },
+  en: {
+    backToHome: "Back to Home",
+    loginTitle: "Welcome Back!",
+    signupTitle: "Scale Your Restaurant Journey",
+    loginDesc: "Log in to manage your dining branches and POS cashier points",
+    signupDesc: "Create your account and try RestoCloud for free",
+    fullnameLabel: "Your Full Name",
+    fullnamePlaceholder: "John Doe",
+    restaurantLabel: "Restaurant Name",
+    restaurantPlaceholder: "Gourmet Bites",
+    phoneLabel: "Phone Number",
+    phonePlaceholder: "0500000000",
+    addressLabel: "Detailed Address",
+    addressPlaceholder: "Riyadh, Al Olaya District, King Fahd Rd",
+    emailLabel: "Email Address",
+    emailPlaceholder: "admin@restaurant.com",
+    passwordLabel: "Password",
+    passwordPlaceholder: "••••••••",
+    changeEmail: "Change Email",
+    forgotPass: "Forgot Password?",
+    forgotPassAlert: "🔑 To reset your password, please contact the Platform Administration (Super Admin) or your restaurant system administrator to set a new password.",
+    otpLabel: "Verification Code (OTP) from Email",
+    resendOtp: "Resend verification code 🔄",
+    btnProcessing: "Processing...",
+    btnVerifySignup: "Confirm & Send Verification Code",
+    btnLogin: "Log In",
+    btnSendOtp: "Send Quick Login Code",
+    btnVerifyLogin: "Confirm & Log In",
+    noAccount: "Don't have an account? ",
+    haveAccount: "Already have an account? ",
+    createAccountNow: "Sign Up Now",
+    loginNow: "Log In",
+    agreeText: "By creating an account, you agree to RestoCloud's Terms of Use and Privacy Policy.",
+    terms: "Terms of Use",
+    privacy: "Privacy Policy",
+    visualTitle: "Manage your restaurant smarter with the latest cloud SaaS tech",
+    visualDesc: "Join hundreds of dining venues that transformed their operations using our lightning-fast POS cashier screens and AI consulting.",
+    usersCount: "+100 Active Restaurants",
+    methodPassword: "🔑 Password Login",
+    methodOtp: "✉️ Email Verification (OTP)",
+    enterEmailErr: "Please enter your email first",
+    pendingTitle: "Application Submitted Successfully!",
+    pendingDesc: "Your restaurant account is now under review. We will send you an email once your subscription is approved and activated.",
+    btnBackHome: "Back to Home",
+    verifyRegisterOtpTitle: "Email Verification",
+    verifyRegisterOtpDesc: "We have sent a 6-digit verification code to your email address:",
+    btnConfirmRegister: "Confirm & Activate Account",
+    otpSendFail: "Failed to send verification code",
+    otpVerifyFail: "Incorrect verification code",
+    loginFail: "Incorrect email or password",
+    registerFail: "Error during restaurant account creation"
+  },
+  tr: {
+    backToHome: "Ana Sayfaya Dön",
+    loginTitle: "Tekrar Hoş Geldiniz!",
+    signupTitle: "Restoranınızın Başarı Yolculuğunu Başlatın",
+    loginDesc: "Restoranınızı ve POS satış noktalarınızı yönetmek için giriş yapın",
+    signupDesc: "Hesabınızı şimdi oluşturun ve RestoCloud'u ücretsiz deneyin",
+    fullnameLabel: "Tam Adınız",
+    fullnamePlaceholder: "Ahmet Yılmaz",
+    restaurantLabel: "Restoran Adı",
+    restaurantPlaceholder: "Lezzet Sarayı",
+    phoneLabel: "Telefon Numarası",
+    phonePlaceholder: "0500000000",
+    addressLabel: "Detaylı Restoran Adresi",
+    addressPlaceholder: "İstanbul, Kadıköy, Atatürk Cad.",
+    emailLabel: "E-posta Adresi",
+    emailPlaceholder: "admin@restoran.com",
+    passwordLabel: "Şifre",
+    passwordPlaceholder: "••••••••",
+    changeEmail: "E-postayı Değiştir",
+    forgotPass: "Şifremi Unuttum?",
+    forgotPassAlert: "🔑 Şifrenizi sıfırlamak için lütfen Platform Yönetimi (Süper Admin) veya restoran yöneticinizle iletişime geçin.",
+    otpLabel: "E-postaya Gönderilen Doğrulama Kodu (OTP)",
+    resendOtp: "Doğrulama kodunu tekrar gönder 🔄",
+    btnProcessing: "İşleniyor...",
+    btnVerifySignup: "Doğrulama Kodunu Gönder",
+    btnLogin: "Giriş Yap",
+    btnSendOtp: "Hızlı Giriş Kodu Gönder",
+    btnVerifyLogin: "Doğrula ve Giriş Yap",
+    noAccount: "Hesabınız yok mu? ",
+    haveAccount: "Zaten bir hesabınız var mı? ",
+    createAccountNow: "Şimdi Kaydolun",
+    loginNow: "Giriş Yap",
+    agreeText: "Hesap oluşturarak RestoCloud Kullanım Koşulları ve Gizlilik Politikasını kabul etmiş olursunuz.",
+    terms: "Kullanım Koşulları",
+    privacy: "Gizlilik Politikası",
+    visualTitle: "Restoranınızı en son bulut SaaS teknolojisiyle daha akıllı yönetin",
+    visualDesc: "Yapay zeka destekli hızlı POS ekranlarımızla operasyonlarını dönüştüren yüzlerce restorana katılın.",
+    usersCount: "+100 Aktif Restoran",
+    methodPassword: "🔑 Şifre ile Giriş",
+    methodOtp: "✉️ E-posta Doğrulama (OTP)",
+    enterEmailErr: "Lütfen önce e-posta adresinizi girin",
+    pendingTitle: "Başvurunuz Başarıyla Alındı!",
+    pendingDesc: "Restoran hesabınız şu anda inceleme aşamasındadır. Hesabınız onaylanıp etkinleştirildiğinde size bir e-posta göndereceğiz.",
+    btnBackHome: "Ana Sayfaya Dön",
+    verifyRegisterOtpTitle: "Doğrulama Kodunu (OTP) Girin",
+    verifyRegisterOtpDesc: "Kaydı onaylamak için e-posta adresinize 6 haneli bir doğrulama kodu gönderdik:",
+    btnConfirmRegister: "Doğrula ve Hesabı Oluştur",
+    otpSendFail: "Doğrulama kodu gönderilemedi",
+    otpVerifyFail: "Geçersiz doğrulama kodu",
+    loginFail: "E-posta veya şifre hatalı",
+    registerFail: "Restoran hesabı oluşturulurken hata"
+  }
+};
 
 interface SaaSAuthViewProps {
   mode: "login" | "signup";
   onSelectView: (view: ActivePortalView) => void;
   onLoginSuccess: (isSuperAdmin: boolean, user?: any, tenant?: any) => void;
   onSignupSubmit?: (data: { name: string; restaurantName: string; email: string }) => void;
+  lang: 'ar' | 'en' | 'tr';
+  onLangChange: (lang: 'ar' | 'en' | 'tr') => void;
 }
 
-export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, onLoginSuccess, onSignupSubmit }) => {
+export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ 
+  mode, 
+  onSelectView, 
+  onLoginSuccess, 
+  onSignupSubmit,
+  lang,
+  onLangChange
+}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -25,11 +208,14 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
   const [otpCode, setOtpCode] = useState("");
   const [otpSentMsg, setOtpSentMsg] = useState<string | null>(null);
   const [showRegisterOtpModal, setShowRegisterOtpModal] = useState(false);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+
+  const t = authTranslations[lang] || authTranslations['ar'];
 
   // Send OTP helper for both signup and login
   const handleSendOtp = async (actionType: "signup" | "login") => {
     if (!email) {
-      setError("يرجى إدخال البريد الإلكتروني أولاً");
+      setError(t.enterEmailErr);
       return;
     }
     setLoading(true);
@@ -42,7 +228,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
         body: JSON.stringify({ email, actionType })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "فشل إرسال رمز التحقق");
+      if (!res.ok) throw new Error(data.error || t.otpSendFail);
       
       setOtpSentMsg(data.message);
       if (actionType === "login") {
@@ -62,7 +248,6 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
     setError(null);
     setLoading(true);
     try {
-      // Generate English subdomain slug from email or name
       const cleanEmailUser = email.split("@")[0].replace(/[^a-z0-9]/g, "");
       const slug = cleanEmailUser || `restaurant-${Date.now()}`;
       
@@ -86,7 +271,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "خطأ أثناء إنشاء حساب المطعم");
+      if (!res.ok) throw new Error(data.error || t.registerFail);
 
       setShowRegisterOtpModal(false);
       setShowPendingMsg(true);
@@ -102,27 +287,23 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
     setError(null);
 
     if (mode === "signup") {
-      // Step 1: Send registration OTP
       await handleSendOtp("signup");
       return;
     }
 
-    // Login logic
     setLoading(true);
     try {
       if (loginMethod === "otp") {
-        // Login via OTP verification
         const res = await fetch("/api/auth/login-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, code: otpCode })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "رمز التحقق غير صحيح");
+        if (!res.ok) throw new Error(data.error || t.otpVerifyFail);
         
         onLoginSuccess(false, data.user, data.tenant);
       } else {
-        // Standard password login
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -130,7 +311,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+        if (!res.ok) throw new Error(data.error || t.loginFail);
 
         if (data.isSuperAdmin) {
           onLoginSuccess(true);
@@ -146,30 +327,96 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-500/30" dir="rtl">
-
-      {/* Right Side: Form */}
+    <div className="min-h-screen bg-slate-50 flex font-sans selection:bg-indigo-500/30" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      {/* Side Form */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12 xl:p-24 relative bg-white shadow-2xl z-10">
+        
+        {/* Header Controls (Return Home & Language) */}
+        <div className={`absolute top-8 ${lang === 'ar' ? 'right-8 left-auto flex-row' : 'left-8 right-auto flex-row-reverse'} flex items-center gap-4`}>
+          <button
+            onClick={() => onSelectView("landing_page")}
+            className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
+          >
+            {lang === 'ar' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+            <span>{t.backToHome}</span>
+          </button>
 
-        <button
-          onClick={() => onSelectView("landing_page")}
-          className="absolute top-8 right-8 flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-800 transition-colors"
-        >
-          <ArrowRight className="w-4 h-4" /> العودة للرئيسية
-        </button>
+          {/* Language Selector Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowLangDropdown(!showLangDropdown)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5 text-slate-500" />
+              <span>
+                {lang === 'ar' ? '🇸🇦' : lang === 'tr' ? '🇹🇷' : '🇬🇧'}
+              </span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
+            </button>
 
-        <div className="w-full max-w-md">
+            {showLangDropdown && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowLangDropdown(false)}
+                />
+                <div className={`absolute mt-2 w-36 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-20 animate-in fade-in zoom-in-95 duration-150 ${lang === 'ar' ? 'left-0 text-right' : 'right-0 text-left'}`}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLangChange('ar');
+                      setShowLangDropdown(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-slate-50 cursor-pointer ${
+                      lang === 'ar' ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                    }`}
+                  >
+                    <span>🇸🇦</span>
+                    <span>العربية</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLangChange('en');
+                      setShowLangDropdown(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-slate-50 cursor-pointer ${
+                      lang === 'en' ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                    }`}
+                  >
+                    <span>🇬🇧</span>
+                    <span>English</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLangChange('tr');
+                      setShowLangDropdown(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-slate-50 cursor-pointer ${
+                      lang === 'tr' ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                    }`}
+                  >
+                    <span>🇹🇷</span>
+                    <span>Türkçe</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="w-full max-w-md mt-12">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20 mb-8">
             <UtensilsCrossed className="w-8 h-8" />
           </div>
 
           <h2 className="text-3xl font-black text-slate-900 mb-2">
-            {mode === "login" ? "مرحباً بعودتك!" : "ابدأ رحلة النجاح لمطعمك"}
+            {mode === "login" ? t.loginTitle : t.signupTitle}
           </h2>
           <p className="text-slate-500 mb-8 font-medium">
-            {mode === "login"
-              ? "سجل دخولك لإدارة مطعمك ونقاط البيع"
-              : "أنشئ حسابك الآن وجرب ريستو كلاود (RestoCloud) مجاناً"}
+            {mode === "login" ? t.loginDesc : t.signupDesc}
           </p>
 
           {showPendingMsg ? (
@@ -177,15 +424,15 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Store className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-emerald-800 mb-2">تم استلام طلبك بنجاح!</h3>
+              <h3 className="text-xl font-bold text-emerald-800 mb-2">{t.pendingTitle}</h3>
               <p className="text-emerald-700 text-sm font-medium mb-6 leading-relaxed">
-                حساب مطعمك الآن قيد المراجعة من قبل الإدارة. سيتم إرسال بريد إلكتروني لك فور الموافقة وتفعيل الحساب.
+                {t.pendingDesc}
               </p>
               <button
                 onClick={() => onSelectView("landing_page")}
-                className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors"
+                className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors cursor-pointer"
               >
-                العودة للصفحة الرئيسية
+                {t.btnBackHome}
               </button>
             </div>
           ) : (
@@ -198,59 +445,58 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
               {mode === "signup" && (
                 <>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5">اسمك الكامل</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">{t.fullnameLabel}</label>
                     <div className="relative">
-                      <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <User className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
                       <input
                         type="text"
                         required
                         value={name}
                         onChange={e => setName(e.target.value)}
-                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium"
-                        placeholder="أحمد محمد"
+                        className={`w-full py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium ${lang === 'ar' ? 'pl-4 pr-12' : 'pr-4 pl-12'}`}
+                        placeholder={t.fullnamePlaceholder}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5">اسم المطعم</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">{t.restaurantLabel}</label>
                     <div className="relative">
-                      <Store className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <Store className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
                       <input
                         type="text"
                         required
                         value={restaurantName}
                         onChange={e => setRestaurantName(e.target.value)}
-                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium"
-                        placeholder="مطعم مذاق الشام"
+                        className={`w-full py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium ${lang === 'ar' ? 'pl-4 pr-12' : 'pr-4 pl-12'}`}
+                        placeholder={t.restaurantPlaceholder}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5">رقم الهاتف</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">{t.phoneLabel}</label>
                     <div className="relative">
-                      <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <Phone className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
                       <input
                         type="tel"
                         required
                         value={phone}
                         onChange={e => setPhone(e.target.value)}
-                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium text-right font-mono"
-                        placeholder="0500000000"
-                        dir="ltr"
+                        className={`w-full py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium font-mono ${lang === 'ar' ? 'pl-4 pr-12 text-right' : 'pr-4 pl-12 text-left'}`}
+                        placeholder={t.phonePlaceholder}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5">عنوان المطعم بالتفصيل</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">{t.addressLabel}</label>
                     <div className="relative">
-                      <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <MapPin className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
                       <input
                         type="text"
                         required
                         value={address}
                         onChange={e => setAddress(e.target.value)}
-                        className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium"
-                        placeholder="الرياض، حي العليا، طريق الملك فهد"
+                        className={`w-full py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium ${lang === 'ar' ? 'pl-4 pr-12' : 'pr-4 pl-12'}`}
+                        placeholder={t.addressPlaceholder}
                       />
                     </div>
                   </div>
@@ -272,7 +518,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                         : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
-                    🔑 تسجيل بكلمة المرور
+                    {t.methodPassword}
                   </button>
                   <button
                     type="button"
@@ -288,7 +534,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                         : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
-                    ✉️ التحقق عبر الإيميل (OTP)
+                    {t.methodOtp}
                   </button>
                 </div>
               )}
@@ -300,17 +546,17 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
               )}
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">البريد الإلكتروني</label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">{t.emailLabel}</label>
                 <div className="relative">
-                  <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Mail className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
                   <input
                     type="text"
                     required
                     disabled={mode === "login" && loginMethod === "otp" && otpStep === "verify"}
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium disabled:opacity-60"
-                    placeholder="admin@restaurant.com"
+                    className={`w-full py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium disabled:opacity-60 ${lang === 'ar' ? 'pl-4 pr-12' : 'pr-4 pl-12'}`}
+                    placeholder={t.emailPlaceholder}
                   />
                   {mode === "login" && loginMethod === "otp" && otpStep === "verify" && (
                     <button
@@ -320,66 +566,66 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                         setOtpSentMsg(null);
                         setError(null);
                       }}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
+                      className={`absolute ${lang === 'ar' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-xs font-bold text-indigo-600 hover:underline cursor-pointer`}
                     >
-                      تغيير البريد
+                      {t.changeEmail}
                     </button>
                   )}
                 </div>
               </div>
 
-              {/* Password field - only for password login/signup */}
+              {/* Password field */}
               {((mode === "login" && loginMethod === "password") || mode === "signup") && (
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-sm font-bold text-slate-700">كلمة المرور</label>
+                    <label className="block text-sm font-bold text-slate-700">{t.passwordLabel}</label>
                     {mode === "login" && (
                       <button
                         type="button"
-                        onClick={() => alert("🔑 لاستعادة كلمة المرور أو إعادة تعيينها، يرجى التواصل مع الإدارة العامة للمنصة (Super Admin) أو مدير النظام الخاص بمطعمك لإعادة تعيين كلمة مرور جديدة.")}
+                        onClick={() => alert(t.forgotPassAlert)}
                         className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline bg-transparent border-0 p-0 cursor-pointer"
                       >
-                        نسيت كلمة المرور؟
+                        {t.forgotPass}
                       </button>
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Lock className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
                     <input
                       type="password"
                       required
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium"
-                      placeholder="••••••••"
+                      className={`w-full py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium ${lang === 'ar' ? 'pl-4 pr-12' : 'pr-4 pl-12'}`}
+                      placeholder={t.passwordPlaceholder}
                     />
                   </div>
                 </div>
               )}
 
-              {/* OTP Code input field for passwordless login verification */}
+              {/* OTP Code input field */}
               {mode === "login" && loginMethod === "otp" && otpStep === "verify" && (
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">رمز التحقق (OTP) من الإيميل</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">{t.otpLabel}</label>
                   <div className="relative">
-                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Lock className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
                     <input
                       type="text"
                       required
                       maxLength={6}
                       value={otpCode}
                       onChange={e => setOtpCode(e.target.value.replace(/[^0-9]/g, ""))}
-                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-mono font-black text-lg tracking-[8px] text-center"
+                      className={`w-full py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono font-black text-lg tracking-[8px] text-center ${lang === 'ar' ? 'pl-4 pr-12' : 'pr-4 pl-12'}`}
                       placeholder="123456"
                     />
                   </div>
-                  <div className="mt-2 text-right">
+                  <div className={`mt-2 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
                     <button
                       type="button"
                       onClick={() => handleSendOtp("login")}
                       className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
                     >
-                      إعادة إرسال رمز التحقق 🔄
+                      {t.resendOtp}
                     </button>
                   </div>
                 </div>
@@ -390,38 +636,36 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-black hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all mt-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                {loading ? (
-                  "جاري المعالجة..."
-                ) : mode === "signup" ? (
-                  "تأكيد وإرسال رمز التحقق للبريد"
-                ) : loginMethod === "password" ? (
-                  "تسجيل الدخول"
-                ) : otpStep === "request" ? (
-                  "إرسال رمز الدخول السريع"
-                ) : (
-                  "تأكيد وتسجيل الدخول"
-                )}
-                <ChevronRight className="w-5 h-5" />
+                <span>
+                  {loading ? (
+                    t.btnProcessing
+                  ) : mode === "signup" ? (
+                    t.btnVerifySignup
+                  ) : loginMethod === "password" ? (
+                    t.btnLogin
+                  ) : otpStep === "request" ? (
+                    t.btnSendOtp
+                  ) : (
+                    t.btnVerifyLogin
+                  )}
+                </span>
+                {lang === 'ar' ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
               </button>
 
               <p className="mt-6 text-center text-sm font-medium text-slate-500">
-                {mode === "login" ? "ليس لديك حساب؟ " : "لديك حساب بالفعل؟ "}
+                {mode === "login" ? t.noAccount : t.haveAccount}
                 <button
                   type="button"
                   onClick={() => onSelectView(mode === "login" ? "auth_signup" : "auth_login")}
                   className="font-bold text-indigo-600 hover:text-indigo-700 underline underline-offset-4 cursor-pointer"
                 >
-                  {mode === "login" ? "أنشئ حسابك الآن" : "سجل دخولك"}
+                  {mode === "login" ? t.createAccountNow : t.loginNow}
                 </button>
               </p>
 
               {mode === "signup" && (
                 <p className="text-center text-[11px] text-slate-400">
-                  بإنشائك للحساب، فأنت توافق على{" "}
-                  <button type="button" onClick={() => onSelectView("terms")} className="underline cursor-pointer">شروط الاستخدام</button>
-                  {" "}و{" "}
-                  <button type="button" onClick={() => onSelectView("terms")} className="underline cursor-pointer">سياسة الخصوصية</button>
-                  {" "}الخاصة بريستو كلاود (RestoCloud).
+                  {t.agreeText}
                 </p>
               )}
             </form>
@@ -429,7 +673,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
         </div>
       </div>
 
-      {/* Left Side: Visual */}
+      {/* Side Visual Graphic */}
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden flex-col items-center justify-center p-12 text-center">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-slate-900 via-indigo-900/80 to-slate-900 mix-blend-multiply" />
@@ -440,10 +684,10 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
             <Store className="w-10 h-10" />
           </div>
           <h3 className="text-3xl font-black text-white mb-6 leading-relaxed">
-            أدِر مطعمك بذكاء،<br />بأحدث تقنيات الـ SaaS السحابية
+            {t.visualTitle}
           </h3>
           <p className="text-indigo-100 text-lg leading-loose font-medium">
-            انضم لمئات المطاعم التي غيرت طريقة عملها باستخدام نقطة البيع الأسرع والمدعومة بالذكاء الاصطناعي مع توافق تام لمتطلبات الفاتورة الإلكترونية ZATCA.
+            {t.visualDesc}
           </p>
 
           <div className="mt-12 flex items-center justify-center gap-4">
@@ -452,15 +696,14 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
               <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-amber-500 flex items-center justify-center text-xs font-bold text-white shadow-sm">👩‍💼</div>
               <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-rose-500 flex items-center justify-center text-xs font-bold text-white shadow-sm">👨‍💼</div>
             </div>
-            <div className="text-right text-sm text-indigo-200">
-              <div className="font-bold text-white">+500 مطعم وكافيه</div>
-              يستخدمون ريستو كلاود (RestoCloud) يومياً
+            <div className={`text-slate-200 text-sm ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+              <div className="font-bold text-white">{t.usersCount}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Glassmorphic Registration OTP Verification Modal */}
+      {/* Registration OTP Modal */}
       {showRegisterOtpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-6">
@@ -475,9 +718,9 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
               <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto text-xl">
                 ✉️
               </div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">التحقق من البريد الإلكتروني</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">{t.verifyRegisterOtpTitle}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
-                لقد أرسلنا رمز تحقق (OTP) مكون من 6 أرقام إلى البريد الإلكتروني:
+                {t.verifyRegisterOtpDesc}
                 <br />
                 <span className="font-bold text-slate-800 dark:text-slate-200">{email}</span>
               </p>
@@ -491,7 +734,6 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
 
             <form onSubmit={handleVerifyRegisterOtpAndSignup} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-350 mb-1.5 text-center">أدخل الرمز هنا:</label>
                 <input
                   type="text"
                   required
@@ -508,8 +750,8 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                 disabled={loading || otpCode.length < 6}
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-black hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                {loading ? "جاري التحقق..." : "تأكيد وتفعيل الحساب"}
-                <ChevronRight className="w-5 h-5" />
+                <span>{loading ? t.btnProcessing : t.btnConfirmRegister}</span>
+                {lang === 'ar' ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
               </button>
 
               <div className="text-center pt-2">
@@ -518,7 +760,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({ mode, onSelectView, 
                   onClick={() => handleSendOtp("signup")}
                   className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
                 >
-                  إعادة إرسال الرمز 🔄
+                  {t.resendOtp}
                 </button>
               </div>
             </form>
