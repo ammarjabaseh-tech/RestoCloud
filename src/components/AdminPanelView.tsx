@@ -306,18 +306,19 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
   const handleSaveItem = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!itemName || !itemPrice) {
-      alert("يرجى إدخال اسم الطبق والسعر");
+    const finalItemName = itemName.trim() || itemNameEn.trim() || itemNameTr.trim();
+    if (!finalItemName || !itemPrice) {
+      alert(lang === 'ar' ? "يرجى إدخال اسم الطبق والسعر" : lang === 'tr' ? "Lütfen ürün adını ve fiyatını girin" : "Please enter item name and price");
       return;
     }
 
     const payload: Partial<MenuItem> = {
-      nameAr: itemName,
-      nameEn: itemNameEn || undefined,
-      nameTr: itemNameTr || undefined,
-      descriptionAr: itemDesc,
-      descriptionEn: itemDescEn || undefined,
-      descriptionTr: itemDescTr || undefined,
+      nameAr: finalItemName,
+      nameEn: itemNameEn.trim() || undefined,
+      nameTr: itemNameTr.trim() || undefined,
+      descriptionAr: itemDesc.trim(),
+      descriptionEn: itemDescEn.trim() || undefined,
+      descriptionTr: itemDescTr.trim() || undefined,
       price: Number(itemPrice) || 0,
       costPrice: Number(itemCost) || Math.round(Number(itemPrice) * 0.4),
       categoryId: itemCat || categories[0]?.id,
@@ -1699,11 +1700,12 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               }} className="px-4 py-2 rounded-xl bg-slate-100 text-xs font-semibold cursor-pointer">{lang === 'ar' ? 'إلغاء' : lang === 'tr' ? 'İptal' : 'Cancel'}</button>
               <button
                 onClick={() => {
-                  if (newCatName) {
+                  const finalNameAr = newCatName.trim() || newCatNameEn.trim() || newCatNameTr.trim();
+                  if (finalNameAr) {
                     if (editingCategory) {
-                      onUpdateCategory && onUpdateCategory(editingCategory.id, newCatName, newCatIcon || "🍴", newCatNameEn || undefined, newCatNameTr || undefined);
+                      onUpdateCategory && onUpdateCategory(editingCategory.id, finalNameAr, newCatIcon || "🍴", newCatNameEn.trim() || undefined, newCatNameTr.trim() || undefined);
                     } else {
-                      onAddCategory(newCatName, newCatIcon || "🍴", newCatNameEn || undefined, newCatNameTr || undefined);
+                      onAddCategory(finalNameAr, newCatIcon || "🍴", newCatNameEn.trim() || undefined, newCatNameTr.trim() || undefined);
                     }
                     setNewCatName("");
                     setNewCatNameEn("");

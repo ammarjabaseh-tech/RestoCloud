@@ -321,25 +321,25 @@ app.post("/api/tenants", async (req, res) => {
 
     // Default categories
     const cats = [
-      { icon: "🍲", name: "الأطباق الرئيسية" },
-      { icon: "🥗", name: "المقبلات والسلطات" },
-      { icon: "🍹", name: "المشروبات والحلويات" },
+      { icon: "🍲", nameAr: "الأطباق الرئيسية", nameEn: "Main Dishes", nameTr: "Ana Yemekler" },
+      { icon: "🥗", nameAr: "المقبلات والسلطات", nameEn: "Appetizers & Salads", nameTr: "Mezeler & Salatalar" },
+      { icon: "🍹", nameAr: "المشروبات والحلويات", nameEn: "Beverages & Desserts", nameTr: "İçecekler & Tatlılar" },
     ];
     let firstCatId = "";
     for (let i = 0; i < cats.length; i++) {
       const catId = `cat-${Date.now()}-${i}`;
       await pool.query(
-        "INSERT INTO categories (id, tenant_id, name_ar, icon, order_index) VALUES ($1,$2,$3,$4,$5)",
-        [catId, id, cats[i].name, cats[i].icon, i + 1]
+        "INSERT INTO categories (id, tenant_id, name_ar, name_en, name_tr, icon, order_index) VALUES ($1,$2,$3,$4,$5,$6,$7)",
+        [catId, id, cats[i].nameAr, cats[i].nameEn, cats[i].nameTr, cats[i].icon, i + 1]
       );
       if (i === 0) firstCatId = catId;
     }
 
     // Default sample item
     await pool.query(
-      `INSERT INTO menu_items (id, tenant_id, category_id, name_ar, description_ar, price, cost_price, image, is_available, is_best_seller)
-       VALUES ($1,$2,$3,$4,$5,45,18,'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',true,true)`,
-      [`item-${Date.now()}-1`, id, firstCatId, "وجبة خاصة مميزة", "طبق طازج محضّر يومياً بأفضل المكونات الطبيعية"]
+      `INSERT INTO menu_items (id, tenant_id, category_id, name_ar, name_en, name_tr, description_ar, description_en, description_tr, price, cost_price, image, is_available, is_best_seller)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,45,18,'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',true,true)`,
+      [`item-${Date.now()}-1`, id, firstCatId, "وجبة خاصة مميزة", "Special Signature Meal", "Özel Karışık Menü", "طبق طازج محضّر يومياً بأفضل المكونات الطبيعية", "Freshly prepared daily with the finest natural ingredients", "En taze doğal malzemelerle günlük olarak hazırlanmış özel lezzet"]
     );
 
     // Default tables
