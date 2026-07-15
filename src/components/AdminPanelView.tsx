@@ -454,6 +454,23 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     }
   };
 
+  const handleBannerImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 3 * 1024 * 1024) {
+        alert(lang === 'ar' ? 'حجم الغلاف كبير جداً، يرجى اختيار صورة أقل من 3 ميجابايت.' : 'Cover photo is too large. Please select an image under 3MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setBannerImage(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Analytics Data
   const categoryChartData = categories.map((cat) => {
     const catItems = items.filter(i => i.categoryId === cat.id);
@@ -1074,23 +1091,37 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {lang === 'ar' ? 'رابط صورة الغلاف (https://...)' : lang === 'tr' ? 'Kapak Resmi URLsi (https://...)' : 'Cover Image URL (https://...)'}
-                </label>
-                <input
-                  type="text"
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={bannerImage}
-                  onChange={(e) => setBannerImage(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  dir="ltr"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="sm:col-span-7">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    {lang === 'ar' ? 'رابط صورة الغلاف (https://...)' : lang === 'tr' ? 'Kapak Resmi URLsi (https://...)' : 'Cover Image URL (https://...)'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={bannerImage}
+                    onChange={(e) => setBannerImage(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="sm:col-span-5 flex items-end">
+                  <label className="w-full cursor-pointer bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all transform hover:-translate-y-0.5 text-center">
+                    <Upload className="w-4 h-4 shrink-0 animate-bounce" />
+                    <span>{lang === 'ar' ? '📂 رفع غلاف من جهازك' : lang === 'tr' ? '📂 Cihazınızdan Kapak Yükleyin' : '📂 Upload Cover from Device'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBannerImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </div>
 
               {/* Cover Live Preview */}
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden h-24 relative bg-slate-100 dark:bg-slate-800">
+              <div className="md:col-span-4 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden h-24 relative bg-slate-100 dark:bg-slate-800">
                 {bannerImage ? (
                   <img src={bannerImage} alt="Cover Preview" className="w-full h-full object-cover" />
                 ) : (
@@ -1863,12 +1894,19 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 />
               </div>
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {lang === 'ar' ? 'رمز أو رابط صورة القسم' : lang === 'tr' ? 'Kategori Simgesi veya URLsi' : 'Category Icon or Image URL'}
-                  </label>
-                  <label className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold cursor-pointer flex items-center gap-1 hover:underline">
-                    <Upload className="w-3 h-3" />
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  {lang === 'ar' ? 'رمز أو رابط صورة القسم' : lang === 'tr' ? 'Kategori Simgesi veya URLsi' : 'Category Icon or Image URL'}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCatIcon}
+                    onChange={(e) => setNewCatIcon(e.target.value)}
+                    className="flex-1 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold outline-none"
+                    placeholder={lang === 'ar' ? "مثال: 🍔 أو رابط صورة..." : "E.g. 🍔 or image URL..."}
+                  />
+                  <label className="cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[10px] px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition-all shrink-0">
+                    <Upload className="w-3.5 h-3.5" />
                     <span>{lang === 'ar' ? '📂 رفع صورة' : '📂 Upload'}</span>
                     <input
                       type="file"
@@ -1878,13 +1916,6 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     />
                   </label>
                 </div>
-                <input
-                  type="text"
-                  value={newCatIcon}
-                  onChange={(e) => setNewCatIcon(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold outline-none"
-                  placeholder={lang === 'ar' ? "مثال: 🍔 أو رابط صورة..." : "E.g. 🍔 or image URL..."}
-                />
               </div>
             </div>
 
