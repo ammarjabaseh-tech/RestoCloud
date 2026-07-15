@@ -368,7 +368,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               <p className="text-xs text-slate-500 mt-1">تأكد من كتابة الكلمة الصحيحة أو تغيير الفلتر</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
               <table className="w-full text-right border-collapse">
                 <thead>
                   <tr className="border-b border-slate-800/80 bg-slate-900/30 text-xs font-bold text-slate-400">

@@ -708,7 +708,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     {lang === 'ar' ? 'حدد رقم الطاولة التي تجلس عليها *' : lang === 'tr' ? 'Oturduğunuz masa numarasını seçin *' : 'Select the table number you are sitting at *'}
                   </label>
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
                     {tables.map((t) => (
                       <button
                         key={t.id}

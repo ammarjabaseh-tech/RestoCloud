@@ -166,7 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className="w-5 h-5 flex items-center justify-center text-base overflow-hidden rounded shrink-0">
                     <RestaurantLogo logo={currentTenant.logo} />
                   </span>
-                  <span className="max-w-[110px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
+                  <span className="max-w-[80px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
                   <a
                     href={getRestaurantMenuUrl()}
                     target="_blank"
@@ -174,7 +174,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="text-[9px] bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-indigo-700 hover:text-indigo-900 font-bold font-mono border border-indigo-200 transition-all shadow-3xs flex items-center gap-0.5"
                     title="فتح المنيو الرقمي للزبائن"
                   >
-                    <span>🔗 {currentTenant.subdomain}.resto-cloud.com</span>
+                    <span className="hidden md:inline">🔗 {currentTenant.subdomain}.resto-cloud.com</span>
+                    <span className="md:hidden">🔗 {currentTenant.subdomain}</span>
                   </a>
                 </div>
               ) : (
@@ -186,7 +187,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span className="w-5 h-5 flex items-center justify-center text-base overflow-hidden rounded shrink-0">
                       <RestaurantLogo logo={currentTenant.logo} />
                     </span>
-                    <span className="max-w-[110px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
+                    <span className="max-w-[80px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
                     <a
                       href={getRestaurantMenuUrl()}
                       target="_blank"
@@ -195,7 +196,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onClick={(e) => e.stopPropagation()} // Prevent dropdown toggle
                       title="فتح المنيو الرقمي للزبائن"
                     >
-                      <span>🔗 {currentTenant.subdomain}.resto-cloud.com</span>
+                      <span className="hidden md:inline">🔗 {currentTenant.subdomain}.resto-cloud.com</span>
+                      <span className="md:hidden">🔗 {currentTenant.subdomain}</span>
                     </a>
                     <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showTenantDropdown ? 'rotate-180' : ''}`} />
                   </button>
@@ -265,69 +267,69 @@ export const Navbar: React.FC<NavbarProps> = ({
             {(!currentUser || currentUser.permissions.canManagePOS) && (
               <button
                 onClick={() => onSelectView("pos_dashboard")}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
                   activeView === "pos_dashboard"
                     ? `${theme.primaryBg} text-white font-bold shadow-sm`
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
                 <CreditCard className="w-3.5 h-3.5" />
-                <span>{navTranslations[lang].pos}</span>
+                <span className="hidden sm:inline">{navTranslations[lang].pos}</span>
               </button>
             )}
 
             {(!currentUser || currentUser.permissions.canManageMenu) && (
               <button
                 onClick={() => onSelectView("admin_panel")}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
                   activeView === "admin_panel"
                     ? `${theme.primaryBg} text-white font-bold shadow-sm`
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
                 <Settings className="w-3.5 h-3.5" />
-                <span>{navTranslations[lang].admin}</span>
+                <span className="hidden sm:inline">{navTranslations[lang].admin}</span>
               </button>
             )}
 
 
             <button
               onClick={() => onSelectView("digital_menu")}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
                 activeView === "digital_menu"
                   ? `${theme.primaryBg} text-white font-bold shadow-sm`
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span>{navTranslations[lang].menu}</span>
+              <span className="hidden sm:inline">{navTranslations[lang].menu}</span>
             </button>
 
             {(!currentUser || currentUser.permissions.canViewReports) && (
               <button
                 onClick={() => onSelectView("ai_assistant")}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
                   activeView === "ai_assistant"
                     ? "bg-indigo-600 text-white font-bold shadow-sm"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>{navTranslations[lang].ai}</span>
+                <span className="hidden sm:inline">{navTranslations[lang].ai}</span>
               </button>
             )}
 
             {currentUser && (
               <button
                 onClick={() => onSelectView("kitchen_display")}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
                   activeView === "kitchen_display"
                     ? `${theme.primaryBg} text-white font-bold shadow-sm`
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
                 <ChefHat className="w-3.5 h-3.5 text-amber-500" />
-                <span>{navTranslations[lang].kds}</span>
+                <span className="hidden sm:inline">{navTranslations[lang].kds}</span>
               </button>
             )}
 
@@ -335,42 +337,43 @@ export const Navbar: React.FC<NavbarProps> = ({
               <>
                 <button
                   onClick={() => onSelectView("tenant_login")}
-                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-bold transition-all whitespace-nowrap ${
                     activeView === "tenant_login"
                       ? "bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30 scale-102"
                       : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300"
                   }`}
                 >
-                  <span>{navTranslations[lang].saasOnboard}</span>
+                  <span className="hidden sm:inline">{navTranslations[lang].saasOnboard}</span>
+                  <span className="sm:hidden">🚀 {lang === 'ar' ? 'حجز' : lang === 'tr' ? 'Rez.' : 'Book'}</span>
                 </button>
 
                 <button
                   onClick={() => onSelectView("saas_portal")}
-                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-medium transition-all whitespace-nowrap ${
                     activeView === "saas_portal"
                       ? "bg-slate-100 text-slate-900 font-bold border border-slate-300"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                   }`}
                 >
                   <Building2 className="w-3 h-3" />
-                  <span>{navTranslations[lang].saasPortal}</span>
+                  <span className="hidden sm:inline">{navTranslations[lang].saasPortal}</span>
                 </button>
 
                 <button
                   onClick={() => onSelectView("saas_subscriptions")}
-                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-medium transition-all whitespace-nowrap ${
                     activeView === "saas_subscriptions"
                       ? "bg-purple-100 text-purple-900 font-bold border border-purple-300"
                       : "text-purple-600 hover:bg-purple-50 hover:text-purple-800"
                   }`}
                 >
                   <FileText className="w-3 h-3" />
-                  <span>{navTranslations[lang].saasSubs}</span>
+                  <span className="hidden sm:inline">{navTranslations[lang].saasSubs}</span>
                 </button>
 
                 <button
                   onClick={() => onSelectView("postgres_export")}
-                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-medium transition-all whitespace-nowrap ${
                     activeView === "postgres_export"
                       ? "bg-slate-100 text-slate-900 font-bold border border-slate-300"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
@@ -378,7 +381,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   title="تصدير قاعدة بيانات PostgreSQL لسيرفر VPS"
                 >
                   <Database className="w-3 h-3" />
-                  <span>{navTranslations[lang].postgres}</span>
+                  <span className="hidden sm:inline">{navTranslations[lang].postgres}</span>
                 </button>
               </>
             )}
@@ -390,13 +393,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-bold transition-all border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 shadow-xs cursor-pointer"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 rounded-lg text-xs font-bold transition-all border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 shadow-xs cursor-pointer animate-in"
               >
                 <Globe className="w-3.5 h-3.5 text-slate-500" />
-                <span>
+                <span className="hidden sm:inline">
                   {lang === 'ar' ? '🇸🇦 العربية' : lang === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English'}
                 </span>
-                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showLangDropdown ? 'rotate-180' : ''}`} />
+                <span className="sm:hidden">
+                  {lang === 'ar' ? '🇸🇦' : lang === 'tr' ? '🇹🇷' : '🇬🇧'}
+                </span>
+                <ChevronDown className="w-2.5 h-2.5 text-slate-400" />
               </button>
 
               {showLangDropdown && (
@@ -453,11 +459,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             {currentUser && (
               <button
                 onClick={onLogout}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 transition-all whitespace-nowrap cursor-pointer"
+                className="flex items-center gap-1 px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-lg text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 transition-all whitespace-nowrap cursor-pointer"
                 title="تسجيل خروج المستخدم الحالي"
               >
                 <LogOut className="w-3 h-3" />
-                <span>{navTranslations[lang].logout}</span>
+                <span className="hidden sm:inline">{navTranslations[lang].logout}</span>
               </button>
             )}
           </div>

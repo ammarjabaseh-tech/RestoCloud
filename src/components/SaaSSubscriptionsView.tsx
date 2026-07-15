@@ -276,7 +276,7 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
           ) : filteredInvoices.length === 0 ? (
             <div className="p-12 text-center text-slate-400 font-medium">لا توجد فواتير تطابق الفلتر المحدد.</div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
               <table className="w-full text-right border-collapse">
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200/80 text-xs text-slate-500 font-bold">

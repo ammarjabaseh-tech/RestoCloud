@@ -513,7 +513,7 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
           ) : users.length === 0 ? (
             <div className="p-12 text-center text-slate-400 font-medium">{usersTranslations[lang].empty}</div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
               <table className={`w-full ${lang === 'ar' ? 'text-right' : 'text-left'} border-collapse`}>
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200/80 text-xs text-slate-500 font-bold">
