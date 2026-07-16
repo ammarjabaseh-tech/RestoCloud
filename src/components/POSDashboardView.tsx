@@ -328,7 +328,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [historyLoading, setHistoryLoading] = useState<boolean>(false);
   const [historySearch, setHistorySearch] = useState<string>("");
   const [historyTab, setHistoryTab] = useState<"all" | "pending">("all");
-  const [posMode, setPosMode] = useState<"sales" | "orders">("sales");
+  const [posMode, setPosMode] = useState<"sales" | "orders" | "tables">("sales");
+  const [editingTableStatus, setEditingTableStatus] = useState<RestaurantTable | null>(null);
   const [posOrderTab, setPosOrderTab] = useState<"all" | "pending" | "preparing" | "ready" | "archived">("all");
   const [showMobileCart, setShowMobileCart] = useState<boolean>(false);
   const [offlineQueueCount, setOfflineQueueCount] = useState<number>(0);
@@ -1257,6 +1258,16 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   </span>
                 )}
               </button>
+              <button
+                onClick={() => setPosMode("tables")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  posMode === "tables"
+                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
+                    : "text-slate-600 hover:bg-white/70"
+                }`}
+              >
+                <span>{lang === 'ar' ? 'حالة الطاولات' : lang === 'tr' ? 'Masa Durumu' : 'Tables Status'}</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -1683,6 +1694,165 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                 <p className="text-xs text-slate-400">ستظهر الطلبات الحية والنشطة هنا بمجرد وصولها لتسهيل إدارتها.</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Tables Status View */}
+      {posMode === "tables" && (
+        <div className="lg:col-span-12 space-y-4 animate-in fade-in duration-200 pos-tables-dashboard">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-150 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  {lang === 'ar' ? 'إدارة حالات طاولات الصالة' : 'Manage Hall Tables Status'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {lang === 'ar' ? 'انقر على أي طاولة لتحديث حالتها فوراً لمتابعة الحجوزات والخدمة.' : 'Click any table to update its status.'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs font-bold font-sans">
+                <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>{lang === 'ar' ? `متاح (${tables.filter(t => t.status === 'available').length})` : 'Available'}</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span>{lang === 'ar' ? `مشغول (${tables.filter(t => t.status === 'occupied').length})` : 'Occupied'}</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border border-blue-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <span>{lang === 'ar' ? `محجوز (${tables.filter(t => t.status === 'reserved').length})` : 'Reserved'}</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span>{lang === 'ar' ? `بحاجة لتنظيف (${tables.filter(t => t.status === 'needs_cleaning').length})` : 'Needs Cleaning'}</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+              {tables.map((t) => {
+                const statusLabels = {
+                  available: lang === 'ar' ? 'متاح' : 'Available',
+                  occupied: lang === 'ar' ? 'مشغول' : 'Occupied',
+                  reserved: lang === 'ar' ? 'محجوز' : 'Reserved',
+                  needs_cleaning: lang === 'ar' ? 'بحاجة لتنظيف' : 'Needs Cleaning'
+                };
+
+                const statusStyles = {
+                  available: "bg-emerald-50/60 dark:bg-emerald-950/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-100/50",
+                  occupied: "bg-rose-50/60 dark:bg-rose-950/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-100/50",
+                  reserved: "bg-blue-50/60 dark:bg-blue-950/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/40 hover:bg-blue-100/50",
+                  needs_cleaning: "bg-amber-50/60 dark:bg-amber-950/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40 hover:bg-amber-100/50"
+                };
+
+                const statusDot = {
+                  available: "bg-emerald-500",
+                  occupied: "bg-rose-500",
+                  reserved: "bg-blue-500",
+                  needs_cleaning: "bg-amber-500"
+                };
+
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setEditingTableStatus(t)}
+                    className={`p-4 rounded-3xl border text-center transition-all flex flex-col items-center justify-center gap-2 cursor-pointer hover:scale-102 hover:shadow-xs ${
+                      statusStyles[t.status] || "bg-slate-50 text-slate-700 border-slate-200"
+                    }`}
+                  >
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                      {lang === 'ar' ? 'طاولة' : 'Table'}
+                    </span>
+                    <span className="text-3xl font-black font-mono leading-none">
+                      {t.tableNumber}
+                    </span>
+                    <div className="flex items-center gap-1 mt-1 bg-white/70 dark:bg-slate-900/70 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-800">
+                      <span className={`w-1.5 h-1.5 rounded-full ${statusDot[t.status]}`} />
+                      <span className="text-[9px] font-bold">{statusLabels[t.status]}</span>
+                    </div>
+                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">
+                      👤 {t.capacity} {lang === 'ar' ? 'كراسي' : 'Seats'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table Status Edit Modal */}
+      {editingTableStatus && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-6 text-right" dir="rtl">
+            <button
+              onClick={() => setEditingTableStatus(null)}
+              className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="space-y-1.5 text-center">
+              <span className="text-3xl">🍽️</span>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                تعديل حالة الطاولة {editingTableStatus.tableNumber}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                السعة الاستيعابية: {editingTableStatus.capacity} كراسي
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 font-sans">
+              {(["available", "occupied", "reserved", "needs_cleaning"] as const).map((status) => {
+                const labels = {
+                  available: "🟢 متاح (Available)",
+                  occupied: "🔴 مشغول (Occupied)",
+                  reserved: "🔵 محجوز (Reserved)",
+                  needs_cleaning: "🟡 بحاجة لتنظيف"
+                };
+
+                const isSelected = editingTableStatus.status === status;
+
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => setEditingTableStatus({ ...editingTableStatus, status })}
+                    className={`py-3 px-2 rounded-xl border text-xs font-bold transition-all text-center flex items-center justify-center cursor-pointer ${
+                      isSelected
+                        ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md scale-102"
+                        : "bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-750 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    {labels[status]}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingTableStatus(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (onUpdateTableStatus) {
+                    await onUpdateTableStatus(editingTableStatus.id, editingTableStatus.status);
+                  }
+                  setEditingTableStatus(null);
+                }}
+                className={`flex-1 py-2.5 rounded-xl ${theme.primaryBg} ${theme.primaryHover} text-white text-xs font-bold shadow-md transition-colors cursor-pointer`}
+              >
+                حفظ التعديل
+              </button>
+            </div>
           </div>
         </div>
       )}

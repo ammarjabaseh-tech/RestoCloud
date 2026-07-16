@@ -1350,11 +1350,13 @@ app.post("/api/tenants/:tenantId/orders", async (req, res) => {
       );
     }
 
-    // If dine_in, mark table as occupied
+    // If dine_in, mark table status (occupied for cashier, reserved for QR orders)
     if (b.orderType === "dine_in" && b.tableNumber) {
+      const isQR = b.cashierName === "طلب ذاتي (QR Menu)";
+      const tableStatus = isQR ? 'reserved' : 'occupied';
       await client.query(
-        "UPDATE restaurant_tables SET status = 'occupied', current_order_id = $1 WHERE tenant_id = $2 AND table_number = $3",
-        [orderId, tenantId, Number(b.tableNumber)]
+        "UPDATE restaurant_tables SET status = $1, current_order_id = $2 WHERE tenant_id = $3 AND table_number = $4",
+        [tableStatus, orderId, tenantId, Number(b.tableNumber)]
       );
     }
 
