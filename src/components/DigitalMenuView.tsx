@@ -471,11 +471,13 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               </div>
 
               {/* Social Media Profiles */}
-              {(tenant.facebookUrl || tenant.instagramUrl || tenant.tiktokUrl) && (
-                <div className="flex items-center gap-2 shrink-0">
-                  {tenant.facebookUrl && (
+              {((tenant.facebookUrl && tenant.facebookUrl.trim() !== "") || 
+                (tenant.instagramUrl && tenant.instagramUrl.trim() !== "") || 
+                (tenant.tiktokUrl && tenant.tiktokUrl.trim() !== "")) && (
+                <div className="flex items-center gap-2 shrink-0 animate-in fade-in duration-200">
+                  {tenant.facebookUrl && tenant.facebookUrl.trim() !== "" && (
                     <a 
-                      href={tenant.facebookUrl} 
+                      href={tenant.facebookUrl.startsWith("http") ? tenant.facebookUrl : `https://${tenant.facebookUrl}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="w-8 h-8 rounded-full bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-950/60 text-slate-600 hover:text-blue-600 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
@@ -484,9 +486,9 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                       <Facebook className="w-4 h-4" />
                     </a>
                   )}
-                  {tenant.instagramUrl && (
+                  {tenant.instagramUrl && tenant.instagramUrl.trim() !== "" && (
                     <a 
-                      href={tenant.instagramUrl} 
+                      href={tenant.instagramUrl.startsWith("http") ? tenant.instagramUrl : `https://${tenant.instagramUrl}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="w-8 h-8 rounded-full bg-slate-100 hover:bg-pink-50 dark:bg-slate-800 dark:hover:bg-pink-950/60 text-slate-600 hover:text-pink-600 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
@@ -495,9 +497,9 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                       <Instagram className="w-4 h-4" />
                     </a>
                   )}
-                  {tenant.tiktokUrl && (
+                  {tenant.tiktokUrl && tenant.tiktokUrl.trim() !== "" && (
                     <a 
-                      href={tenant.tiktokUrl} 
+                      href={tenant.tiktokUrl.startsWith("http") ? tenant.tiktokUrl : `https://${tenant.tiktokUrl}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"

@@ -407,11 +407,13 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
         body: JSON.stringify(updated)
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "فشل في حفظ التعديلات");
       onUpdateTenant(data);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err) {
-      alert("فشل في حفظ التعديلات");
+    } catch (err: any) {
+      console.error("Save branding error:", err);
+      alert(lang === 'ar' ? "فشل في حفظ التعديلات: " + err.message : "Failed to save: " + err.message);
     }
   };
 

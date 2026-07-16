@@ -1,13 +1,25 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/restocloud';
-const pool = new Pool({ connectionString });
+const config = process.env.DATABASE_URL
+  ? { 
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
+    }
+  : {
+      host:     process.env.DB_HOST     || "localhost",
+      port:     Number(process.env.DB_PORT)     || 5432,
+      user:     process.env.DB_USER     || "postgres",
+      password: process.env.DB_PASSWORD || "postgres",
+      database: process.env.DB_NAME     || "sufra_cloud",
+      ssl: false,
+    };
+
+const pool = new Pool(config);
 
 async function run() {
-  console.log("Running social media URLs migration...");
+  console.log("Running social media URLs migration using environment variables...");
   try {
-    // Add facebook_url, instagram_url, tiktok_url columns to tenants table if not exists
     await pool.query(`
       ALTER TABLE tenants 
       ADD COLUMN IF NOT EXISTS facebook_url TEXT DEFAULT '',
