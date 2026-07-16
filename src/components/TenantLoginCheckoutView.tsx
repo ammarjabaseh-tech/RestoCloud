@@ -257,7 +257,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   
   // Plan Selection
-  const [selectedPlan, setSelectedPlan] = useState<"starter" | "pro" | "enterprise">("pro");
+  const [selectedPlan, setSelectedPlan] = useState<"starter" | "pro">("pro");
   
   // Payment Form
   const [paymentMethod, setPaymentMethod] = useState<"mada" | "visa" | "apple" | "stc">("mada");
@@ -348,32 +348,6 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
       badge: lang === 'ar' ? "🔥 الباقة الأكثر طلباً للمطاعم" : lang === 'tr' ? "🔥 En çok tercih edilen restoran paketi" : "🔥 Most popular for active restaurants",
       color: "from-emerald-500 to-teal-600",
       popular: true
-    },
-    enterprise: {
-      name: lang === 'ar' ? "باقة الشركات (Enterprise)" : lang === 'tr' ? "Kurumsal Paket (Enterprise)" : "Enterprise Plan",
-      price: lang === 'ar' ? 799 : lang === 'tr' ? 5990 : 239,
-      features: lang === 'ar' ? [
-        "جميع مميزات باقة المحترف (Pro)",
-        "مساعد الذكاء الاصطناعي AI لتقليل التكاليف",
-        "تصدير قواطع بيانات PostgreSQL وسيرفرات VPS",
-        "ربط بوابات دفع مخصصة ومحاسبة",
-        "مدير حساب مخصص ودعم 24/7 VIP"
-      ] : lang === 'tr' ? [
-        "Profesyonel (Pro) paketinin tüm özellikleri",
-        "Yapay zeka asistanı ile maliyet düşürme",
-        "PostgreSQL veri tabanı dışa aktarma & VPS sunucu",
-        "Özel ödeme geçitleri entegrasyonu",
-        "Size özel hesap temsilcisi & 7/24 VIP Destek"
-      ] : [
-        "All features of the Pro plan",
-        "AI assistant insights for cost reduction",
-        "Export PostgreSQL database to your own VPS",
-        "Custom payment gateways & accounting sync",
-        "Dedicated account manager & 24/7 VIP support"
-      ],
-      badge: lang === 'ar' ? "للسلاسل والمطاعم الكبرى" : lang === 'tr' ? "Büyük zincir restoranlar için" : "For chains & large restaurants",
-      color: "from-purple-600 to-indigo-600",
-      popular: false
     }
   };
 

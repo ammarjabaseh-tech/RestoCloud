@@ -716,12 +716,11 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                     onChange={(e) => setFormData({ ...formData, subscriptionPlan: e.target.value as Tenant["subscriptionPlan"] })}
                   >
                     <option value="starter">الأساسية (Starter)</option>
-                    <option value="pro">المتقدمة (Pro)</option>
-                    <option value="enterprise">المؤسسات (Enterprise)</option>
+                    <option value="pro">الاحترافية (Pro)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1.5">قيمة الاشتراك الشهري (ر.س)</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1.5">قيمة الاشتراك السنوي ($)</label>
                   <input
                     type="number"
                     className="w-full rounded-xl border border-slate-800 bg-slate-950/40 py-2.5 px-4 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-left"
@@ -955,12 +954,11 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                     onChange={(e) => setFormData({ ...formData, subscriptionPlan: e.target.value as Tenant["subscriptionPlan"] })}
                   >
                     <option value="starter">الأساسية (Starter)</option>
-                    <option value="pro">المتقدمة (Pro)</option>
-                    <option value="enterprise">المؤسسات (Enterprise)</option>
+                    <option value="pro">الاحترافية (Pro)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1.5">قيمة الاشتراك الشهري (ر.س)</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1.5">قيمة الاشتراك السنوي ($)</label>
                   <input
                     type="number"
                     className="w-full rounded-xl border border-slate-800 bg-slate-950/40 py-2.5 px-4 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-left"

@@ -25,7 +25,7 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
   // New Invoice / Renewal Modal
   const [showModal, setShowModal] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState(currentTenant?.id || (tenants[0]?.id || ""));
-  const [plan, setPlan] = useState<"starter" | "pro" | "enterprise">("pro");
+  const [plan, setPlan] = useState<"starter" | "pro">("pro");
   const [amount, setAmount] = useState<number>(599);
   const [billingPeriod, setBillingPeriod] = useState("سنوي - تجديد دوري 365 يوم");
 
@@ -50,11 +50,10 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
     fetchInvoices();
   }, [currentTenant?.id, isSuperAdmin]);
 
-  const handlePlanChange = (p: "starter" | "pro" | "enterprise") => {
+  const handlePlanChange = (p: "starter" | "pro") => {
     setPlan(p);
     if (p === "starter") setAmount(299);
     else if (p === "pro") setAmount(599);
-    else if (p === "enterprise") setAmount(1499);
   };
 
   const handleCreateInvoice = async (e: React.FormEvent) => {
@@ -378,7 +377,6 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
                   >
                     <option value="starter">💡 باقة البداية (Starter - $299)</option>
                     <option value="pro">🔥 باقة المحترف (Pro - $599)</option>
-                    <option value="enterprise">👑 باقة المؤسسات (Enterprise - $1499)</option>
                   </select>
                 </div>
 
