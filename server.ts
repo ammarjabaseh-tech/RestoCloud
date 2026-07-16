@@ -102,6 +102,9 @@ function mapTenant(row: any) {
     subscriptionAmount: row.subscription_amount ? parseFloat(row.subscription_amount) : undefined,
     subscriptionDate: row.subscription_date,
     isOpen: row.is_open !== false,
+    facebookUrl: row.facebook_url || "",
+    instagramUrl: row.instagram_url || "",
+    tiktokUrl: row.tiktok_url || "",
     createdAt: row.created_at ? row.created_at.toISOString().split("T")[0] : "",
   };
 }
@@ -381,6 +384,9 @@ app.put("/api/tenants/:id", async (req, res) => {
       bannerImage: "banner_image", subscriptionPlan: "subscription_plan",
       subscriptionAmount: "subscription_amount", subscriptionDate: "subscription_date",
       isOpen: "is_open",
+      facebookUrl: "facebook_url",
+      instagramUrl: "instagram_url",
+      tiktokUrl: "tiktok_url",
     };
     
     // Filter to keys that are either mapped or represent valid columns

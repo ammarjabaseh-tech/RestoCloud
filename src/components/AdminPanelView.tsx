@@ -30,7 +30,10 @@ import {
   Image,
   ChevronLeft,
   ChevronRight,
-  Printer as PrinterIcon
+  Printer as PrinterIcon,
+  Share2,
+  Facebook,
+  Instagram
 } from "lucide-react";
 import { QRCodeModal } from "./QRCodeModal";
 import { RestaurantLogo } from "./RestaurantLogo";
@@ -227,6 +230,9 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   const [currency, setCurrency] = useState(tenant.currency || "ر.س");
   const [bannerImage, setBannerImage] = useState(tenant.bannerImage || "");
   const [isOpen, setIsOpen] = useState(tenant.isOpen !== false);
+  const [facebookUrl, setFacebookUrl] = useState(tenant.facebookUrl || "");
+  const [instagramUrl, setInstagramUrl] = useState(tenant.instagramUrl || "");
+  const [tiktokUrl, setTiktokUrl] = useState(tenant.tiktokUrl || "");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Sync state when tenant prop changes (e.g. on save or tenant switch)
@@ -243,6 +249,9 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     setCurrency(tenant.currency || "ر.س");
     setBannerImage(tenant.bannerImage || "");
     setIsOpen(tenant.isOpen !== false);
+    setFacebookUrl(tenant.facebookUrl || "");
+    setInstagramUrl(tenant.instagramUrl || "");
+    setTiktokUrl(tenant.tiktokUrl || "");
   }, [tenant]);
 
   // New Category State
@@ -385,7 +394,10 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
       wifiName: wifiName,
       currency,
       bannerImage,
-      isOpen
+      isOpen,
+      facebookUrl,
+      instagramUrl,
+      tiktokUrl
     };
 
     try {
@@ -1156,6 +1168,68 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate w-full">{option.name}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Social Media Links Customization */}
+          <div className="space-y-4 p-5 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700">
+            <div>
+              <label className="block text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-emerald-600 animate-pulse" />
+                <span>{lang === 'ar' ? 'روابط شبكات التواصل الاجتماعي (Social Media)' : lang === 'tr' ? 'Sosyal Medya Bağlantıları' : 'Social Media Links'}</span>
+              </label>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {lang === 'ar' ? 'أدخل روابط صفحات المطعم الرسمية لتظهر لعملائك أسفل المنيو الرقمي.' : 'Add official page links to display in your digital menu footer.'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <Facebook className="w-4 h-4 text-blue-600" />
+                  <span>فيسبوك (Facebook)</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://facebook.com/username"
+                  value={facebookUrl}
+                  onChange={(e) => setFacebookUrl(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  dir="ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <Instagram className="w-4 h-4 text-pink-600" />
+                  <span>انستغرام (Instagram)</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://instagram.com/username"
+                  value={instagramUrl}
+                  onChange={(e) => setInstagramUrl(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  dir="ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-slate-900 dark:text-white shrink-0 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm5.75 8.16a3.52 3.52 0 0 1-2.07-.67v4.61a4.35 4.35 0 1 1-4.35-4.35 4.31 4.31 0 0 1 1 .12v2.24a2.15 2.15 0 0 0-1-.24 2.11 2.11 0 1 0 2.11 2.11V7.75h2.24a3.53 3.53 0 0 1 2.07 2.07v.34z"/>
+                  </svg>
+                  <span>تيك توك (TikTok)</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://tiktok.com/@username"
+                  value={tiktokUrl}
+                  onChange={(e) => setTiktokUrl(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  dir="ltr"
+                />
               </div>
             </div>
           </div>

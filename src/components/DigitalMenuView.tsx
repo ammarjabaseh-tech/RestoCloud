@@ -23,7 +23,9 @@ import {
   QrCode,
   X,
   ChevronRight,
-  Info
+  Info,
+  Facebook,
+  Instagram
 } from "lucide-react";
 import { QRCodeModal } from "./QRCodeModal";
 
@@ -453,17 +455,60 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
             </div>
 
             {/* Address, Phone, Wifi detailed row */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/80 font-sans">
-              <span className="flex items-center gap-1 shrink-0">
-                📍 {tenant.address}
-              </span>
-              <span className="flex items-center gap-1 shrink-0">
-                📞 {tenant.phone}
-              </span>
-              {(tenant.wifiName || tenant.wifiPassword) && (
-                <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold font-mono shrink-0">
-                  📶 WiFi: {tenant.wifiName || (lang === 'ar' ? 'عام' : lang === 'tr' ? 'Genel' : 'General')} {tenant.wifiPassword ? `(${tenant.wifiPassword})` : ''}
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 font-sans">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1 shrink-0">
+                  📍 {tenant.address}
                 </span>
+                <span className="flex items-center gap-1 shrink-0">
+                  📞 {tenant.phone}
+                </span>
+                {(tenant.wifiName || tenant.wifiPassword) && (
+                  <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold font-mono shrink-0">
+                    📶 WiFi: {tenant.wifiName || (lang === 'ar' ? 'عام' : lang === 'tr' ? 'Genel' : 'General')} {tenant.wifiPassword ? `(${tenant.wifiPassword})` : ''}
+                  </span>
+                )}
+              </div>
+
+              {/* Social Media Profiles */}
+              {(tenant.facebookUrl || tenant.instagramUrl || tenant.tiktokUrl) && (
+                <div className="flex items-center gap-2 shrink-0">
+                  {tenant.facebookUrl && (
+                    <a 
+                      href={tenant.facebookUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 rounded-full bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-950/60 text-slate-600 hover:text-blue-600 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
+                      title="Facebook"
+                    >
+                      <Facebook className="w-4 h-4" />
+                    </a>
+                  )}
+                  {tenant.instagramUrl && (
+                    <a 
+                      href={tenant.instagramUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 rounded-full bg-slate-100 hover:bg-pink-50 dark:bg-slate-800 dark:hover:bg-pink-950/60 text-slate-600 hover:text-pink-600 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
+                      title="Instagram"
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                  )}
+                  {tenant.tiktokUrl && (
+                    <a 
+                      href={tenant.tiktokUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
+                      title="TikTok"
+                    >
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm5.75 8.16a3.52 3.52 0 0 1-2.07-.67v4.61a4.35 4.35 0 1 1-4.35-4.35 4.31 4.31 0 0 1 1 .12v2.24a2.15 2.15 0 0 0-1-.24 2.11 2.11 0 1 0 2.11 2.11V7.75h2.24a3.53 3.53 0 0 1 2.07 2.07v.34z"/>
+                      </svg>
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           </div>

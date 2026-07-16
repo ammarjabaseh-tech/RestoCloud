@@ -24,6 +24,9 @@ export interface Tenant {
   subscriptionAmount?: number;
   subscriptionDate?: string;
   isOpen?: boolean;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  tiktokUrl?: string;
 }
 
 export interface Category {
