@@ -199,7 +199,10 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               >
                 <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>
-                  {lang === 'ar' ? '🇸🇦 العربية' : lang === 'tr' ? '🇹🇷 Türkçe' : '🇬🇧 English'}
+                  {lang === 'ar' ? '🇸🇦 ' : lang === 'tr' ? '🇹🇷 ' : '🇬🇧 '}
+                </span>
+                <span className="hidden sm:inline">
+                  {lang === 'ar' ? 'العربية' : lang === 'tr' ? 'Türkçe' : 'English'}
                 </span>
                 <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" />
               </button>
@@ -274,12 +277,12 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
+      <section className="relative pt-24 pb-16 sm:pt-32 sm:pb-20 lg:pt-48 lg:pb-32 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-semibold mb-8">
-            <SparklesIcon className="w-4 h-4" /> {t.heroBadge}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs sm:text-sm font-semibold mb-6 sm:mb-8">
+            <SparklesIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {t.heroBadge}
           </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 mb-8 leading-[1.2] whitespace-pre-line">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 mb-6 sm:mb-8 leading-[1.2]">
             {t.heroTitle}
           </h1>
           <p className="text-base md:text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
@@ -318,36 +321,42 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               title={t.feat1Title}
               desc={t.feat1Desc}
               color="from-blue-500 to-cyan-500"
+              lang={lang}
             />
             <FeatureCard
               icon={<Bot />}
               title={t.feat2Title}
               desc={t.feat2Desc}
               color="from-purple-500 to-pink-500"
+              lang={lang}
             />
             <FeatureCard
               icon={<ShieldCheck />}
               title={t.feat3Title}
               desc={t.feat3Desc}
               color="from-emerald-500 to-teal-500"
+              lang={lang}
             />
             <FeatureCard
               icon={<Zap />}
               title={t.feat4Title}
               desc={t.feat4Desc}
               color="from-amber-500 to-orange-500"
+              lang={lang}
             />
             <FeatureCard
               icon={<Smartphone />}
               title={t.feat5Title}
               desc={t.feat5Desc}
               color="from-rose-500 to-red-500"
+              lang={lang}
             />
             <FeatureCard
               icon={<CreditCard />}
               title={t.feat6Title}
               desc={t.feat6Desc}
               color="from-indigo-500 to-blue-500"
+              lang={lang}
             />
           </div>
         </div>
@@ -363,11 +372,11 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Starter Plan */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-8 flex flex-col hover:border-slate-500 transition-colors">
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-6 sm:p-8 flex flex-col hover:border-slate-500 transition-colors">
               <h3 className="text-2xl font-bold text-white mb-2">{t.planStarter}</h3>
               <p className="text-slate-400 text-sm mb-6">{t.planStarterDesc}</p>
               <div className="mb-6">
-                <span className="text-5xl font-black text-white">{t.planStarterPriceVal}</span>
+                <span className="text-4xl sm:text-5xl font-black text-white">{t.planStarterPriceVal}</span>
                 <span className="text-slate-400">{t.planStarterPriceUnit}</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
@@ -383,14 +392,14 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-gradient-to-b from-indigo-900/40 to-slate-900 border border-indigo-500/30 rounded-3xl p-8 flex flex-col relative shadow-2xl shadow-indigo-500/10 transform md:-translate-y-4">
-              <div className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg">
+            <div className="bg-gradient-to-b from-indigo-900/40 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 flex flex-col relative shadow-2xl shadow-indigo-500/10 transform md:-translate-y-4 mt-8 md:mt-0">
+              <div className={`absolute top-0 ${lang === 'ar' ? 'right-8' : 'left-8'} -translate-y-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg`}>
                 {t.planProBadge}
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">{t.planPro}</h3>
               <p className="text-indigo-200 text-sm mb-6">{t.planProDesc}</p>
               <div className="mb-6">
-                <span className="text-5xl font-black text-white">{t.planProPriceVal}</span>
+                <span className="text-4xl sm:text-5xl font-black text-white">{t.planProPriceVal}</span>
                 <span className="text-indigo-200">{t.planProPriceUnit}</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
@@ -438,10 +447,10 @@ function SparklesIcon(props: any) {
   );
 }
 
-function FeatureCard({ icon, title, desc, color }: { icon: React.ReactNode, title: string, desc: string, color: string }) {
+function FeatureCard({ icon, title, desc, color, lang }: { icon: React.ReactNode, title: string, desc: string, color: string, lang: string }) {
   return (
-    <div className="bg-slate-800/40 border border-white/5 rounded-3xl p-6 hover:bg-slate-800/60 transition-colors group text-right">
-      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white mb-6 shadow-lg transform group-hover:scale-110 transition-transform`}>
+    <div className={`bg-slate-800/40 border border-white/5 rounded-3xl p-6 hover:bg-slate-800/60 transition-colors group ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white mb-6 shadow-lg transform group-hover:scale-110 transition-transform ${lang === 'ar' ? 'mr-0 ml-auto' : 'ml-0 mr-auto'}`}>
         {icon}
       </div>
       <h3 className="text-xl font-bold text-white mb-3">{title}</h3>

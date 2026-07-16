@@ -337,13 +337,13 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12 xl:p-24 relative bg-white shadow-2xl z-10">
         
         {/* Header Controls (Return Home & Language) */}
-        <div className={`absolute top-8 ${lang === 'ar' ? 'right-8 left-auto flex-row' : 'left-8 right-auto flex-row-reverse'} flex items-center gap-4`}>
+        <div className={`absolute top-4 sm:top-8 ${lang === 'ar' ? 'right-4 sm:right-8' : 'left-4 sm:left-8'} flex items-center gap-2 sm:gap-4`}>
           <button
             onClick={() => onSelectView("landing_page")}
-            className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
           >
-            {lang === 'ar' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-            <span>{t.backToHome}</span>
+            {lang === 'ar' ? <ArrowRight className="w-4 h-4 shrink-0" /> : <ArrowLeft className="w-4 h-4 shrink-0" />}
+            <span className="hidden sm:inline">{t.backToHome}</span>
           </button>
 
           {/* Language Selector Dropdown */}

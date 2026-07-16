@@ -628,7 +628,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           <p className="text-xs text-slate-500">{translations[lang].noItemsFoundDesc}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {availableItems.map((item) => {
             const inCartQty = cart.find((i) => i.itemId === item.id)?.quantity || 0;
             const itemName = lang === 'en' && item.nameEn ? item.nameEn : lang === 'tr' && item.nameTr ? item.nameTr : item.nameAr;
@@ -640,7 +640,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between group cursor-pointer hover:-translate-y-0.5 transform"
               >
                 {/* Photo & Badges */}
-                <div className="relative h-32 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-800">
+                <div className="relative h-28 sm:h-32 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-800">
                   <img
                     src={item.image}
                     alt={itemName}
@@ -664,7 +664,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 </div>
 
                 {/* Details & Action */}
-                <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
+                <div className="p-2.5 sm:p-3 flex-1 flex flex-col justify-between space-y-2">
                   <div className="space-y-0.5">
                     <h3 className="text-xs font-black text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
                       {itemName}
