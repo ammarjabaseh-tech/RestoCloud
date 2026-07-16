@@ -230,7 +230,12 @@ export default function App() {
               const owner = users.find((u: TenantUser) => u.role === "owner") || users[0];
               setCurrentUser(owner);
             }
-            setActiveView("pos_dashboard");
+            const savedView = localStorage.getItem("activeView");
+            if (savedView && savedView !== 'super_admin_dashboard' && savedView !== 'super_admin_login' && savedView !== 'landing_page') {
+              setActiveView(savedView as ActivePortalView);
+            } else {
+              setActiveView("pos_dashboard");
+            }
           }
         }
         // E. Is this a Tenant subdomain route?

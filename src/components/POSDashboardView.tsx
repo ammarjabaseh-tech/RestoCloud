@@ -26,7 +26,8 @@ import {
   MapPin,
   RefreshCw,
   History,
-  Bell
+  Bell,
+  WifiOff
 } from "lucide-react";
 const posTranslations = {
   ar: {
@@ -330,6 +331,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [posMode, setPosMode] = useState<"sales" | "orders">("sales");
   const [posOrderTab, setPosOrderTab] = useState<"all" | "pending" | "preparing" | "ready" | "archived">("all");
   const [showMobileCart, setShowMobileCart] = useState<boolean>(false);
+  const [offlineQueueCount, setOfflineQueueCount] = useState<number>(0);
 
   React.useEffect(() => {
     if (cart.length === 0) {
@@ -357,6 +359,92 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       console.error("Failed to update restaurant status:", err);
     }
   };
+
+  const syncOfflineOrders = async () => {
+    const queue = JSON.parse(localStorage.getItem("offline_orders_queue") || "[]");
+    if (queue.length === 0) {
+      setOfflineQueueCount(0);
+      return;
+    }
+    
+    setOfflineQueueCount(queue.length);
+    console.log(`[Offline Sync] Found ${queue.length} offline orders to sync.`);
+    
+    let successCount = 0;
+    const remainingQueue = [];
+    
+    for (const order of queue) {
+      try {
+        const res = await fetch(`/api/tenants/${tenant.id}/orders`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderType: order.orderType,
+            tableNumber: order.tableNumber,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            customerAddress: order.customerAddress,
+            items: order.items,
+            subtotal: order.subtotal,
+            taxAmount: order.taxAmount,
+            discountAmount: order.discountAmount,
+            total: order.total,
+            paymentMethod: order.paymentMethod,
+            paymentStatus: order.paymentStatus,
+            cashierName: order.cashierName || "Offline Cashier",
+            createdAt: order.createdAt
+          })
+        });
+        
+        if (res.ok) {
+          successCount++;
+          const syncedOrder = await res.json();
+          onOrderCreated(syncedOrder);
+        } else {
+          remainingQueue.push(order);
+        }
+      } catch (err) {
+        console.error("[Offline Sync] Failed to sync order:", order.id, err);
+        remainingQueue.push(order);
+      }
+    }
+    
+    localStorage.setItem("offline_orders_queue", JSON.stringify(remainingQueue));
+    setOfflineQueueCount(remainingQueue.length);
+    
+    if (successCount > 0) {
+      alert(lang === 'ar'
+        ? `🟢 تم بنجاح مزامنة وإرسال (${successCount}) طلبات كانت محفوظة محلياً إلى السيرفر!`
+        : `🟢 Successfully synced (${successCount}) offline orders to the server!`
+      );
+    }
+  };
+
+  React.useEffect(() => {
+    const queue = JSON.parse(localStorage.getItem("offline_orders_queue") || "[]");
+    setOfflineQueueCount(queue.length);
+
+    if (navigator.onLine) {
+      syncOfflineOrders();
+    }
+
+    const handleOnline = () => {
+      syncOfflineOrders();
+    };
+
+    window.addEventListener("online", handleOnline);
+    
+    const interval = setInterval(() => {
+      if (navigator.onLine) {
+        syncOfflineOrders();
+      }
+    }, 30000);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      clearInterval(interval);
+    };
+  }, [tenant.id]);
 
   const pendingSelfOrders = useMemo(() => {
     return historyOrders.filter(o => o.orderStatus === "pending");
@@ -620,6 +708,73 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       setCustomerAddress("");
       setDiscountAmount(0);
     } catch (err: any) {
+      console.error("Order submission error:", err);
+      
+      const isNetworkError = !navigator.onLine || 
+                            err.message.includes("Failed to fetch") || 
+                            err.message.includes("network error") || 
+                            err.message.includes("NetworkError") ||
+                            err.message.includes("Failed to execute 'fetch'");
+                            
+      if (isNetworkError) {
+        const offlineId = `offline-${Date.now()}`;
+        const offlineOrder = {
+          id: offlineId,
+          orderNumber: `OFF-${Math.floor(1000 + Math.random() * 9000)}`,
+          orderType,
+          tableNumber: orderType === "dine_in" ? selectedTable : undefined,
+          customerName: customerName || (orderType === "dine_in" ? `${posTranslations[lang].dineInLabel} ${selectedTable}` : posTranslations[lang].takeawayLabel),
+          customerPhone,
+          customerAddress: orderType === "delivery" ? customerAddress : undefined,
+          items: cart.map(i => ({
+            ...i,
+            itemId: i.itemId,
+            nameAr: i.nameAr,
+            price: Number(i.price),
+            quantity: Number(i.quantity)
+          })),
+          subtotal,
+          taxAmount,
+          discountAmount,
+          total,
+          paymentMethod: statusOverride === 'pending' ? 'pending' : paymentMethod,
+          paymentStatus: statusOverride === 'pending' ? 'pending' : 'paid',
+          orderStatus: 'pending',
+          createdAt: new Date().toISOString(),
+          isOffline: true
+        };
+
+        const queue = JSON.parse(localStorage.getItem("offline_orders_queue") || "[]");
+        queue.push(offlineOrder);
+        localStorage.setItem("offline_orders_queue", JSON.stringify(queue));
+
+        try {
+          confetti({
+            particleCount: 50,
+            spread: 50,
+            origin: { y: 0.6 }
+          });
+        } catch (e) {}
+
+        onOrderCreated(offlineOrder as any);
+        setCompletedOrder(offlineOrder as any);
+        
+        setCart([]);
+        setDiscountAmount(0);
+        setCustomerName("");
+        setCustomerPhone("");
+        setCustomerAddress("");
+        
+        setOfflineQueueCount(queue.length);
+        
+        alert(lang === 'ar' 
+          ? "🔴 انقطع الاتصال بالإنترنت! تم حفظ الفاتورة محلياً بنجاح وسنقوم بمزامنتها تلقائياً عند عودة الشبكة. يمكنك الاستمرار في العمل وطباعة الفاتورة."
+          : "🔴 Connection offline! Order saved locally. It will sync automatically when connection returns. You can continue selling and printing receipts."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+      
       alert(err.message || (lang === 'ar' ? "حدث خطأ في الاتصال" : lang === 'tr' ? "Bağlantı hatası oluştu" : "Connection error occurred"));
     } finally {
       setIsSubmitting(false);
@@ -1001,6 +1156,34 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-in fade-in duration-200" dir="rtl">
       
+      {offlineQueueCount > 0 && (
+        <div className="lg:col-span-12 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300 p-4 rounded-3xl flex items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-3">
+            <WifiOff className="w-5 h-5 text-rose-600 dark:text-rose-400 animate-pulse shrink-0" />
+            <div>
+              <p className="text-xs font-bold">
+                {lang === 'ar' 
+                  ? `أنت تعمل في وضع عدم الاتصال بالشبكة (Offline). لديك (${offlineQueueCount}) طلبات معلقة محفوظة محلياً.` 
+                  : `You are working offline. You have (${offlineQueueCount}) cached orders pending sync.`
+                }
+              </p>
+              <p className="text-[10px] opacity-80 mt-0.5">
+                {lang === 'ar'
+                  ? "سيتم إرسال الطلبات تلقائياً للسيرفر فور عودة الاتصال بالإنترنت. يمكنك الاستمرار في تسجيل الطلبات وطباعة الفواتير كالمعتاد."
+                  : "Orders will sync to the server automatically once network connection is restored. You can keep taking and printing orders."
+                }
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={syncOfflineOrders}
+            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[10px] font-bold transition-all shadow-sm shrink-0 cursor-pointer"
+          >
+            {lang === 'ar' ? "مزامنة الآن" : "Sync Now"}
+          </button>
+        </div>
+      )}
+
       {/* POS Top Header Bar (12 Cols) */}
       <div className="lg:col-span-12 bg-white p-3.5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
