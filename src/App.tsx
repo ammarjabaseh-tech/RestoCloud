@@ -818,14 +818,14 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto shadow-sm print:hidden">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <span className="font-bold text-slate-800">
               {lang === 'ar' ? 'ريستو كلاود (RestoCloud)' : 'RestoCloud'}
             </span>
             <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200 font-medium text-[10px]">
               SaaS Multi-Tenant
             </span>
-            <span>
+            <span className="hidden sm:inline text-slate-500">
               {lang === 'ar' ? '— نظام مبيعات وإدارة المطاعم متعدد المستأجرين (SaaS POS)' : lang === 'tr' ? '— Çok Kiracılı Restoran Yönetim ve POS Sistemi (SaaS POS)' : '— Multi-Tenant Restaurant POS & Management System (SaaS POS)'}
             </span>
           </div>

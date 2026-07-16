@@ -153,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-1.5 font-bold text-base tracking-tight text-slate-900">
               <span className="bg-indigo-600 text-white font-bold px-2 py-1 rounded-lg text-xs flex items-center gap-1 shadow-sm">
                 <Store className="w-3.5 h-3.5 text-white" />
-                ريستو كلاود (RestoCloud)
+                <span className="hidden sm:inline">ريستو كلاود (RestoCloud)</span>
               </span>
             </div>
 
@@ -175,7 +175,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     title="فتح المنيو الرقمي للزبائن"
                   >
                     <span className="hidden md:inline">🔗 {currentTenant.subdomain}.resto-cloud.com</span>
-                    <span className="md:hidden">🔗 {currentTenant.subdomain}</span>
+                    <span className="hidden sm:inline md:hidden">🔗 {currentTenant.subdomain}</span>
+                    <span className="sm:hidden">🔗</span>
                   </a>
                 </div>
               ) : (
@@ -197,7 +198,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       title="فتح المنيو الرقمي للزبائن"
                     >
                       <span className="hidden md:inline">🔗 {currentTenant.subdomain}.resto-cloud.com</span>
-                      <span className="md:hidden">🔗 {currentTenant.subdomain}</span>
+                      <span className="hidden sm:inline md:hidden">🔗 {currentTenant.subdomain}</span>
+                      <span className="sm:hidden">🔗</span>
                     </a>
                     <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showTenantDropdown ? 'rotate-180' : ''}`} />
                   </button>

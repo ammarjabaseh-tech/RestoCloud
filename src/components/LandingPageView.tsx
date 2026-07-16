@@ -171,8 +171,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   return (
     <div className="min-h-screen bg-slate-900 text-slate-50 font-sans selection:bg-indigo-500/30 overflow-x-hidden" dir={(lang || 'ar') === 'ar' ? 'rtl' : 'ltr'}>
       {/* Decorative Background Glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/30 rounded-full blur-[128px] -z-10 animate-pulse pointer-events-none" />
-      <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-rose-600/20 rounded-full blur-[128px] -z-10 pointer-events-none" />
+      <div className="hidden sm:block absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/30 rounded-full blur-[128px] -z-10 animate-pulse pointer-events-none" />
+      <div className="hidden sm:block absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-rose-600/20 rounded-full blur-[128px] -z-10 pointer-events-none" />
 
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-white/10">
