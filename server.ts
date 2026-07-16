@@ -267,6 +267,10 @@ app.post("/api/tenants", async (req, res) => {
   const { nameAr, subdomain, themeColor, logo, phone, address, ownerName, slogan, status, ownerEmail, password, subscriptionPlan, subscriptionAmount, subscriptionDate, currency, otpCode, bypassOTP } = req.body;
   try {
     const cleanEmail = ownerEmail?.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ error: "البريد الإلكتروني لمالك المطعم غير صحيح أو غير متوفر" });
+    }
 
     // Verify OTP unless explicitly bypassed (e.g., direct admin creation or portal payment checkout)
     if (!bypassOTP) {
@@ -442,6 +446,10 @@ app.post("/api/auth/send-otp", async (req, res) => {
   }
 
   const cleanEmail = email.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(cleanEmail)) {
+    return res.status(400).json({ error: "البريد الإلكتروني المدخل غير صحيح" });
+  }
 
   try {
     if (actionType === "signup") {

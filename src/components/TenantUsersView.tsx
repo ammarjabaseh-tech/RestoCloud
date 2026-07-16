@@ -319,6 +319,12 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
     setError("");
     setSuccessMsg("");
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError(lang === 'ar' ? "يرجى إدخال بريد إلكتروني صحيح وصالح" : "Please enter a valid email address");
+      return;
+    }
+
     try {
       if (editingUser) {
         // Update user

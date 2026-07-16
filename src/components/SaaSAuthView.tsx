@@ -218,6 +218,11 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({
       setError(t.enterEmailErr);
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError(lang === 'ar' ? "يرجى كتابة بريد إلكتروني صحيح وصالح (مثال: name@example.com)" : "Please enter a valid email address (e.g. name@example.com)");
+      return;
+    }
     setLoading(true);
     setError(null);
     setOtpSentMsg(null);
