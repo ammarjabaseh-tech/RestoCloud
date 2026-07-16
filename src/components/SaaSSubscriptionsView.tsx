@@ -26,8 +26,8 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState(currentTenant?.id || (tenants[0]?.id || ""));
   const [plan, setPlan] = useState<"starter" | "pro" | "enterprise">("pro");
-  const [amount, setAmount] = useState<number>(399);
-  const [billingPeriod, setBillingPeriod] = useState("شهري - تجديد دوري 30 يوم");
+  const [amount, setAmount] = useState<number>(599);
+  const [billingPeriod, setBillingPeriod] = useState("سنوي - تجديد دوري 365 يوم");
 
   const fetchInvoices = async () => {
     try {
@@ -52,9 +52,9 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
 
   const handlePlanChange = (p: "starter" | "pro" | "enterprise") => {
     setPlan(p);
-    if (p === "starter") setAmount(199);
-    else if (p === "pro") setAmount(399);
-    else if (p === "enterprise") setAmount(899);
+    if (p === "starter") setAmount(299);
+    else if (p === "pro") setAmount(599);
+    else if (p === "enterprise") setAmount(1499);
   };
 
   const handleCreateInvoice = async (e: React.FormEvent) => {
@@ -121,11 +121,11 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
   const getPlanBadge = (p: string) => {
     switch (p) {
       case "starter":
-        return <span className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs font-bold border border-blue-300">💡 البداية (199 ر.س)</span>;
+        return <span className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs font-bold border border-blue-300">💡 البداية ($299 / سنة)</span>;
       case "pro":
-        return <span className="px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-bold border border-purple-300">🔥 المحترف (399 ر.س)</span>;
+        return <span className="px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-bold border border-purple-300">🔥 المحترف ($599 / سنة)</span>;
       case "enterprise":
-        return <span className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold border border-amber-300">👑 المؤسسات (899 ر.س)</span>;
+        return <span className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold border border-amber-300">👑 المؤسسات ($1499 / سنة)</span>;
       default:
         return <span className="px-2.5 py-1 bg-slate-100 text-slate-800 rounded-lg text-xs font-bold">{p}</span>;
     }
@@ -202,7 +202,7 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
             </div>
             <div className="text-2xl font-black text-emerald-700 flex items-baseline gap-1">
               <span>{totalCollected.toLocaleString()}</span>
-              <span className="text-xs font-medium text-slate-400">ر.س</span>
+              <span className="text-xs font-medium text-slate-400">$</span>
             </div>
             <div className="text-[11px] text-slate-400 mt-1">فواتير سددت بنجاح وتعمل حالياً</div>
           </div>
@@ -214,7 +214,7 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
             </div>
             <div className="text-2xl font-black text-amber-600 flex items-baseline gap-1">
               <span>{totalPending.toLocaleString()}</span>
-              <span className="text-xs font-medium text-slate-400">ر.س</span>
+              <span className="text-xs font-medium text-slate-400">$</span>
             </div>
             <div className="text-[11px] text-slate-400 mt-1">مطاعم في مرحلة التجربة أو بانتظار التجديد</div>
           </div>
@@ -309,7 +309,7 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
                         <div className="text-slate-400 mt-0.5">تاريخ الاستحقاق: <span className="font-mono">{inv.dueDate}</span></div>
                       </td>
                       <td className="py-4 px-4 font-black text-slate-800">
-                        {inv.amount.toLocaleString()} <span className="text-xs font-normal text-slate-500">ر.س</span>
+                        {inv.amount.toLocaleString()} <span className="text-xs font-normal text-slate-500">$</span>
                       </td>
                       <td className="py-4 px-4 text-center">
                         {getStatusBadge(inv.status)}
@@ -376,14 +376,14 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
                     onChange={(e) => handlePlanChange(e.target.value as any)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-purple-500"
                   >
-                    <option value="starter">💡 باقة البداية (Starter - 199 ر.س)</option>
-                    <option value="pro">🔥 باقة المحترف (Pro - 399 ر.س)</option>
-                    <option value="enterprise">👑 باقة المؤسسات (Enterprise - 899 ر.س)</option>
+                    <option value="starter">💡 باقة البداية (Starter - $299)</option>
+                    <option value="pro">🔥 باقة المحترف (Pro - $599)</option>
+                    <option value="enterprise">👑 باقة المؤسسات (Enterprise - $1499)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">مبلغ الفاتورة (ر.س) *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">مبلغ الفاتورة ($) *</label>
                   <input
                     type="number"
                     required

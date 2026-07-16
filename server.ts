@@ -310,7 +310,7 @@ app.post("/api/tenants", async (req, res) => {
        address || "الرياض، المملكة العربية السعودية", phone || "0500000000", ownerName || "صاحب المطعم",
        ownerEmail || "", password || "", status || "trial",
        slogan || "نكهات طازجة وجودة عالية كل يوم", `${cleanSub}_wifi_2026`,
-       subscriptionPlan || "starter", subscriptionAmount || 199,
+       subscriptionPlan || "starter", subscriptionAmount || 299,
        subscriptionDate || new Date().toISOString().split("T")[0]]
     );
 
@@ -728,7 +728,7 @@ app.post("/api/invoices", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO invoices (id, invoice_number, tenant_id, tenant_name, plan, amount, billing_period, issue_date, due_date, status)
        VALUES ($1,$2,$3,$4,$5,$6,$7,CURRENT_DATE,$8,'pending') RETURNING *`,
-      [id, invoiceNumber, tenantId, tenantName, plan || "starter", amount || 199, billingPeriod || "شهري",
+      [id, invoiceNumber, tenantId, tenantName, plan || "starter", amount || 299, billingPeriod || "سنوي",
        dueDate || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0]]
     );
     res.status(201).json(mapInvoice(result.rows[0]));

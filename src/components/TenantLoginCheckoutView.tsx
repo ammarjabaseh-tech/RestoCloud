@@ -296,7 +296,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   const plans = {
     starter: {
       name: lang === 'ar' ? "باقة المنطلق (Starter)" : lang === 'tr' ? "Başlangıç Paketi (Starter)" : "Starter Plan",
-      price: lang === 'ar' ? 199 : lang === 'tr' ? 1490 : 59,
+      price: 299,
       features: lang === 'ar' ? [
         "منيو إلكتروني رقمي مع باركود QR",
         "حتى 500 طلب شهرياً",
@@ -322,7 +322,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
     },
     pro: {
       name: lang === 'ar' ? "باقة المحترف (Pro)" : lang === 'tr' ? "Profesyonel Paket (Pro)" : "Pro Plan",
-      price: lang === 'ar' ? 399 : lang === 'tr' ? 2990 : 119,
+      price: 599,
       features: lang === 'ar' ? [
         "نظام كاشير ونقطة بيع متكاملة (POS)",
         "طلبات وفواتير غير محدودة",
@@ -890,8 +890,8 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                       </div>
 
                       <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-                        <span className="text-3xl font-black text-slate-950 dark:text-white">{p.price}</span>
-                        <span className="text-xs text-slate-400"> {currency} / {lang === 'ar' ? 'شهرياً' : lang === 'tr' ? 'aylık' : 'month'}</span>
+                        <span className="text-3xl font-black text-slate-950 dark:text-white">${p.price}</span>
+                        <span className="text-xs text-slate-400"> / {lang === 'ar' ? 'سنوياً' : lang === 'tr' ? 'yıllık' : 'year'}</span>
                       </div>
 
                       <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 font-medium mb-6 flex-1">
@@ -958,18 +958,18 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
                 <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                   <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
                     <span>{t.billingPrice}</span>
-                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{currentPlanObj.price} {currency}</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">${currentPlanObj.price}</span>
                   </div>
                   <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
                     <span>{t.billingTax}</span>
-                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{vatAmount} {currency}</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">${vatAmount}</span>
                   </div>
                   
                   <div className="h-px bg-slate-200 dark:bg-slate-800 my-2" />
                   
                   <div className="flex justify-between text-sm font-black text-slate-900 dark:text-white">
                     <span>{t.billingTotal}</span>
-                    <span className="font-mono text-emerald-600 text-base">{totalWithVat} {currency}</span>
+                    <span className="font-mono text-emerald-600 text-base">${totalWithVat}</span>
                   </div>
                 </div>
 

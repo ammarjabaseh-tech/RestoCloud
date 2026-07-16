@@ -270,7 +270,7 @@ export const SaaSAuthView: React.FC<SaaSAuthViewProps> = ({
           status: "pending_approval",
           themeColor: "emerald",
           subscriptionPlan: "starter",
-          subscriptionAmount: 199,
+          subscriptionAmount: 299,
           otpCode: otpCode
         })
       });

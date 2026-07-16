@@ -250,7 +250,7 @@ export const SaaSPortalView: React.FC<SaaSPortalViewProps> = ({
                       <DollarSign className="w-4 h-4 text-emerald-600" />
                       <span>الباقة: {t.subscriptionPlan === "enterprise" ? "الشركات (Enterprise)" : t.subscriptionPlan === "starter" ? "المنطلق (Starter)" : "المحترف (Pro)"}</span>
                     </span>
-                    <span className="text-emerald-600 text-sm font-black">{t.subscriptionAmount || 399} ر.س (مدفوعة)</span>
+                    <span className="text-emerald-600 text-sm font-black">${t.subscriptionAmount || 599} (سنوياً)</span>
                   </div>
                 </div>
 

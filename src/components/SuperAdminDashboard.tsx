@@ -43,7 +43,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     slogan: "",
     status: "trial" as Tenant["status"],
     subscriptionPlan: "starter" as Tenant["subscriptionPlan"],
-    subscriptionAmount: 199,
+    subscriptionAmount: 299,
     currency: "ر.س",
   });
 
@@ -88,7 +88,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       slogan: "",
       status: "trial",
       subscriptionPlan: "starter",
-      subscriptionAmount: 199,
+      subscriptionAmount: 299,
       currency: "ر.س",
     });
   };
@@ -190,7 +190,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       slogan: tenant.slogan || "",
       status: tenant.status || "trial",
       subscriptionPlan: tenant.subscriptionPlan || "starter",
-      subscriptionAmount: tenant.subscriptionAmount || 199,
+      subscriptionAmount: tenant.subscriptionAmount || 299,
       currency: tenant.currency || "ر.س",
     });
     setShowEditModal(true);
@@ -419,7 +419,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                       <td className="p-4">
                         <div className="space-y-1">
                           <div className="font-bold text-indigo-400">
-                            {t.subscriptionAmount || 0} ر.س / شهر
+                            ${t.subscriptionAmount || 0} / سنة
                           </div>
                           {t.subscriptionDate && (
                             <div className="text-[10px] text-slate-500 flex items-center gap-1">
