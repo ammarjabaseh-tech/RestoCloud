@@ -254,11 +254,10 @@ export const SaaSOnboardingModal: React.FC<SaaSOnboardingModalProps> = ({
               <div className="sm:col-span-7">
                 <input
                   type="text"
-                  placeholder="رابط صورة (https://...) أو كتابة رمز (مثال: ✨ أو KF)"
-                  value={logo}
+                  placeholder="اكتب رمز شعارك أو اختصاره (مثال: ✨ أو KF)"
+                  value={logo?.startsWith("data:") || logo?.startsWith("http") ? "" : logo}
                   onChange={(e) => setLogo(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  dir="ltr"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
 

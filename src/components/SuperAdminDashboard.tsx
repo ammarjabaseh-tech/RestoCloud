@@ -620,7 +620,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                     type="text"
                     placeholder="مثال: 🍔، 🍕، 🍲"
                     className="w-full rounded-xl border border-slate-800 bg-slate-950/40 py-2.5 px-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-center"
-                    value={formData.logo}
+                    value={formData.logo?.startsWith("data:") || formData.logo?.startsWith("http") ? "" : formData.logo}
                     onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
                   />
                 </div>
@@ -861,7 +861,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                   <input
                     type="text"
                     className="w-full rounded-xl border border-slate-800 bg-slate-950/40 py-2.5 px-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-center"
-                    value={formData.logo}
+                    value={formData.logo?.startsWith("data:") || formData.logo?.startsWith("http") ? "" : formData.logo}
                     onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
                   />
                 </div>
