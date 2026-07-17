@@ -139,6 +139,12 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     }
   }, [activeTab]);
 
+  React.useEffect(() => {
+    if (tenant.subscriptionPlan === "lite" && activeTab !== "menu" && activeTab !== "branding") {
+      setActiveTab("menu");
+    }
+  }, [activeTab, tenant.subscriptionPlan]);
+
   const handleSavePrinter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPrinter || !editingPrinter.name || !editingPrinter.connectionType) return;
@@ -584,53 +590,61 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             <span>{adminTranslations[lang].tabBranding}</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab("tables")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-              activeTab === "tables"
-                ? `${theme.primaryBg} text-white shadow-sm`
-                : "text-slate-600 hover:bg-white/70"
-            }`}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>{adminTranslations[lang].tabTables}</span>
-          </button>
+          {tenant.subscriptionPlan !== "lite" && (
+            <button
+              onClick={() => setActiveTab("tables")}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                activeTab === "tables"
+                  ? `${theme.primaryBg} text-white shadow-sm`
+                  : "text-slate-600 hover:bg-white/70"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>{adminTranslations[lang].tabTables}</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab("analytics")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-              activeTab === "analytics"
-                ? `${theme.primaryBg} text-white shadow-sm`
-                : "text-slate-600 hover:bg-white/70"
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>{adminTranslations[lang].tabAnalytics}</span>
-          </button>
+          {tenant.subscriptionPlan !== "lite" && (
+            <button
+              onClick={() => setActiveTab("analytics")}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                activeTab === "analytics"
+                  ? `${theme.primaryBg} text-white shadow-sm`
+                  : "text-slate-600 hover:bg-white/70"
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>{adminTranslations[lang].tabAnalytics}</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-              activeTab === "users"
-                ? `${theme.primaryBg} text-white shadow-sm`
-                : "text-slate-600 hover:bg-white/70"
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>{adminTranslations[lang].tabUsers}</span>
-          </button>
+          {tenant.subscriptionPlan !== "lite" && (
+            <button
+              onClick={() => setActiveTab("users")}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                activeTab === "users"
+                  ? `${theme.primaryBg} text-white shadow-sm`
+                  : "text-slate-600 hover:bg-white/70"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>{adminTranslations[lang].tabUsers}</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab("printers")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-              activeTab === "printers"
-                ? `${theme.primaryBg} text-white shadow-sm`
-                : "text-slate-600 hover:bg-white/70"
-            }`}
-          >
-            <PrinterIcon className="w-3.5 h-3.5" />
-            <span>{adminTranslations[lang].tabPrinters}</span>
-          </button>
+          {tenant.subscriptionPlan !== "lite" && (
+            <button
+              onClick={() => setActiveTab("printers")}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                activeTab === "printers"
+                  ? `${theme.primaryBg} text-white shadow-sm`
+                  : "text-slate-600 hover:bg-white/70"
+              }`}
+            >
+              <PrinterIcon className="w-3.5 h-3.5" />
+              <span>{adminTranslations[lang].tabPrinters}</span>
+            </button>
+          )}
         </div>
       </div>
 

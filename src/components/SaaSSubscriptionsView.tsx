@@ -25,7 +25,7 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
   // New Invoice / Renewal Modal
   const [showModal, setShowModal] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState(currentTenant?.id || (tenants[0]?.id || ""));
-  const [plan, setPlan] = useState<"starter" | "pro">("pro");
+  const [plan, setPlan] = useState<"lite" | "starter" | "pro">("pro");
   const [amount, setAmount] = useState<number>(599);
   const [billingPeriod, setBillingPeriod] = useState("سنوي - تجديد دوري 365 يوم");
 
@@ -50,9 +50,10 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
     fetchInvoices();
   }, [currentTenant?.id, isSuperAdmin]);
 
-  const handlePlanChange = (p: "starter" | "pro") => {
+  const handlePlanChange = (p: "lite" | "starter" | "pro") => {
     setPlan(p);
-    if (p === "starter") setAmount(299);
+    if (p === "lite") setAmount(50);
+    else if (p === "starter") setAmount(299);
     else if (p === "pro") setAmount(599);
   };
 
@@ -119,6 +120,8 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
 
   const getPlanBadge = (p: string) => {
     switch (p) {
+      case "lite":
+        return <span className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold border border-amber-300">📁 الرقمية ($50 / سنة)</span>;
       case "starter":
         return <span className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs font-bold border border-blue-300">💡 البداية ($299 / سنة)</span>;
       case "pro":
@@ -236,9 +239,9 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
             <span className="text-xs font-bold text-slate-700">تصنيف حسب الباقة:</span>
             <div className="flex bg-slate-100 p-1 rounded-lg text-xs font-bold">
               <button onClick={() => setFilterPlan("all")} className={`px-3 py-1.5 rounded-md transition-all ${filterPlan === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600"}`}>الكل</button>
-              <button onClick={() => setFilterPlan("starter")} className={`px-3 py-1.5 rounded-md transition-all ${filterPlan === "starter" ? "bg-white text-blue-700 shadow-sm" : "text-slate-600"}`}>البداية</button>
-              <button onClick={() => setFilterPlan("pro")} className={`px-3 py-1.5 rounded-md transition-all ${filterPlan === "pro" ? "bg-white text-purple-700 shadow-sm" : "text-slate-600"}`}>المحترف</button>
-              <button onClick={() => setFilterPlan("enterprise")} className={`px-3 py-1.5 rounded-md transition-all ${filterPlan === "enterprise" ? "bg-white text-amber-700 shadow-sm" : "text-slate-600"}`}>المؤسسات</button>
+              <button onClick={() => setFilterPlan("lite")} className={`px-3 py-1.5 rounded-md transition-all ${filterPlan === "lite" ? "bg-white text-amber-750 shadow-sm" : "text-slate-600"}`}>الرقمية</button>
+              <button onClick={() => setFilterPlan("starter")} className={`px-3 py-1.5 rounded-md transition-all ${filterPlan === "starter" ? "bg-white text-blue-750 shadow-sm" : "text-slate-600"}`}>البداية</button>
+              <button onClick={() => setFilterPlan("pro")} className={`px-3 py-1.5 rounded-md transition-all ${filterPlan === "pro" ? "bg-white text-purple-750 shadow-sm" : "text-slate-600"}`}>المحترف</button>
             </div>
           </div>
 
@@ -375,6 +378,7 @@ export const SaaSSubscriptionsView: React.FC<SaaSSubscriptionsViewProps> = ({
                     onChange={(e) => handlePlanChange(e.target.value as any)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold bg-white focus:ring-2 focus:ring-purple-500"
                   >
+                    <option value="lite">📁 باقة المنيو الرقمي (Lite Menu - $50)</option>
                     <option value="starter">💡 باقة البداية (Starter - $299)</option>
                     <option value="pro">🔥 باقة المحترف (Pro - $599)</option>
                   </select>

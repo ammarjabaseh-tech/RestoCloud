@@ -20,7 +20,7 @@ export interface Tenant {
   wifiName?: string;
   ownerEmail?: string;
   password?: string;
-  subscriptionPlan?: 'starter' | 'pro';
+  subscriptionPlan?: 'lite' | 'starter' | 'pro';
   subscriptionAmount?: number;
   subscriptionDate?: string;
   isOpen?: boolean;

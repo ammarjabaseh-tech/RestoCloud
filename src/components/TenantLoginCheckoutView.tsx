@@ -257,7 +257,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   
   // Plan Selection
-  const [selectedPlan, setSelectedPlan] = useState<"starter" | "pro">("pro");
+  const [selectedPlan, setSelectedPlan] = useState<"lite" | "starter" | "pro">("pro");
   
   // Payment Form
   const [paymentMethod, setPaymentMethod] = useState<"mada" | "visa" | "apple" | "stc">("mada");
@@ -294,6 +294,32 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
   ];
 
   const plans = {
+    lite: {
+      name: lang === 'ar' ? "باقة المنيو الرقمي (Lite Menu)" : lang === 'tr' ? "Dijital Menü Paketi (Lite)" : "Lite Menu Plan",
+      price: 50,
+      features: lang === 'ar' ? [
+        "منيو إلكتروني رقمي متكامل مع باركود QR",
+        "إدارة المنتجات والأقسام والأسعار بمرونة",
+        "تنسيق ودعم كامل للهواتف والأجهزة",
+        "رابط فرعي خاص بمطعمك (*.restocloud.app)",
+        "دعم فني عبر البريد الإلكتروني"
+      ] : lang === 'tr' ? [
+        "Dijital QR Kod Menü Standı",
+        "Kategori, ürün ve fiyat yönetimi",
+        "Mobil ve tablet uyumlu modern tasarım",
+        "Özel alt alan adı (*.restocloud.app)",
+        "E-posta ile teknik destek"
+      ] : [
+        "Digital QR code menu for tables",
+        "Product, categories & pricing control panel",
+        "Fully mobile & tablet responsive layout",
+        "Subdomain hosting (*.restocloud.app)",
+        "Email customer support"
+      ],
+      badge: lang === 'ar' ? "مثالية لمطاعم الوجبات السريعة والبوفيهات" : lang === 'tr' ? "Hızlı servis ve büfeler için ideal" : "Ideal for fast food & quick service kiosks",
+      color: "from-amber-500 to-orange-600",
+      popular: false
+    },
     starter: {
       name: lang === 'ar' ? "باقة المنطلق (Starter)" : lang === 'tr' ? "Başlangıç Paketi (Starter)" : "Starter Plan",
       price: 299,

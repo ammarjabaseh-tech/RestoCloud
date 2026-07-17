@@ -85,8 +85,8 @@ export default function App() {
       setCurrentUser(user);
       fetchTenants();
       
-      // Route based on user permissions
-      if (user.permissions.canManagePOS) {
+      // Route based on user plan and permissions
+      if (user.permissions.canManagePOS && tenant.subscriptionPlan !== "lite") {
         setActiveView('pos_dashboard');
       } else if (user.permissions.canManageMenu) {
         setActiveView('admin_panel');
@@ -568,7 +568,7 @@ export default function App() {
     } catch (e) {
       console.error("Failed to fetch tenant owner:", e);
     }
-    setActiveView("pos_dashboard");
+    setActiveView(tenant.subscriptionPlan === "lite" ? "admin_panel" : "pos_dashboard");
   };
 
   const handleVisitTenant = async (tenant: Tenant) => {
@@ -583,7 +583,7 @@ export default function App() {
     } catch (e) {
       console.error("Failed to fetch tenant owner for preview:", e);
     }
-    setActiveView("pos_dashboard");
+    setActiveView(tenant.subscriptionPlan === "lite" ? "admin_panel" : "pos_dashboard");
   };
 
   // Standalone Marketing / Auth Views (No Navbar/Layout)

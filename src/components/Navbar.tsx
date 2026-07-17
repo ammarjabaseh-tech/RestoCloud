@@ -266,7 +266,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Left Section: Navigation Tabs */}
           <nav className="flex items-center gap-1 overflow-x-auto py-1 no-scrollbar">
-            {(!currentUser || currentUser.permissions.canManagePOS) && (
+            {(!currentUser || currentUser.permissions.canManagePOS) && currentTenant?.subscriptionPlan !== "lite" && (
               <button
                 onClick={() => onSelectView("pos_dashboard")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
@@ -307,7 +307,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">{navTranslations[lang].menu}</span>
             </button>
 
-            {(!currentUser || currentUser.permissions.canViewReports) && (
+            {(!currentUser || currentUser.permissions.canViewReports) && currentTenant?.subscriptionPlan !== "lite" && (
               <button
                 onClick={() => onSelectView("ai_assistant")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
@@ -321,7 +321,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {currentUser && (
+            {currentUser && currentTenant?.subscriptionPlan !== "lite" && (
               <button
                 onClick={() => onSelectView("kitchen_display")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${

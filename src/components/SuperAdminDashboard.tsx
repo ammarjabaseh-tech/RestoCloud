@@ -215,12 +215,12 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   const getPlanBadge = (plan: Tenant["subscriptionPlan"]) => {
     switch (plan) {
+      case "lite":
+        return <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">الرقمية (Lite)</span>;
       case "starter":
         return <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 border border-slate-700">الأساسية</span>;
       case "pro":
-        return <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">المتقدمة</span>;
-      case "enterprise":
-        return <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">المؤسسات</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">الاحترافية</span>;
       default:
         return null;
     }
@@ -718,6 +718,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                     value={formData.subscriptionPlan}
                     onChange={(e) => setFormData({ ...formData, subscriptionPlan: e.target.value as Tenant["subscriptionPlan"] })}
                   >
+                    <option value="lite">الرقمية (Lite)</option>
                     <option value="starter">الأساسية (Starter)</option>
                     <option value="pro">الاحترافية (Pro)</option>
                   </select>
@@ -956,6 +957,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                     value={formData.subscriptionPlan}
                     onChange={(e) => setFormData({ ...formData, subscriptionPlan: e.target.value as Tenant["subscriptionPlan"] })}
                   >
+                    <option value="lite">الرقمية (Lite)</option>
                     <option value="starter">الأساسية (Starter)</option>
                     <option value="pro">الاحترافية (Pro)</option>
                   </select>
