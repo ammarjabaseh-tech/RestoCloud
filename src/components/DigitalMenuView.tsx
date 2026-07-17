@@ -289,6 +289,61 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
     if (cart.length === 0) return;
 
     setIsSubmitting(true);
+    
+    if (tenant.subscriptionPlan === "lite") {
+      const whatsappNumber = tenant.phone ? tenant.phone.replace(/[^0-9]/g, "") : "";
+      const cleanedNumber = whatsappNumber.startsWith("05") && whatsappNumber.length === 10
+        ? "966" + whatsappNumber.substring(1)
+        : whatsappNumber;
+      
+      if (!cleanedNumber) {
+        alert(lang === 'ar' ? "عذراً، لم يقم المطعم بتهيئة رقم الهاتف للواتساب بعد." : "Sorry, the restaurant has not configured their WhatsApp number yet.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Format items list
+      const itemsText = cart.map(i => {
+        const notesText = i.notes ? ` (ملاحظة: ${i.notes})` : "";
+        return `- ${i.nameAr} (العدد: ${i.quantity}) - ${i.price * i.quantity} ${tenant.currency || 'ر.س'}${notesText}`;
+      }).join("\n");
+
+      const typeLabel = orderType === "dine_in" 
+        ? (lang === 'ar' ? "🍽️ سفري/طاولة" : "Dine In / Table")
+        : orderType === "takeaway"
+          ? (lang === 'ar' ? "🛍️ سفري/استلام" : "Takeaway")
+          : (lang === 'ar' ? "🛵 توصيل" : "Delivery");
+
+      const tableText = orderType === "dine_in" && selectedTable 
+        ? `\n📍 رقم الطاولة: ${selectedTable}` 
+        : "";
+
+      const customerNameText = customerName ? `\n👤 العميل: ${customerName}` : "";
+      const customerPhoneText = customerPhone ? `\n📞 الهاتف: ${customerPhone}` : "";
+
+      const msg = `*طلب جديد من المنيو الرقمي (RestoCloud)* 🍽️\n` +
+        `----------------------------------------\n` +
+        `*نوع الطلب:* ${typeLabel}${tableText}${customerNameText}${customerPhoneText}\n` +
+        `----------------------------------------\n` +
+        `*الطلبات:*\n${itemsText}\n` +
+        `----------------------------------------\n` +
+        `*المجموع الإجمالي:* *${total} ${tenant.currency || 'ر.س'}*\n` +
+        `----------------------------------------\n` +
+        `شكراً لطلبكم! 🙏`;
+
+      const encodedMsg = encodeURIComponent(msg);
+      const whatsappUrl = `https://wa.me/${cleanedNumber}?text=${encodedMsg}`;
+      
+      // Clear cart & close modal
+      setCart([]);
+      setShowCartModal(false);
+      setIsSubmitting(false);
+      
+      // Open WhatsApp
+      window.open(whatsappUrl, "_blank");
+      return;
+    }
+
     try {
       const res = await fetch(`/api/tenants/${tenant.id}/orders`, {
         method: "POST",
@@ -921,11 +976,24 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   className={`flex-1 py-3 rounded-xl ${theme.primaryBg} ${theme.primaryHover} text-white font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}
                 >
                   {isSubmitting ? (
-                    <span>{lang === 'ar' ? 'جاري إرسال الطلب للمطبخ...' : lang === 'tr' ? 'Sipariş Gönderiliyor...' : 'Sending Order...'}</span>
+                    <span>
+                      {tenant.subscriptionPlan === "lite"
+                        ? (lang === 'ar' ? 'جاري تحويلك للواتساب...' : lang === 'tr' ? 'WhatsApp\'a yönlendiriliyor...' : 'Redirecting to WhatsApp...')
+                        : (lang === 'ar' ? 'جاري إرسال الطلب للمطبخ...' : lang === 'tr' ? 'Sipariş Gönderiliyor...' : 'Sending Order...')}
+                    </span>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-5 h-5" />
-                      <span>{translations[lang].sendOrder}</span>
+                      {tenant.subscriptionPlan === "lite" ? (
+                        <>
+                          <span className="text-base">💬</span>
+                          <span>{lang === 'ar' ? 'إرسال الطلب عبر الواتساب' : lang === 'tr' ? 'WhatsApp ile Gönder' : 'Send Order via WhatsApp'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-5 h-5" />
+                          <span>{translations[lang].sendOrder}</span>
+                        </>
+                      )}
                     </>
                   )}
                 </button>

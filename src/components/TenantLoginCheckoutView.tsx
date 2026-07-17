@@ -862,7 +862,7 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(Object.keys(plans) as Array<"starter" | "pro" | "enterprise">).map((planKey) => {
+                {(Object.keys(plans) as Array<"lite" | "starter" | "pro">).map((planKey) => {
                   const p = plans[planKey];
                   const isSelected = selectedPlan === planKey;
                   return (
