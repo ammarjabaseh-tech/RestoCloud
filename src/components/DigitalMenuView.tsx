@@ -302,9 +302,6 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
         return;
       }
 
-      // Generate a unique 4-digit order number for client-side reference
-      const clientOrderNum = Math.floor(1000 + Math.random() * 9000).toString();
-
       // Format items list
       const itemsText = cart.map(i => {
         const notesText = i.notes ? ` (ملاحظة: ${i.notes})` : "";
@@ -313,29 +310,28 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
 
       const typeLabel = orderType === "dine_in" 
         ? (tenant.subscriptionPlan === "lite"
-            ? (lang === 'ar' ? "🍽️ تناول في المطعم" : "Dine In")
-            : (lang === 'ar' ? "🍽️ سفري/طاولة" : "Dine In / Table"))
+            ? (lang === 'ar' ? "تناول في المطعم" : "Dine In")
+            : (lang === 'ar' ? "سفري/طاولة" : "Dine In / Table"))
         : orderType === "takeaway"
-          ? (lang === 'ar' ? "🛍️ سفري/استلام" : "Takeaway")
-          : (lang === 'ar' ? "🛵 توصيل" : "Delivery");
+          ? (lang === 'ar' ? "سفري/استلام" : "Takeaway")
+          : (lang === 'ar' ? "توصيل" : "Delivery");
 
       const tableText = orderType === "dine_in" && selectedTable && tenant.subscriptionPlan !== "lite"
-        ? `\n📍 رقم الطاولة: ${selectedTable}` 
+        ? `\nرقم الطاولة: ${selectedTable}` 
         : "";
 
-      const customerNameText = customerName ? `\n👤 العميل: ${customerName}` : "";
-      const customerPhoneText = customerPhone ? `\n📞 الهاتف: ${customerPhone}` : "";
+      const customerNameText = customerName ? `\nالعميل: ${customerName}` : "";
+      const customerPhoneText = customerPhone ? `\nالهاتف: ${customerPhone}` : "";
 
-      const msg = `*طلب جديد من المنيو الرقمي (RestoCloud)* 🍽️\n` +
+      const msg = `*طلب جديد من المنيو الرقمي (RestoCloud)*\n` +
         `----------------------------------------\n` +
-        `*رقم الطلب:* #RC-${clientOrderNum}\n` +
         `*نوع الطلب:* ${typeLabel}${tableText}${customerNameText}${customerPhoneText}\n` +
         `----------------------------------------\n` +
         `*الطلبات:*\n${itemsText}\n` +
         `----------------------------------------\n` +
         `*المجموع الإجمالي:* *${total} ${tenant.currency || 'ر.س'}*\n` +
         `----------------------------------------\n` +
-        `شكراً لطلبكم! 🙏`;
+        `شكرا لطلبكم!`;
 
       const encodedMsg = encodeURIComponent(msg);
       const whatsappUrl = `https://wa.me/${cleanedNumber}?text=${encodedMsg}`;
@@ -344,7 +340,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       setCart([]);
       setShowCartModal(false);
       setIsSubmitting(false);
-      setOrderSuccessNumber(`RC-${clientOrderNum}`);
+      setOrderSuccessNumber("whatsapp");
       
       // Open WhatsApp
       window.open(whatsappUrl, "_blank");
@@ -585,13 +581,26 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           <div className="w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-2xl shadow-md">
             ✓
           </div>
-          <h3 className="text-xl font-extrabold text-emerald-900 dark:text-emerald-100">
-            تم استلام طلبكم بنجاح في المطبخ!
-          </h3>
-          <p className="text-sm text-emerald-700 dark:text-emerald-300">
-            رقم الطلب الخاص بك هو: <strong className="font-mono text-lg bg-emerald-600 text-white px-3 py-1 rounded-xl">{orderSuccessNumber}</strong>
-          </p>
-          <p className="text-xs text-slate-500">سيصلك الطلب على الطاولة فور الانتهاء من التجهيز. نتمنى لكم وجبة شهية!</p>
+          {orderSuccessNumber === "whatsapp" ? (
+            <>
+              <h3 className="text-xl font-extrabold text-emerald-900 dark:text-emerald-100">
+                تم تحويلك إلى الواتساب بنجاح!
+              </h3>
+              <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                يرجى إرسال الرسالة المجهزة في تطبيق الواتساب لتأكيد طلبك مباشرة مع المطعم.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl font-extrabold text-emerald-900 dark:text-emerald-100">
+                تم استلام طلبكم بنجاح في المطبخ!
+              </h3>
+              <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                رقم الطلب الخاص بك هو: <strong className="font-mono text-lg bg-emerald-600 text-white px-3 py-1 rounded-xl">{orderSuccessNumber}</strong>
+              </p>
+              <p className="text-xs text-slate-500">سيصلك الطلب على الطاولة فور الانتهاء من التجهيز. نتمنى لكم وجبة شهية!</p>
+            </>
+          )}
           <button
             onClick={() => setOrderSuccessNumber(null)}
             className="px-6 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
