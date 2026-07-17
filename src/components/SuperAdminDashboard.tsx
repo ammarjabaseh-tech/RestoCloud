@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Tenant, ThemeColor } from "../types";
+import { RestaurantLogo } from "./RestaurantLogo";
 import { 
   Store, Check, X, Pause, Play, Trash2, Plus, Edit, Search, 
   DollarSign, ExternalLink, ShieldAlert, Award, Calendar, Phone, 
@@ -385,7 +386,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                       {/* Brand Info */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl p-1.5 bg-slate-900 border border-slate-800 rounded-xl">{t.logo || "🍽️"}</span>
+                          <div className="w-10 h-10 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-xl overflow-hidden shrink-0">
+                            <RestaurantLogo logo={t.logo || "🍽️"} />
+                          </div>
                           <div>
                             <div className="font-bold text-slate-200 text-sm flex items-center gap-1.5">
                               {t.nameAr}

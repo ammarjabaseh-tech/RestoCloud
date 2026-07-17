@@ -603,7 +603,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                     : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
                 }`}
               >
-                {cat.icon.startsWith("http") ? (
+                {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
                   <img src={cat.icon} alt="" className="w-5 h-5 object-cover rounded-lg shrink-0" />
                 ) : (
                   <span className="text-base shrink-0">{cat.icon}</span>

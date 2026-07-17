@@ -1337,7 +1337,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                         : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
                     }`}
                   >
-                    {cat.icon.startsWith("http") ? (
+                    {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
                       <img src={cat.icon} alt="" className="w-4.5 h-4.5 object-cover rounded shrink-0" />
                     ) : (
                       <span className="text-[10px] shrink-0">{cat.icon}</span>

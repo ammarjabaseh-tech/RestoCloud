@@ -671,7 +671,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
             {categories.map((cat, idx) => (
               <div key={cat.id} className="bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 shrink-0">
-                {cat.icon.startsWith("http") ? (
+                {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
                   <img src={cat.icon} alt="" className="w-5 h-5 object-cover rounded-md shrink-0" />
                 ) : (
                   <span className="text-lg shrink-0">{cat.icon}</span>
@@ -774,8 +774,19 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                         </td>
 
                         <td className="p-4">
-                          <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg">
-                            {cat ? `${cat.icon} ${catName}` : (lang === 'ar' ? 'عام' : lang === 'tr' ? 'Genel' : 'General')}
+                          <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5 inline-flex">
+                            {cat ? (
+                              <>
+                                {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
+                                  <img src={cat.icon} alt="" className="w-4 h-4 object-cover rounded-md shrink-0" />
+                                ) : (
+                                  <span>{cat.icon}</span>
+                                )}
+                                <span>{catName}</span>
+                              </>
+                            ) : (
+                              lang === 'ar' ? 'عام' : lang === 'tr' ? 'Genel' : 'General'
+                            )}
                           </span>
                         </td>
 
@@ -1605,8 +1616,13 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                               const cat = categories.find(c => c.id === catId);
                               const catName = cat ? (lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr) : '';
                               return cat ? (
-                                <span key={catId} className="text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-605 dark:text-slate-300 px-2 py-0.5 rounded-full">
-                                  {cat.icon} {catName}
+                                <span key={catId} className="text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full flex items-center gap-1 inline-flex">
+                                  {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
+                                    <img src={cat.icon} alt="" className="w-3.5 h-3.5 object-cover rounded-sm shrink-0" />
+                                  ) : (
+                                    <span>{cat.icon}</span>
+                                  )}
+                                  <span>{catName}</span>
                                 </span>
                               ) : null;
                             })}
@@ -1686,7 +1702,9 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none font-bold"
                   >
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.icon} {c.nameAr}</option>
+                      <option key={c.id} value={c.id}>
+                        {c.icon.startsWith("http") || c.icon.startsWith("data:image") ? "📁" : c.icon} {c.nameAr}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -2156,7 +2174,14 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                           }}
                           className="w-4 h-4 rounded text-emerald-600 ml-1.5"
                         />
-                        <span>{cat.icon} {cat.nameAr}</span>
+                        <span className="flex items-center gap-1 inline-flex">
+                          {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
+                            <img src={cat.icon} alt="" className="w-4 h-4 object-cover rounded-sm shrink-0" />
+                          ) : (
+                            <span>{cat.icon}</span>
+                          )}
+                          <span>{cat.nameAr}</span>
+                        </span>
                       </label>
                     );
                   })}
