@@ -1847,14 +1847,34 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     </label>
                     <div className="grid grid-cols-4 gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 max-h-36 overflow-y-auto">
                       {[
-                        { name: lang === 'ar' ? '🍔 برجر' : 'Burger', url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400' },
-                        { name: lang === 'ar' ? '🍕 بيتزا' : 'Pizza', url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400' },
-                        { name: lang === 'ar' ? '🥩 شاورما/كباب' : 'Kebab', url: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=400' },
-                        { name: lang === 'ar' ? '🍝 باستا' : 'Pasta', url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=400' },
-                        { name: lang === 'ar' ? '🍟 بطاطس' : 'Fries', url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=400' },
-                        { name: lang === 'ar' ? '🥗 سلطة' : 'Salad', url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=400' },
-                        { name: lang === 'ar' ? '🍰 كيك/حلى' : 'Cake', url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=400' },
-                        { name: lang === 'ar' ? '🥤 كولا/مشروب' : 'Soda', url: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=400' }
+                        { name: lang === 'ar' ? '☕ إسبريسو' : 'Espresso', url: 'https://images.unsplash.com/photo-1510972527409-cef7e2b7652b?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥛 كابتشينو/لاتيه' : 'Cappuccino', url: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍵 آيس ماتشا' : 'Ice Matcha', url: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?q=80&w=400' },
+                        { name: lang === 'ar' ? '🧊 قهوة باردة' : 'Cold Brew', url: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍹 موهيتو منعش' : 'Fresh Mojito', url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍊 عصير برتقال' : 'Orange Juice', url: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?q=80&w=400' },
+                        { name: lang === 'ar' ? '🧋 ميلك شيك' : 'Milkshake', url: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥤 كولا/غازي' : 'Soda Drink', url: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍔 سماش برجر' : 'Smash Burger', url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍗 دجاج كرسبي' : 'Crispy Chicken', url: 'https://images.unsplash.com/photo-1627662236973-4f8259fa2441?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍕 مارغريتا' : 'Margherita', url: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍕 بيتزا بيبروني' : 'Pepperoni', url: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=400' },
+                        { name: lang === 'ar' ? '🌮 تاكو مكسيكي' : 'Mexican Tacos', url: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=400' },
+                        { name: lang === 'ar' ? '🌯 شاورما صاج' : 'Shawarma Wrap', url: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍟 بطاطس مقلية' : 'French Fries', url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍢 مشاوي مشكلة' : 'Mixed Grills', url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥩 ستيك بقري' : 'Beef Steak', url: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍝 باستا ألفريدو' : 'Pasta Alfredo', url: 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍣 سوشي مشكل' : 'Sushi Platter', url: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍚 كبسة سعودية' : 'Saudi Kabsa', url: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍤 جمبري مقلي' : 'Fried Shrimp', url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥗 سلطة خضراء' : 'Green Salad', url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥗 سلطة سيزر' : 'Caesar Salad', url: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?q=80&w=400' },
+                        { name: lang === 'ar' ? '🧆 كبة مقلية' : 'Kibbeh Cups', url: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍰 سان سيباستيان' : 'San Sebastian', url: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?q=80&w=400' },
+                        { name: lang === 'ar' ? '🍫 كيكة شوكولا' : 'Chocolate Cake', url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=400' },
+                        { name: lang === 'ar' ? '🥐 كرواسون زبدة' : 'Croissant', url: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=400' },
+                        { name: lang === 'ar' ? '🧇 وافل شوكولا' : 'Chocolate Waffle', url: 'https://images.unsplash.com/photo-1562376502-6f769499c886?q=80&w=400' }
                       ].map((option) => (
                         <button
                           key={option.url}
