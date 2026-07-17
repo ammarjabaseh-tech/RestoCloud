@@ -302,6 +302,9 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
         return;
       }
 
+      // Generate a unique 4-digit order number for client-side reference
+      const clientOrderNum = Math.floor(1000 + Math.random() * 9000).toString();
+
       // Format items list
       const itemsText = cart.map(i => {
         const notesText = i.notes ? ` (ملاحظة: ${i.notes})` : "";
@@ -325,6 +328,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
 
       const msg = `*طلب جديد من المنيو الرقمي (RestoCloud)* 🍽️\n` +
         `----------------------------------------\n` +
+        `*رقم الطلب:* #RC-${clientOrderNum}\n` +
         `*نوع الطلب:* ${typeLabel}${tableText}${customerNameText}${customerPhoneText}\n` +
         `----------------------------------------\n` +
         `*الطلبات:*\n${itemsText}\n` +
@@ -340,6 +344,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       setCart([]);
       setShowCartModal(false);
       setIsSubmitting(false);
+      setOrderSuccessNumber(`RC-${clientOrderNum}`);
       
       // Open WhatsApp
       window.open(whatsappUrl, "_blank");
@@ -901,6 +906,9 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                       type="text"
                       required
                       placeholder={translations[lang].customerNamePlaceholder}
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
