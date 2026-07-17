@@ -211,33 +211,41 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
           {/* Target Selector: General vs Table */}
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <span className="text-xs font-bold text-slate-600 shrink-0">تخصيص الباركود:</span>
-            <select
-              value={selectedTarget}
-              onChange={(e) => setSelectedTarget(e.target.value === "general" ? "general" : Number(e.target.value))}
-              className="px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-300 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-56 shadow-2xs"
-            >
-              <option value="general">🌐 المنيو العام (طلب خارجي / سفري / سفري)</option>
-              {tables.map((t) => (
-                <option key={t.id} value={t.tableNumber}>
-                  🪑 طاولة رقم {t.tableNumber} ({t.capacity} أشخاص)
-                </option>
-              ))}
-            </select>
+            {tenant.subscriptionPlan === "lite" ? (
+              <span className="px-3 py-2 rounded-xl text-xs font-black bg-indigo-50 text-indigo-750 border border-indigo-100 flex items-center gap-1.5 shadow-2xs">
+                🌐 المنيو العام (باركود QR)
+              </span>
+            ) : (
+              <select
+                value={selectedTarget}
+                onChange={(e) => setSelectedTarget(e.target.value === "general" ? "general" : Number(e.target.value))}
+                className="px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-300 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-56 shadow-2xs"
+              >
+                <option value="general">🌐 المنيو العام (طلب خارجي / سفري / سفري)</option>
+                {tables.map((t) => (
+                  <option key={t.id} value={t.tableNumber}>
+                    🪑 طاولة رقم {t.tableNumber} ({t.capacity} أشخاص)
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Switch View Mode: Single vs All Grid */}
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <button
-              onClick={() => setViewMode(viewMode === "single" ? "all_grid" : "single")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
-                viewMode === "all_grid"
-                  ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                  : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-              }`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-              <span>{viewMode === "single" ? "عرض جميع الطاولات للطباعة" : "عرض ستاند فردي"}</span>
-            </button>
+            {tenant.subscriptionPlan !== "lite" && (
+              <button
+                onClick={() => setViewMode(viewMode === "single" ? "all_grid" : "single")}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
+                  viewMode === "all_grid"
+                    ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span>{viewMode === "single" ? "عرض جميع الطاولات للطباعة" : "عرض ستاند فردي"}</span>
+              </button>
+            )}
 
             <button
               onClick={handlePrint}
