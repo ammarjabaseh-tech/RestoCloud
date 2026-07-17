@@ -43,8 +43,27 @@ pool.query(`
   )
 `).then(() => {
   console.log("🔒 Verification (tenant_otps) table initialized.");
+  
+  // Migration to update plan CHECK constraints to support 'lite' plan
+  return pool.query(`
+    DO $$
+    BEGIN
+      -- Drop old constraints if they exist
+      ALTER TABLE tenants DROP CONSTRAINT IF EXISTS tenants_subscription_plan_check;
+      ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_plan_check;
+      
+      -- Add updated constraints
+      ALTER TABLE tenants ADD CONSTRAINT tenants_subscription_plan_check CHECK (subscription_plan IN ('lite', 'starter', 'pro', 'enterprise'));
+      ALTER TABLE invoices ADD CONSTRAINT invoices_plan_check CHECK (plan IN ('lite', 'starter', 'pro', 'enterprise'));
+    EXCEPTION
+      WHEN OTHERS THEN
+        RAISE NOTICE 'Migration error: %', SQLERRM;
+    END $$;
+  `);
+}).then(() => {
+  console.log("🔄 Database plan CHECK constraints migrated successfully.");
 }).catch((err) => {
-  console.error("❌ Failed to initialize tenant_otps table:", err.message);
+  console.error("❌ Failed to initialize database tables or constraints:", err.message);
 });
 
 export default pool;

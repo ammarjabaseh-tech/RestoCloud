@@ -45,6 +45,12 @@ const landingTranslations = {
     feat6Desc: "متوافق مع بوابات الدفع المحلية والعالمية، ومدعوم لطباعة الإيصالات الحرارية مباشرة.",
     sectionPricingTitle: "باقات تناسب طموحك",
     sectionPricingDesc: "اختر الباقة المناسبة لحجم أعمالك، يمكنك الترقية في أي وقت.",
+    planLite: "الرقمية (Lite Menu)",
+    planLiteDesc: "خاصة بمطاعم الوجبات السريعة ومنافذ البيع البسيطة.",
+    planLitePriceVal: "50",
+    planLitePriceUnit: " $ / سنوياً",
+    planLiteFeats: ["فرع واحد", "منيو رقمي متكامل مع باركود QR", "إدارة وتعديل الأصناف والأسعار", "دعم فني عبر البريد الإلكتروني"],
+    planLiteCta: "ابدأ الآن",
     planStarter: "البداية (Starter)",
     planStarterDesc: "مثالية للمطاعم الناشئة والكافيهات الصغيرة.",
     planStarterPriceVal: "299",
@@ -90,6 +96,12 @@ const landingTranslations = {
     feat6Desc: "Compatible with regional and global gateways with thermal and network printer integrations out of the box.",
     sectionPricingTitle: "Plans That Match Your Ambition",
     sectionPricingDesc: "Choose the package suitable for your business volume. Upgrade anytime.",
+    planLite: "Lite Menu Plan",
+    planLiteDesc: "For fast food spots and quick service outlets.",
+    planLitePriceVal: "$50",
+    planLitePriceUnit: " / year",
+    planLiteFeats: ["1 Branch", "Full Digital QR Menu", "Dishes & Prices Control Panel", "Email Customer Support"],
+    planLiteCta: "Start Now",
     planStarter: "Starter Plan",
     planStarterDesc: "Ideal for startups, coffee spots, and small diners.",
     planStarterPriceVal: "$299",
@@ -135,6 +147,12 @@ const landingTranslations = {
     feat6Desc: "Yerel ve küresel ödeme altyapılarıyla uyumlu, termal yazıcı baskı destekli tam entegrasyon.",
     sectionPricingTitle: "Hedeflerinize Uygun Paketler",
     sectionPricingDesc: "İşletme hacminize en uygun paketi seçin. Dilediğiniz zaman yükseltin.",
+    planLite: "Dijital Menü (Lite)",
+    planLiteDesc: "Hızlı servis ve büfe tipi işletmeler için.",
+    planLitePriceVal: "50 $",
+    planLitePriceUnit: " / yıllık",
+    planLiteFeats: ["1 Şube", "Tam Dijital QR Menü", "Ürün ve Fiyat Kontrol Paneli", "E-posta ile Teknik Destek"],
+    planLiteCta: "Şimdi Başla",
     planStarter: "Başlangıç Paketi (Starter)",
     planStarterDesc: "Yeni kurulan restoranlar ve küçük kafeler için ideal.",
     planStarterPriceVal: "299 $",
@@ -370,46 +388,66 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             <p className="text-slate-400 max-w-2xl mx-auto">{t.sectionPricingDesc}</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Starter Plan */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-6 sm:p-8 flex flex-col hover:border-slate-500 transition-colors">
-              <h3 className="text-2xl font-bold text-white mb-2">{t.planStarter}</h3>
-              <p className="text-slate-400 text-sm mb-6">{t.planStarterDesc}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
+            {/* Lite Plan */}
+            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/80 rounded-3xl p-6 flex flex-col hover:border-slate-500 transition-colors">
+              <h3 className="text-xl font-bold text-white mb-2">{t.planLite}</h3>
+              <p className="text-slate-400 text-xs mb-6">{t.planLiteDesc}</p>
               <div className="mb-6">
-                <span className="text-4xl sm:text-5xl font-black text-white">{t.planStarterPriceVal}</span>
-                <span className="text-slate-400">{t.planStarterPriceUnit}</span>
+                <span className="text-3xl sm:text-4xl font-black text-white">{t.planLitePriceVal}</span>
+                <span className="text-slate-400 text-xs">{t.planLitePriceUnit}</span>
               </div>
-              <ul className="space-y-4 mb-8 flex-1">
-                {t.planStarterFeats.map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-slate-300 text-sm font-medium">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" /> {item}
+              <ul className="space-y-3.5 mb-8 flex-1">
+                {t.planLiteFeats.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-slate-300 text-xs font-semibold leading-relaxed">
+                    <CheckCircle2 className="w-4.5 h-4.5 text-orange-400 shrink-0 mt-0.5" /> <span>{item}</span>
                   </li>
                 ))}
               </ul>
-              <button onClick={() => onSelectView('auth_signup')} className="w-full py-3 rounded-xl bg-slate-700 text-white font-bold hover:bg-slate-600 transition-colors cursor-pointer">
+              <button onClick={() => onSelectView('auth_signup')} className="w-full py-2.5 rounded-xl bg-slate-700 text-white font-bold text-xs hover:bg-slate-600 transition-colors cursor-pointer">
+                {t.planLiteCta}
+              </button>
+            </div>
+
+            {/* Starter Plan */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-6 flex flex-col hover:border-slate-500 transition-colors">
+              <h3 className="text-xl font-bold text-white mb-2">{t.planStarter}</h3>
+              <p className="text-slate-400 text-xs mb-6">{t.planStarterDesc}</p>
+              <div className="mb-6">
+                <span className="text-3xl sm:text-4xl font-black text-white">{t.planStarterPriceVal}</span>
+                <span className="text-slate-400 text-xs">{t.planStarterPriceUnit}</span>
+              </div>
+              <ul className="space-y-3.5 mb-8 flex-1">
+                {t.planStarterFeats.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-slate-300 text-xs font-semibold leading-relaxed">
+                    <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400 shrink-0 mt-0.5" /> <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <button onClick={() => onSelectView('auth_signup')} className="w-full py-2.5 rounded-xl bg-slate-700/80 text-white font-bold text-xs hover:bg-slate-600 transition-colors cursor-pointer">
                 {t.planStarterCta}
               </button>
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-gradient-to-b from-indigo-900/40 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 flex flex-col relative shadow-2xl shadow-indigo-500/10 transform md:-translate-y-4 mt-8 md:mt-0">
-              <div className={`absolute top-0 ${lang === 'ar' ? 'right-8' : 'left-8'} -translate-y-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg`}>
+            <div className="bg-gradient-to-b from-indigo-900/40 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 flex flex-col relative shadow-2xl shadow-indigo-500/10 hover:border-indigo-500 transition-colors">
+              <div className={`absolute top-0 ${lang === 'ar' ? 'right-6' : 'left-6'} -translate-y-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-[10px] font-black px-3.5 py-1 rounded-full shadow-lg`}>
                 {t.planProBadge}
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">{t.planPro}</h3>
-              <p className="text-indigo-200 text-sm mb-6">{t.planProDesc}</p>
+              <h3 className="text-xl font-bold text-white mb-2">{t.planPro}</h3>
+              <p className="text-indigo-200 text-xs mb-6">{t.planProDesc}</p>
               <div className="mb-6">
-                <span className="text-4xl sm:text-5xl font-black text-white">{t.planProPriceVal}</span>
-                <span className="text-indigo-200">{t.planProPriceUnit}</span>
+                <span className="text-3xl sm:text-4xl font-black text-white">{t.planProPriceVal}</span>
+                <span className="text-indigo-200 text-xs">{t.planProPriceUnit}</span>
               </div>
-              <ul className="space-y-4 mb-8 flex-1">
+              <ul className="space-y-3.5 mb-8 flex-1">
                 {t.planProFeats.map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-white text-sm font-medium">
-                    <CheckCircle2 className="w-5 h-5 text-indigo-400 shrink-0" /> {item}
+                  <li key={i} className="flex items-start gap-2.5 text-white text-xs font-semibold leading-relaxed">
+                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 shrink-0 mt-0.5" /> <span>{item}</span>
                   </li>
                 ))}
               </ul>
-              <button onClick={() => onSelectView('auth_signup')} className="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/25 cursor-pointer">
+              <button onClick={() => onSelectView('auth_signup')} className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/25 cursor-pointer">
                 {t.planProCta}
               </button>
             </div>

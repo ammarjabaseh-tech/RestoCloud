@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   wifi_name       TEXT,
   banner_image    TEXT,
   subscription_plan   TEXT DEFAULT 'starter'
-                      CHECK (subscription_plan IN ('starter','pro','enterprise')),
+                      CHECK (subscription_plan IN ('lite','starter','pro','enterprise')),
   subscription_amount NUMERIC(10,2) DEFAULT 199,
   subscription_date   DATE,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   invoice_number TEXT NOT NULL UNIQUE,
   tenant_id      TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   tenant_name    TEXT NOT NULL,
-  plan           TEXT NOT NULL CHECK (plan IN ('starter','pro','enterprise')),
+  plan           TEXT NOT NULL CHECK (plan IN ('lite','starter','pro','enterprise')),
   amount         NUMERIC(10,2) NOT NULL,
   billing_period TEXT NOT NULL,
   issue_date     DATE NOT NULL,
