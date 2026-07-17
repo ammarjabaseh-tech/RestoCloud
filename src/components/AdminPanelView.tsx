@@ -228,7 +228,8 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   const [slogan, setSlogan] = useState(tenant.slogan || "");
   const [logo, setLogo] = useState(tenant.logo);
   const [themeColor, setThemeColor] = useState<ThemeColor>(tenant.themeColor);
-  const [phone, setPhone] = useState(tenant.phone);
+  const [adminPhoneCountryCode, setAdminPhoneCountryCode] = useState("966");
+  const [adminPhoneLocalNumber, setAdminPhoneLocalNumber] = useState("");
   const [address, setAddress] = useState(tenant.address);
   const [taxRate, setTaxRate] = useState(tenant.taxRate.toString());
   const [wifiPass, setWifiPass] = useState(tenant.wifiPassword || "");
@@ -247,7 +248,23 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     setSlogan(tenant.slogan || "");
     setLogo(tenant.logo);
     setThemeColor(tenant.themeColor);
-    setPhone(tenant.phone);
+    const rawPhone = tenant.phone || "";
+    const cleanPhone = rawPhone.replace(/[^0-9]/g, "");
+    const codes = ["966", "971", "974", "965", "968", "973", "20", "962", "90", "1", "44"];
+    let matchedCode = "966";
+    let localNum = cleanPhone;
+    for (const code of codes) {
+      if (cleanPhone.startsWith(code)) {
+        matchedCode = code;
+        localNum = cleanPhone.substring(code.length);
+        break;
+      }
+    }
+    if (localNum === cleanPhone && cleanPhone.startsWith("0")) {
+      localNum = cleanPhone;
+    }
+    setAdminPhoneCountryCode(matchedCode);
+    setAdminPhoneLocalNumber(localNum);
     setAddress(tenant.address);
     setTaxRate(tenant.taxRate.toString());
     setWifiPass(tenant.wifiPassword || "");
@@ -387,13 +404,16 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   // Handle Save Branding
   const handleSaveBranding = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanLocal = adminPhoneLocalNumber.replace(/^0+/, "");
+    const combinedPhone = `+${adminPhoneCountryCode}${cleanLocal}`;
+
     const updated: Tenant = {
       ...tenant,
       nameAr,
       slogan,
       logo,
       themeColor,
-      phone,
+      phone: combinedPhone,
       address,
       taxRate: Number(taxRate) || 15,
       wifiPassword: wifiPass,
@@ -962,13 +982,34 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'رقم الهاتف' : lang === 'tr' ? 'Telefon Numarası' : 'Phone Number'}</label>
-              <input
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
-              />
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'رقم الهاتف (الواتساب المستلم للطلبات)' : lang === 'tr' ? 'Telefon Numarası (Sipariş WhatsApp)' : 'Phone Number (Order WhatsApp)'}</label>
+              <div className="flex gap-2" dir="ltr">
+                <select
+                  value={adminPhoneCountryCode}
+                  onChange={(e) => setAdminPhoneCountryCode(e.target.value)}
+                  className="px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm outline-none cursor-pointer"
+                >
+                  <option value="966">🇸🇦 +966</option>
+                  <option value="971">🇦🇪 +971</option>
+                  <option value="974">🇶🇦 +974</option>
+                  <option value="965">🇰🇼 +965</option>
+                  <option value="968">🇴🇲 +968</option>
+                  <option value="973">🇧🇭 +973</option>
+                  <option value="20">🇪🇬 +20</option>
+                  <option value="962">🇯🇴 +962</option>
+                  <option value="90">🇹🇷 +90</option>
+                  <option value="1">🇺🇸 +1</option>
+                  <option value="44">🇬🇧 +44</option>
+                </select>
+                <input
+                  type="text"
+                  required
+                  placeholder="5xxxxxxxx"
+                  value={adminPhoneLocalNumber}
+                  onChange={(e) => setAdminPhoneLocalNumber(e.target.value.replace(/[^0-9]/g, ""))}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm outline-none"
+                />
+              </div>
             </div>
 
             <div>

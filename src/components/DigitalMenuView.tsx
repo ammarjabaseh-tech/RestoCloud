@@ -185,7 +185,6 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
   const [selectedTable, setSelectedTable] = useState<number>(tables[0]?.tableNumber || 1);
   const [customerName, setCustomerName] = useState<string>("");
   const [customerPhone, setCustomerPhone] = useState<string>("");
-  const [phoneCountryCode, setPhoneCountryCode] = useState<string>("966");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [orderSuccessNumber, setOrderSuccessNumber] = useState<string | null>(null);
   const [selectedItemDetail, setSelectedItemDetail] = useState<MenuItem | null>(null);
@@ -321,9 +320,8 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
         ? `\n📍 رقم الطاولة: ${selectedTable}` 
         : "";
 
-      const formattedCustomerPhone = customerPhone ? `+${phoneCountryCode}${customerPhone.replace(/^0+/, "")}` : "";
       const customerNameText = customerName ? `\n👤 العميل: ${customerName}` : "";
-      const customerPhoneText = formattedCustomerPhone ? `\n📞 الهاتف: ${formattedCustomerPhone}` : "";
+      const customerPhoneText = customerPhone ? `\n📞 الهاتف: ${customerPhone}` : "";
 
       const msg = `*طلب جديد من المنيو الرقمي (RestoCloud)* 🍽️\n` +
         `----------------------------------------\n` +
@@ -349,7 +347,6 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
     }
 
     try {
-      const formattedCustomerPhone = customerPhone ? `+${phoneCountryCode}${customerPhone.replace(/^0+/, "")}` : "";
       const res = await fetch(`/api/tenants/${tenant.id}/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -357,7 +354,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           orderType,
           tableNumber: orderType === "dine_in" ? selectedTable : undefined,
           customerName: customerName || (orderType === "dine_in" ? `طلب من طاولة ${selectedTable}` : "زبون قائمة QR"),
-          customerPhone: formattedCustomerPhone,
+          customerPhone,
           items: cart,
           subtotal,
           taxAmount,
@@ -908,33 +905,14 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{translations[lang].customerPhone} *</label>
-                    <div className="flex gap-1.5" dir="ltr">
-                      <select
-                        value={phoneCountryCode}
-                        onChange={(e) => setPhoneCountryCode(e.target.value)}
-                        className="px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-55 bg-white dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
-                      >
-                        <option value="966">🇸🇦 +966</option>
-                        <option value="971">🇦🇪 +971</option>
-                        <option value="974">🇶🇦 +974</option>
-                        <option value="965">🇰🇼 +965</option>
-                        <option value="968">🇴🇲 +968</option>
-                        <option value="973">🇧🇭 +973</option>
-                        <option value="20">🇪🇬 +20</option>
-                        <option value="962">🇯🇴 +962</option>
-                        <option value="90">🇹🇷 +90</option>
-                        <option value="1">🇺🇸 +1</option>
-                        <option value="44">🇬🇧 +44</option>
-                      </select>
-                      <input
-                        type="tel"
-                        required
-                        placeholder={translations[lang].customerPhonePlaceholder}
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value.replace(/[^0-9]/g, ""))}
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      required
+                      placeholder={translations[lang].customerPhonePlaceholder}
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
+                    />
                   </div>
                 </div>
               )}
