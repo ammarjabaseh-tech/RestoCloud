@@ -564,6 +564,20 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           </div>
         </div>
 
+        {/* QR Code Action Button */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => {
+              setQrTargetTable("general");
+              setShowQRModal(true);
+            }}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 cursor-pointer shadow-3xs hover:-translate-y-0.5 transform"
+          >
+            <QrCode className="w-4 h-4 shrink-0 text-indigo-600 animate-pulse" />
+            <span>{lang === 'ar' ? '📲 باركود المنيو العام (QR)' : lang === 'tr' ? '📲 Genel Menü Barkodu (QR)' : '📲 General Menu QR Code'}</span>
+          </button>
+        </div>
+
         {/* Tab Switcher */}
         <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto border border-slate-200 no-scrollbar">
           <button
