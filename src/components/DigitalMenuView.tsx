@@ -309,12 +309,14 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       }).join("\n");
 
       const typeLabel = orderType === "dine_in" 
-        ? (lang === 'ar' ? "🍽️ سفري/طاولة" : "Dine In / Table")
+        ? (tenant.subscriptionPlan === "lite"
+            ? (lang === 'ar' ? "🍽️ تناول في المطعم" : "Dine In")
+            : (lang === 'ar' ? "🍽️ سفري/طاولة" : "Dine In / Table"))
         : orderType === "takeaway"
           ? (lang === 'ar' ? "🛍️ سفري/استلام" : "Takeaway")
           : (lang === 'ar' ? "🛵 توصيل" : "Delivery");
 
-      const tableText = orderType === "dine_in" && selectedTable 
+      const tableText = orderType === "dine_in" && selectedTable && tenant.subscriptionPlan !== "lite"
         ? `\n📍 رقم الطاولة: ${selectedTable}` 
         : "";
 
@@ -846,7 +848,11 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                     }`}
                   >
                     <UtensilsCrossed className="w-4 h-4" />
-                    <span>{translations[lang].dineIn}</span>
+                    <span>
+                      {tenant.subscriptionPlan === "lite"
+                        ? (lang === 'ar' ? 'تناول في المطعم' : lang === 'tr' ? 'Restoranda Yemek' : 'Dine In')
+                        : translations[lang].dineIn}
+                    </span>
                   </button>
 
                   <button
@@ -865,7 +871,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               </div>
 
               {/* Table Number or Customer Details */}
-              {orderType === "dine_in" ? (
+              {orderType === "dine_in" && tenant.subscriptionPlan !== "lite" ? (
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     {lang === 'ar' ? 'حدد رقم الطاولة التي تجلس عليها *' : lang === 'tr' ? 'Oturduğunuz masa numarasını seçin *' : 'Select the table number you are sitting at *'}

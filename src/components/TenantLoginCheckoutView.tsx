@@ -298,19 +298,19 @@ export const TenantLoginCheckoutView: React.FC<TenantLoginCheckoutViewProps> = (
       name: lang === 'ar' ? "باقة المنيو الرقمي (Lite Menu)" : lang === 'tr' ? "Dijital Menü Paketi (Lite)" : "Lite Menu Plan",
       price: 50,
       features: lang === 'ar' ? [
-        "منيو إلكتروني رقمي متكامل مع باركود QR",
+        "منيو إلكتروني رقمي متكامل مع باركود QR عام",
         "إدارة المنتجات والأقسام والأسعار بمرونة",
         "تنسيق ودعم كامل للهواتف والأجهزة",
         "رابط فرعي خاص بمطعمك (*.restocloud.app)",
         "دعم فني عبر البريد الإلكتروني"
       ] : lang === 'tr' ? [
-        "Dijital QR Kod Menü Standı",
+        "Genel QR Kod Menü Standı",
         "Kategori, ürün ve fiyat yönetimi",
         "Mobil ve tablet uyumlu modern tasarım",
         "Özel alt alan adı (*.restocloud.app)",
         "E-posta ile teknik destek"
       ] : [
-        "Digital QR code menu for tables",
+        "General QR code digital menu",
         "Product, categories & pricing control panel",
         "Fully mobile & tablet responsive layout",
         "Subdomain hosting (*.restocloud.app)",
