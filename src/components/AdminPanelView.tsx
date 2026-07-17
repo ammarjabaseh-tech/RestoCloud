@@ -1859,7 +1859,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                         { name: lang === 'ar' ? '🍗 دجاج كرسبي' : 'Crispy Chicken', url: 'https://images.unsplash.com/photo-1627662236973-4f8259fa2441?q=80&w=400' },
                         { name: lang === 'ar' ? '🍕 مارغريتا' : 'Margherita', url: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=400' },
                         { name: lang === 'ar' ? '🍕 بيتزا بيبروني' : 'Pepperoni', url: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=400' },
-                        { name: lang === 'ar' ? '🌮 تاكو مكسيكي' : 'Mexican Tacos', url: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=400' },
+                        { name: lang === 'ar' ? '🌮 تاكو مكسيكي' : 'Mexican Tacos', url: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?q=80&w=400' },
                         { name: lang === 'ar' ? '🌯 شاورما صاج' : 'Shawarma Wrap', url: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?q=80&w=400' },
                         { name: lang === 'ar' ? '🍟 بطاطس مقلية' : 'French Fries', url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=400' },
                         { name: lang === 'ar' ? '🍢 مشاوي مشكلة' : 'Mixed Grills', url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=400' },
