@@ -184,6 +184,45 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   onLangChange 
 }) => {
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [activeVideo, setActiveVideo] = useState(0);
+  
+  const tutorials = [
+    {
+      title: lang === 'ar' ? "تصفح وطلب العميل من المنيو" : lang === 'tr' ? "Müşteri Menü Gezintisi & Sipariş" : "Customer Menu Browsing & Ordering",
+      desc: lang === 'ar' ? "تجربة مسح الباركود، تصفح المنيو، وإتمام الطلب التفاعلي من هاتف العميل." : lang === 'tr' ? "Müşterinin masa barkodunu taraması ve sipariş vermesi." : "Interactive table QR scanning and customer checkout simulation.",
+      thumbnail: "📱"
+    },
+    {
+      title: lang === 'ar' ? "تخصيص الهوية والألوان لحظياً" : lang === 'tr' ? "Canlı Renk ve Marka Seçimi" : "Real-time Theme & Branding",
+      desc: lang === 'ar' ? "تغيير شعار وألوان وتصميم المنيو وملاحظة التعديل فورياً." : lang === 'tr' ? "Menü renklerini değiştirin ve anında önizleyin." : "Change menu colors and see live updates instantly.",
+      thumbnail: "🎨"
+    },
+    {
+      title: lang === 'ar' ? "استقبال الطلبات على الواتساب" : lang === 'tr' ? "WhatsApp Sipariş Akışı" : "WhatsApp Order Receipts",
+      desc: lang === 'ar' ? "محاكاة طريقة وصول تفاصيل الطلب والحساب إلى رقم الواتساب الخاص بك." : lang === 'tr' ? "Sipariş detaylarının WhatsApp'a ulaşma şekli." : "Simulate how structured orders and bills land on your WhatsApp.",
+      thumbnail: "💬"
+    },
+    {
+      title: lang === 'ar' ? "لوحة الإدارة وإضافة الأصناف" : lang === 'tr' ? "Ürün Ekleme & Kontrol Paneli" : "Item Manager & Admin Panel",
+      desc: lang === 'ar' ? "تجربة إضافة وتعديل أسعار وصور الأطباق والوجبات بمرونة." : lang === 'tr' ? "Ürün ekleme ve menüyü kontrol etme." : "Simulate adding food items and updating prices.",
+      thumbnail: "🍽️"
+    },
+    {
+      title: lang === 'ar' ? "شاشة الكاشير ونقاط البيع السريعة" : lang === 'tr' ? "Hızlı POS Kasa Ekranı" : "Ultra-fast POS & Cashier Station",
+      desc: lang === 'ar' ? "شاشة كاشير سريعة جداً لتسجيل الطلبات المباشرة والسفري بنقرة واحدة." : lang === 'tr' ? "Siparişleri hızlıca kaydetmek için POS kasası." : "A swift cashier console to checkout dine-in and takeaway orders.",
+      thumbnail: "🖥️"
+    },
+    {
+      title: lang === 'ar' ? "الفواتير الضريبية وطباعة الإيصالات" : lang === 'tr' ? "E-Fatura & Yazıcı Çözümleri" : "ZATCA E-Invoices & Receipt Printing",
+      desc: lang === 'ar' ? "إصدار فواتير حرارية متوافقة مع هيئة الزكاة (ZATCA) مع رمز QR مشفر." : lang === 'tr' ? "Vergi kurallarına uyumlu fatura ve fiş yazdırma." : "Generate tax e-invoices with encrypted ZATCA QR codes.",
+      thumbnail: "🖨️"
+    },
+    {
+      title: lang === 'ar' ? "لوحة مبيعات وتقارير الفروع" : lang === 'tr' ? "Çoklu Şube Satış Raporları" : "Multi-branch Sales & Analytics",
+      desc: lang === 'ar' ? "متابعة أرباح فروع مطعمك، مبيعاتك اليومية، وإحصائيات الطلبات." : lang === 'tr' ? "Şubelerinizin günlük kazançlarını ve satış raporlarını izleyin." : "Track daily earnings, orders, and branch sales statistics.",
+      thumbnail: "📊"
+    }
+  ];
   const t = landingTranslations[lang] || landingTranslations['ar'];
 
   return (
@@ -380,7 +419,76 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
         </div>
       </section>
 
-      {/* Pricing Section */}
+      
+      {/* Video Tutorials Section */}
+      <section id="tutorials" className="py-24 bg-slate-950/60 relative border-t border-white/5">
+        {/* Glow light */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6 relative">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-black mb-4">
+              {lang === 'ar' ? 'شرح المنيو وكيفية العمل' : lang === 'tr' ? 'Nasıl Çalışır & Video Rehberler' : 'How it Works & Video Guides'}
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">
+              {lang === 'ar' ? 'شاهد شروحات سريعة توضح كيف تساهم منصتنا في تنظيم طلبات مطعمك ورفع أرباحك بضغطة زر' : lang === 'tr' ? 'Platformumuzun restoran siparişlerinizi nasıl düzenlediğini ve satışlarınızı nasıl artırdığını gösteren hızlı rehberleri izleyin' : 'Watch quick videos showing how our platform organizes your restaurant orders and boosts your sales easily'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left side: Video Player Mockup (5 cols) */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="relative w-[280px] h-[560px] bg-slate-900 rounded-[40px] p-3 border-4 border-slate-700 shadow-2xl shadow-indigo-500/10 flex flex-col overflow-hidden group">
+                {/* Phone Speaker & Camera Notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-5 w-32 bg-slate-700 rounded-b-xl z-20 flex items-center justify-center">
+                  <div className="w-12 h-1 bg-slate-800 rounded-full" />
+                  <div className="w-2.5 h-2.5 bg-slate-850 rounded-full ml-2" />
+                </div>
+
+                {/* Inner Screen */}
+                <div className="relative flex-1 rounded-[32px] overflow-hidden bg-slate-950 flex items-center justify-center">
+                  <PhoneSimulation activeIndex={activeVideo} lang={lang} />
+                </div>
+              </div>
+            </div>
+
+            {/* Right side: Interactive Tutorial list (7 cols) */}
+            <div className="lg:col-span-7 space-y-2.5 max-h-[560px] overflow-y-auto pr-2 custom-scrollbar" dir={lang === "ar" ? "rtl" : "ltr"}>
+              {tutorials.map((t, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveVideo(idx)}
+                  className={`w-full p-3.5 rounded-2xl border text-right flex items-center gap-3 transition-all cursor-pointer ${
+                    activeVideo === idx
+                      ? "bg-gradient-to-l from-indigo-900/30 to-slate-800/80 border-indigo-500/40 shadow-lg shadow-indigo-500/5"
+                      : "bg-slate-800/20 hover:bg-slate-800/40 border-white/5"
+                  }`}
+                >
+                  {/* Play circle / Selected icon */}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-md shrink-0 transition-all shadow-md ${
+                    activeVideo === idx
+                      ? "bg-indigo-600 text-white scale-105"
+                      : "bg-slate-800/60 text-slate-400 group-hover:text-white"
+                  }`}>
+                    {t.thumbnail}
+                  </div>
+
+                  <div className="flex-1 space-y-1">
+                    <h3 className={`text-base font-bold transition-colors ${
+                      activeVideo === idx ? "text-white" : "text-slate-300"
+                    }`}>
+                      {t.title}
+                    </h3>
+                    <p className="text-xs text-slate-400 leading-relaxed">{t.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+{/* Pricing Section */}
       <section id="pricing" className="py-24 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
@@ -484,6 +592,372 @@ function SparklesIcon(props: any) {
     </svg>
   );
 }
+
+
+const PhoneSimulation: React.FC<{ activeIndex: number; lang: string }> = ({ activeIndex, lang }) => {
+  const [cartCount, setCartCount] = useState(0);
+  const [orderSent, setOrderSent] = useState(false);
+  const [brandingColor, setBrandingColor] = useState("emerald");
+  const [itemsList, setItemsList] = useState([
+    { name: lang === 'ar' ? "برجر كلاسيك" : "Classic Burger", price: 25 },
+    { name: lang === 'ar' ? "بطاطس مقرمشة" : "Crispy Fries", price: 10 }
+  ]);
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemPrice, setNewItemPrice] = useState("");
+  const [posCart, setPosCart] = useState<{ name: string; price: number; qty: number }[]>([]);
+  const [posPaid, setPosPaid] = useState(false);
+  const [branch, setBranch] = useState("riyadh");
+
+  React.useEffect(() => {
+    setOrderSent(false);
+    setCartCount(0);
+    setPosCart([]);
+    setPosPaid(false);
+  }, [activeIndex]);
+
+  const getColorHex = (col: string) => {
+    if (col === "violet") return "#8b5cf6";
+    if (col === "rose") return "#f43f5e";
+    return "#10b981";
+  };
+
+  const activeThemeColor = getColorHex(brandingColor);
+
+  return (
+    <div className="w-full h-full flex flex-col bg-slate-950 font-sans text-right relative select-none">
+      {/* Top Header Simulation bar */}
+      <div className="h-10 bg-slate-900 border-b border-white/5 flex items-center justify-between px-4 pt-3 shrink-0 text-slate-400 text-[10px]">
+        <div className="flex items-center gap-1">
+          <span>🔋 100%</span>
+        </div>
+        <div className="w-14 h-3 bg-slate-950 rounded-full" />
+        <div className="flex items-center gap-1 font-mono">
+          <span>12:00 PM</span>
+        </div>
+      </div>
+
+      {/* Screen Content */}
+      <div className="flex-1 overflow-y-auto p-3 text-slate-200 text-xs flex flex-col">
+        {activeIndex === 0 && (
+          <div className="flex-1 flex flex-col space-y-2.5">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <span className="text-[9px] bg-indigo-500/20 text-indigo-400 font-bold px-1.5 py-0.5 rounded-full">طاولة 4</span>
+              <h4 className="font-bold text-white text-[11px]">🍔 برجر شو (Burger Show)</h4>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="bg-slate-900 p-2 rounded-xl border border-white/5 flex items-center justify-between gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCartCount(c => c + 1);
+                    setOrderSent(false);
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] cursor-pointer"
+                >
+                  {lang === 'ar' ? 'أضف +' : 'Add +'}
+                </button>
+                <div className="text-right">
+                  <div className="font-bold text-white text-[11px]">{lang === 'ar' ? 'كلاسيك برجر 🍔' : 'Classic Burger 🍔'}</div>
+                  <div className="text-[10px] text-slate-400">25 ر.س</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-900 p-2 rounded-xl border border-white/5 flex items-center justify-between gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCartCount(c => c + 1);
+                    setOrderSent(false);
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] cursor-pointer"
+                >
+                  {lang === 'ar' ? 'أضف +' : 'Add +'}
+                </button>
+                <div className="text-right">
+                  <div className="font-bold text-white text-[11px]">{lang === 'ar' ? 'بطاطس مقرمشة 🍟' : 'Crispy Fries 🍟'}</div>
+                  <div className="text-[10px] text-slate-400">10 ر.س</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-auto pt-3">
+              {orderSent ? (
+                <div className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-2.5 rounded-xl text-center font-bold text-[9px] animate-in zoom-in-95">
+                  🎉 {lang === 'ar' ? 'تم إرسال الطلب بنجاح إلى الواتساب!' : 'Order sent to WhatsApp!'}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (cartCount > 0) setOrderSent(true);
+                  }}
+                  disabled={cartCount === 0}
+                  className={`w-full py-2 rounded-xl text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                    cartCount > 0 ? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 cursor-pointer" : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                  }`}
+                >
+                  <span>🛒 {lang === 'ar' ? 'إرسال الطلب عبر الواتساب' : 'Send Order to WhatsApp'}</span>
+                  {cartCount > 0 && <span className="bg-white text-emerald-600 font-black rounded-full w-4 h-4 flex items-center justify-center text-[10px]">{cartCount}</span>}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeIndex === 1 && (
+          <div className="flex-1 flex flex-col space-y-3">
+            <div className="bg-slate-900 p-2.5 rounded-xl border border-white/5 space-y-2">
+              <span className="text-[9px] text-slate-400 block font-bold">{lang === 'ar' ? 'اختر لون الهوية للمنيو:' : 'Choose Menu Theme Color:'}</span>
+              <div className="flex gap-2 justify-end">
+                {["emerald", "violet", "rose"].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBrandingColor(c)}
+                    className={`w-5 h-5 rounded-full border cursor-pointer transition-all ${
+                      c === "emerald" ? "bg-emerald-500" : c === "violet" ? "bg-violet-500" : "bg-rose-500"
+                    } ${brandingColor === c ? "ring-2 ring-white scale-110 border-black" : "border-white/10 hover:scale-105"}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex-1 border rounded-2xl p-2.5 flex flex-col space-y-2" style={{ borderColor: activeThemeColor + "40" }}>
+              <div className="text-center py-1.5 rounded-xl" style={{ backgroundColor: activeThemeColor + "15" }}>
+                <h5 className="font-bold text-[10px]" style={{ color: activeThemeColor }}>
+                  {lang === 'ar' ? 'معاينة المنيو الخاص بك' : 'Your Menu Live Preview'}
+                </h5>
+              </div>
+              <div className="bg-slate-900/60 p-2 rounded-xl border border-white/5 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-white px-2 py-0.5 rounded-md" style={{ backgroundColor: activeThemeColor }}>
+                  {lang === 'ar' ? 'طلب' : 'Order'}
+                </span>
+                <span className="font-bold text-white text-[10px]">🍔 برجر لحم فاخر</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeIndex === 2 && (
+          <div className="flex-1 flex flex-col space-y-2">
+            <div className="bg-[#075e54] p-2 rounded-lg flex items-center justify-between text-white text-[9px] shrink-0">
+              <span className="text-[8px] text-emerald-200">Online</span>
+              <span className="font-bold">برجر شو (RestoCloud) 🍔</span>
+            </div>
+
+            <div className="flex-1 bg-slate-900/80 rounded-xl p-2 space-y-2 flex flex-col justify-end">
+              <div className="bg-[#056162] text-white p-2 rounded-xl text-[9px] max-w-[90%] self-end space-y-1 text-right shadow-sm leading-relaxed">
+                <div className="font-bold border-b border-white/10 pb-0.5 text-[8px] text-emerald-300">
+                  {lang === 'ar' ? '💬 طلب جديد من طاولة 4' : '💬 New Order - Table 4'}
+                </div>
+                <div className="font-mono text-[8px] text-slate-100">
+                  🍔 1x كلاسيك برجر (25 ر.س)<br />
+                  🍟 1x بطاطس مقرمشة (10 ر.س)<br />
+                  ---------------------<br />
+                  💰 المجموع الإجمالي: 35 ر.س
+                </div>
+              </div>
+              
+              <div className="bg-[#262d31] text-slate-300 p-2 rounded-xl text-[9px] max-w-[85%] self-start text-right shadow-sm">
+                👨‍🍳 {lang === 'ar' ? 'مرحباً بك! تم استلام طلبك وجاري تحضيره في المطبخ.' : 'Hello! We received your order and are preparing it.'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeIndex === 3 && (
+          <div className="flex-1 flex flex-col space-y-3">
+            <div className="bg-slate-900 p-2.5 rounded-xl border border-white/5 space-y-2">
+              <span className="text-[9px] font-bold text-white block">{lang === 'ar' ? 'إضافة طبق جديد للمنيو:' : 'Add New Dish:'}</span>
+              <div className="space-y-1.5">
+                <input
+                  type="text"
+                  placeholder={lang === 'ar' ? "اسم الوجبة (مثال: شاورما)" : "Item Name"}
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  className="w-full px-2 py-1 bg-slate-950 border border-white/10 rounded-lg text-[9px] text-right focus:outline-none"
+                />
+                <input
+                  type="number"
+                  placeholder={lang === 'ar' ? "السعر (مثال: 15)" : "Price"}
+                  value={newItemPrice}
+                  onChange={(e) => setNewItemPrice(e.target.value)}
+                  className="w-full px-2 py-1 bg-slate-950 border border-white/10 rounded-lg text-[9px] text-right focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newItemName && newItemPrice) {
+                      setItemsList([...itemsList, { name: newItemName, price: Number(newItemPrice) }]);
+                      setNewItemName("");
+                      setNewItemPrice("");
+                    }
+                  }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1 rounded-lg text-[9px] cursor-pointer"
+                >
+                  {lang === 'ar' ? 'حفظ الصنف الجديد' : 'Save New Item'}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 bg-slate-900/40 border border-white/5 rounded-xl p-2 max-h-[90px] overflow-y-auto space-y-1">
+              <span className="text-[8px] text-slate-500 font-bold block mb-1">{lang === 'ar' ? 'قائمة الطعام الحالية:' : 'Current Menu:'}</span>
+              {itemsList.map((item, idx) => (
+                <div key={idx} className="bg-slate-950 p-1 rounded-lg border border-white/5 flex items-center justify-between text-[9px]">
+                  <span className="text-slate-400 font-mono">{item.price} ر.س</span>
+                  <span className="font-bold text-white">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeIndex === 4 && (
+          <div className="flex-1 flex flex-col space-y-2">
+            <div className="grid grid-cols-3 gap-1 shrink-0">
+              {[{ name: "🍔 برجر", p: 25 }, { name: "🍟 بطاطس", p: 10 }, { name: "🥤 كولا", p: 5 }].map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    const existing = posCart.find(c => c.name === item.name);
+                    if (existing) {
+                      setPosCart(posCart.map(c => c.name === item.name ? { ...c, qty: c.qty + 1 } : c));
+                    } else {
+                      setPosCart([...posCart, { name: item.name, price: item.p, qty: 1 }]);
+                    }
+                    setPosPaid(false);
+                  }}
+                  className="bg-slate-900 hover:bg-slate-800 p-1.5 rounded-lg border border-white/5 text-center text-[9px] font-bold text-slate-200 cursor-pointer"
+                >
+                  <div>{item.name}</div>
+                  <div className="text-[8px] text-slate-500">{item.p} ر.س</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex-1 bg-white text-slate-900 rounded-xl p-2 flex flex-col overflow-y-auto font-mono text-[8px] space-y-1">
+              <span className="font-black text-center border-b border-dashed border-slate-300 pb-1 text-[9px] text-slate-800">
+                {lang === 'ar' ? 'فاتورة كاشير سريعة' : 'POS Cashier Slip'}
+              </span>
+              
+              <div className="flex-1 space-y-0.5 max-h-[80px] overflow-y-auto">
+                {posCart.length === 0 ? (
+                  <div className="text-center text-slate-400 pt-3">{lang === 'ar' ? 'انقر على الأصناف بالأعلى' : 'Click items above'}</div>
+                ) : (
+                  posCart.map((c, i) => (
+                    <div key={i} className="flex justify-between">
+                      <span>{c.price * c.qty} ر.س</span>
+                      <span className="text-right">{c.name} x{c.qty}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {posCart.length > 0 && (
+                <div className="border-t border-dashed border-slate-300 pt-1">
+                  <div className="flex justify-between font-black text-slate-950">
+                    <span>{posCart.reduce((sum, item) => sum + (item.price * item.qty), 0)} ر.س</span>
+                    <span>{lang === 'ar' ? 'المجموع:' : 'TOTAL:'}</span>
+                  </div>
+
+                  {posPaid ? (
+                    <div className="bg-emerald-500 text-white font-bold p-1 rounded-md text-center text-[8px] mt-1">
+                      🎉 {lang === 'ar' ? 'تم الدفع وطباعة الفاتورة!' : 'Paid & Printed!'}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setPosPaid(true)}
+                      className="w-full bg-slate-900 hover:bg-slate-850 text-white font-bold py-1 rounded-md text-[8px] mt-1 cursor-pointer"
+                    >
+                      💳 {lang === 'ar' ? 'دفع وطباعة' : 'Checkout & Print'}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeIndex === 5 && (
+          <div className="flex-1 flex flex-col items-center justify-center p-2 space-y-3">
+            <div className="bg-white text-slate-900 p-3 rounded-xl shadow-md border border-slate-200 w-full max-w-[180px] font-mono text-[8px] space-y-1.5 text-center animate-in slide-in-from-top-12 duration-550">
+              <div className="font-black text-[9px] text-slate-800">🧾 {lang === 'ar' ? 'فاتورة ضريبية مبسطة' : 'Simplified Tax Invoice'}</div>
+              <div className="text-slate-500 text-[7px]">{lang === 'ar' ? 'الرقم الضريبي: ٣١٠٥٢٩١٨٤' : 'VAT ID: 310529184'}</div>
+              
+              <div className="border-y border-dashed border-slate-200 py-1 space-y-0.5 text-right px-1">
+                <div className="flex justify-between"><span>٢٥.٠٠ ر.س</span><span>برجر كلاسيك x١</span></div>
+                <div className="flex justify-between"><span>٣.٧٥ ر.س</span><span>ضريبة القيمة المضافة ١٥٪</span></div>
+              </div>
+
+              <div className="flex justify-between font-black text-slate-950 px-1">
+                <span>٢٨.٧٥ ر.س</span>
+                <span>{lang === 'ar' ? 'الإجمالي:' : 'TOTAL:'}</span>
+              </div>
+
+              <div className="flex justify-center pt-2">
+                <div className="w-14 h-14 bg-slate-100 border border-slate-200 p-1 flex flex-wrap gap-0.5 justify-center items-center">
+                  {Array.from({ length: 49 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`w-1 h-1 ${
+                        (idx % 2 === 0 && idx % 3 === 0) || idx < 7 || idx % 7 === 0 || idx > 42 ? "bg-slate-900" : "bg-slate-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="text-[6px] text-slate-400 font-sans">{lang === 'ar' ? 'متوافق مع متطلبات هيئة الزكاة والجمارك' : 'ZATCA Phase 2 Compliant'}</div>
+            </div>
+          </div>
+        )}
+
+        {activeIndex === 6 && (
+          <div className="flex-1 flex flex-col space-y-2.5">
+            <div className="flex items-center justify-between shrink-0 bg-slate-900 p-1.5 rounded-lg border border-white/5">
+              <select
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                className="bg-slate-950 border border-white/10 rounded-md text-[8px] text-white p-1 focus:outline-none"
+              >
+                <option value="riyadh">📍 {lang === 'ar' ? 'فرع الرياض' : 'Riyadh Branch'}</option>
+                <option value="jeddah">📍 {lang === 'ar' ? 'فرع جدة' : 'Jeddah Branch'}</option>
+              </select>
+              <span className="text-[9px] text-slate-400 font-bold">{lang === 'ar' ? 'مراقبة أرباح الفروع:' : 'Branch Sales Monitor:'}</span>
+            </div>
+
+            <div className="flex-1 bg-slate-900 p-2.5 rounded-xl border border-white/5 flex flex-col space-y-2">
+              <div className="flex justify-between items-end border-b border-white/5 pb-1">
+                <span className="text-[8px] text-emerald-400 font-black">+18.5%</span>
+                <div className="text-right">
+                  <div className="text-[7px] text-slate-500">{lang === 'ar' ? 'مبيعات اليوم' : 'Today Sales'}</div>
+                  <div className="font-bold text-white text-[10px] font-mono">
+                    {branch === "riyadh" ? "١٢,٨٥٠ ر.س" : "٨,٤٠٠ ر.س"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 flex items-end justify-between gap-1.5 px-2 pt-4 h-16">
+                {[30, 45, 60, 40, 75, 90, 65].map((val, idx) => (
+                  <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className="w-full bg-gradient-to-t from-indigo-600 to-violet-400 rounded-t-md transition-all duration-500"
+                      style={{ height: `${branch === "riyadh" ? val * 0.75 : val * 0.5}px` }}
+                    />
+                    <span className="text-[5px] text-slate-500 font-mono">D{idx+1}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 
 function FeatureCard({ icon, title, desc, color, lang }: { icon: React.ReactNode, title: string, desc: string, color: string, lang: string }) {
   return (

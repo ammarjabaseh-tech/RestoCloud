@@ -594,77 +594,81 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     <div className="space-y-6 animate-in fade-in duration-200" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       {/* Top Banner & Tabs */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-800 text-3xl flex items-center justify-center border border-slate-200 shadow-2xs overflow-hidden">
-            <RestaurantLogo logo={tenant.logo} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-extrabold text-slate-900">{tenant.nameAr}</h1>
-              <span className="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200 font-sans">
-                {lang === 'ar' ? 'لوحة المالك (Admin)' : lang === 'tr' ? 'Sahip Paneli (Admin)' : 'Owner Panel (Admin)'}
-              </span>
-              {tenant.status === 'trial' && (
-                <span className="text-[11px] bg-amber-100 dark:bg-amber-950 text-amber-855 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
-                  {lang === 'ar' ? `⏳ تجريبي: متبقي ${getTrialDaysLeft()} يوم` : lang === 'tr' ? `⏳ Deneme: ${getTrialDaysLeft()} gün kaldı` : `⏳ Trial: ${getTrialDaysLeft()} days left`}
-                </span>
-              )}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+        
+        {/* Row 1: Restaurant Logo + Owner Info (on the right) AND QR Code Button (on the left) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/60 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-205 text-3xl flex items-center justify-center border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden shrink-0">
+              <RestaurantLogo logo={tenant.logo} />
             </div>
-            <p className="text-xs text-slate-500 mt-1">{adminTranslations[lang].subtitle}</p>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">{tenant.nameAr}</h1>
+                <span className="text-xs bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200 dark:border-emerald-900 font-sans">
+                  {lang === 'ar' ? 'لوحة المالك (Admin)' : lang === 'tr' ? 'Sahip Paneli (Admin)' : 'Owner Panel (Admin)'}
+                </span>
+                {tenant.status === 'trial' && (
+                  <span className="text-[11px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded-full animate-pulse font-bold">
+                    {lang === 'ar' ? `⏳ تجريبي: متبقي ${getTrialDaysLeft()} يوم` : lang === 'tr' ? `⏳ Deneme: ${getTrialDaysLeft()} gün kaldı` : `⏳ Trial: ${getTrialDaysLeft()} days left`}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">{adminTranslations[lang].subtitle}</p>
+            </div>
+          </div>
+
+          {/* QR Code Action Button on the Left */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                setQrTargetTable("general");
+                setShowQRModal(true);
+              }}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60 cursor-pointer shadow-3xs hover:-translate-y-0.5 transform"
+            >
+              <QrCode className="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+              <span>{lang === 'ar' ? '📲 باركود المنيو العام (QR)' : lang === 'tr' ? '📲 Genel Menü Barkodu (QR)' : '📲 General Menu QR Code'}</span>
+            </button>
           </div>
         </div>
 
-        {/* QR Code Action Button */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => {
-              setQrTargetTable("general");
-              setShowQRModal(true);
-            }}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 cursor-pointer shadow-3xs hover:-translate-y-0.5 transform"
-          >
-            <QrCode className="w-4 h-4 shrink-0 text-indigo-600 animate-pulse" />
-            <span>{lang === 'ar' ? '📲 باركود المنيو العام (QR)' : lang === 'tr' ? '📲 Genel Menü Barkodu (QR)' : '📲 General Menu QR Code'}</span>
-          </button>
-        </div>
-
-        {/* Tab Switcher */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto border border-slate-200 no-scrollbar">
+        {/* Row 2: Tab Switcher (Stretches full width of the card) */}
+        <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-2xl overflow-x-auto border border-slate-150 dark:border-slate-805/50 w-full no-scrollbar">
           <button
             onClick={() => setActiveTab("menu")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
               activeTab === "menu"
-                ? `${theme.primaryBg} text-white shadow-sm`
-                : "text-slate-600 hover:bg-white/70"
+                ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
             }`}
           >
-            <Utensils className="w-3.5 h-3.5" />
+            <Utensils className="w-4 h-4" />
             <span>{adminTranslations[lang].tabMenu}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("branding")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
               activeTab === "branding"
-                ? `${theme.primaryBg} text-white shadow-sm`
-                : "text-slate-600 hover:bg-white/70"
+                ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
             }`}
           >
-            <Palette className="w-3.5 h-3.5" />
+            <Palette className="w-4 h-4" />
             <span>{adminTranslations[lang].tabBranding}</span>
           </button>
 
           {tenant.subscriptionPlan !== "lite" && (
             <button
               onClick={() => setActiveTab("tables")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === "tables"
-                  ? `${theme.primaryBg} text-white shadow-sm`
-                  : "text-slate-600 hover:bg-white/70"
+                  ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                  : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
               }`}
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
+              <LayoutGrid className="w-4 h-4" />
               <span>{adminTranslations[lang].tabTables}</span>
             </button>
           )}
@@ -672,13 +676,13 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           {tenant.subscriptionPlan !== "lite" && (
             <button
               onClick={() => setActiveTab("analytics")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === "analytics"
-                  ? `${theme.primaryBg} text-white shadow-sm`
-                  : "text-slate-600 hover:bg-white/70"
+                  ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                  : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
+              <BarChart3 className="w-4 h-4" />
               <span>{adminTranslations[lang].tabAnalytics}</span>
             </button>
           )}
@@ -686,13 +690,13 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           {tenant.subscriptionPlan !== "lite" && (
             <button
               onClick={() => setActiveTab("users")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === "users"
-                  ? `${theme.primaryBg} text-white shadow-sm`
-                  : "text-slate-600 hover:bg-white/70"
+                  ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                  : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
               }`}
             >
-              <Users className="w-3.5 h-3.5" />
+              <Users className="w-4 h-4" />
               <span>{adminTranslations[lang].tabUsers}</span>
             </button>
           )}
@@ -700,13 +704,13 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
           {tenant.subscriptionPlan !== "lite" && (
             <button
               onClick={() => setActiveTab("printers")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === "printers"
-                  ? `${theme.primaryBg} text-white shadow-sm`
-                  : "text-slate-600 hover:bg-white/70"
+                  ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                  : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
               }`}
             >
-              <PrinterIcon className="w-3.5 h-3.5" />
+              <PrinterIcon className="w-4 h-4" />
               <span>{adminTranslations[lang].tabPrinters}</span>
             </button>
           )}
@@ -763,7 +767,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 </span>
 
                 {/* Edit & Delete Controls */}
-                <div className="flex items-center gap-0.5 border-r border-slate-200 dark:border-slate-800 px-1.5 mr-1">
+                <div className="flex items-center gap-0.5 border-s border-slate-200 dark:border-slate-800 ps-1.5 ms-1.5">
                   <button 
                     onClick={() => openCategoryModal(cat)}
                     className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400 cursor-pointer"
@@ -818,11 +822,11 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               <table className="w-full text-right border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs font-bold border-b border-slate-200 dark:border-slate-800">
-                    <th className="p-4">{lang === 'ar' ? 'الصنف والوصف' : lang === 'tr' ? 'Ürün & Açıklama' : 'Item & Description'}</th>
-                    <th className="p-4">{lang === 'ar' ? 'القسم' : lang === 'tr' ? 'Kategori' : 'Category'}</th>
-                    <th className="p-4">{lang === 'ar' ? 'السعر والتكلفة' : lang === 'tr' ? 'Fiyat & Maliyet' : 'Price & Cost'}</th>
-                    <th className="p-4">{lang === 'ar' ? 'مدة التحضير' : lang === 'tr' ? 'Hazırlama Süresi' : 'Prep Time'}</th>
-                    <th className="p-4">{lang === 'ar' ? 'الحالة والتوفر' : lang === 'tr' ? 'Durum & Stok' : 'Status & Availability'}</th>
+                    <th className="p-4 text-right">{lang === 'ar' ? 'الصنف والوصف' : lang === 'tr' ? 'Ürün & Açıklama' : 'Item & Description'}</th>
+                    <th className="p-4 text-right">{lang === 'ar' ? 'القسم' : lang === 'tr' ? 'Kategori' : 'Category'}</th>
+                    <th className="p-4 text-right">{lang === 'ar' ? 'السعر والتكلفة' : lang === 'tr' ? 'Fiyat & Maliyet' : 'Price & Cost'}</th>
+                    <th className="p-4 text-right">{lang === 'ar' ? 'مدة التحضير' : lang === 'tr' ? 'Hazırlama Süresi' : 'Prep Time'}</th>
+                    <th className="p-4 text-right">{lang === 'ar' ? 'الحالة والتوفر' : lang === 'tr' ? 'Durum & Stok' : 'Status & Availability'}</th>
                     <th className="p-4 text-center">{lang === 'ar' ? 'إجراءات' : lang === 'tr' ? 'İşlemler' : 'Actions'}</th>
                   </tr>
                 </thead>
@@ -1841,23 +1845,23 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             <form onSubmit={handleSaveItem} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالعربية *</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">اسم الطبق بالعربية *</label>
                   <input
                     type="text"
                     required
                     placeholder="مثال: كباب لحم نعيمي"
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">القسم *</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">القسم *</label>
                   <select
                     value={itemCat}
                     onChange={(e) => setItemCat(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none font-bold"
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -1868,29 +1872,29 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 </div>
 
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالإنجليزية (English)</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">اسم الطبق بالإنجليزية (English)</label>
                   <input
                     type="text"
                     placeholder="مثال: Grilled Kabab"
                     value={itemNameEn}
                     onChange={(e) => setItemNameEn(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالتركية (Türkçe)</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">اسم الطبق بالتركية (Türkçe)</label>
                   <input
                     type="text"
                     placeholder="مثال: Izgara Kebap"
                     value={itemNameTr}
                     onChange={(e) => setItemNameTr(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">سعر البيع للزبون ({tenant.currency}) *</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">سعر البيع للزبون ({tenant.currency}) *</label>
                   <input
                     type="number"
                     step="0.5"
@@ -1898,19 +1902,19 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     placeholder="0"
                     value={itemPrice}
                     onChange={(e) => setItemPrice(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">تكلفة المواد الخام (Cost Price) *</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">تكلفة المواد الخام (Cost Price) *</label>
                   <input
                     type="number"
                     step="0.5"
                     placeholder="لحساب هامش الربح"
                     value={itemCost}
                     onChange={(e) => setItemCost(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -1943,28 +1947,28 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                   placeholder="وصف المكونات والنكهة وطريقة التحضير..."
                   value={itemDesc}
                   onChange={(e) => setItemDesc(e.target.value)}
-                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
+                  className="w-full p-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs text-slate-900 dark:text-white outline-none leading-relaxed focus:ring-2 focus:ring-indigo-500"
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">وصف الطبق بالإنجليزية (English)</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">وصف الطبق بالإنجليزية (English)</label>
                     <textarea
                       rows={2}
                       placeholder="English description..."
                       value={itemDescEn}
                       onChange={(e) => setItemDescEn(e.target.value)}
-                      className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
+                      className="w-full p-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs text-slate-900 dark:text-white outline-none leading-relaxed focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                   <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">وصف الطبق بالتركية (Türkçe)</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">وصف الطبق بالتركية (Türkçe)</label>
                     <textarea
                       rows={2}
                       placeholder="Türkçe açıklama..."
                       value={itemDescTr}
                       onChange={(e) => setItemDescTr(e.target.value)}
-                      className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
+                      className="w-full p-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs text-slate-900 dark:text-white outline-none leading-relaxed focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                 </div>
@@ -1972,7 +1976,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">صورة الطبق (Item Image)</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-405 mb-1.5">صورة الطبق (Item Image)</label>
                   <label className="w-full cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all transform hover:-translate-y-0.5 text-center">
                     <Upload className="w-4 h-4 shrink-0 animate-bounce" />
                     <span>{lang === 'ar' ? '📂 رفع صورة الطبق من جهازك' : '📂 Upload Dish Image'}</span>
@@ -2037,12 +2041,12 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 </div>
 
                 <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مدة التحضير المتوقعة (بالدقائق)</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">مدة التحضير المتوقعة (بالدقائق)</label>
                   <input
                     type="number"
                     value={itemPrep}
                     onChange={(e) => setItemPrep(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -2111,37 +2115,37 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             </div>
             <div className="space-y-3">
               <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالعربية *' : lang === 'tr' ? 'Arapça Kategori Adı *' : 'Category Name in Arabic *'}</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">{lang === 'ar' ? 'اسم القسم بالعربية *' : lang === 'tr' ? 'Arapça Kategori Adı *' : 'Category Name in Arabic *'}</label>
                 <input
                   type="text"
                   placeholder={lang === 'ar' ? "مثال: مقبلات ساخنة" : lang === 'tr' ? "Örnek: Sıcak Başlangıçlar" : "e.g. Hot Appetizers"}
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
               <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالإنجليزية (English)' : lang === 'tr' ? 'İngilizce Kategori Adı' : 'Category Name in English'}</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">{lang === 'ar' ? 'اسم القسم بالإنجليزية (English)' : lang === 'tr' ? 'İngilizce Kategori Adı' : 'Category Name in English'}</label>
                 <input
                   type="text"
                   placeholder="e.g. Hot Appetizers"
                   value={newCatNameEn}
                   onChange={(e) => setNewCatNameEn(e.target.value)}
-                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
               <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالتركية (Türkçe)' : lang === 'tr' ? 'Türkçe Kategori Adı' : 'Category Name in Turkish'}</label>
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-400 mb-1">{lang === 'ar' ? 'اسم القسم بالتركية (Türkçe)' : lang === 'tr' ? 'Türkçe Kategori Adı' : 'Category Name in Turkish'}</label>
                 <input
                   type="text"
                   placeholder="Örnek: Sıcak Başlangıçlar"
                   value={newCatNameTr}
                   onChange={(e) => setNewCatNameTr(e.target.value)}
-                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full h-10 px-3.5 rounded-xl border border-slate-250 dark:border-slate-700 bg-white dark:bg-slate-850 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
               <div className="flex flex-col items-start">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-[11px] font-black text-slate-650 dark:text-slate-405 mb-1.5">
                   {lang === 'ar' ? 'رمز القسم (Emoji)' : lang === 'tr' ? 'Kategori Simgesi (Emoji)' : 'Category Icon (Emoji)'}
                 </label>
                 <div className="flex gap-2">
