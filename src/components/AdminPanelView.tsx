@@ -71,6 +71,33 @@ const adminTranslations = {
   }
 };
 
+const countriesList = [
+  { code: "966", iso: "sa", name: "السعودية" },
+  { code: "971", iso: "ae", name: "الإمارات" },
+  { code: "974", iso: "qa", name: "قطر" },
+  { code: "965", iso: "kw", name: "الكويت" },
+  { code: "968", iso: "om", name: "عمان" },
+  { code: "973", iso: "bh", name: "البحرين" },
+  { code: "20",  iso: "eg", name: "مصر" },
+  { code: "962", iso: "jo", name: "الأردن" },
+  { code: "90",  iso: "tr", name: "تركيا" },
+  { code: "963", iso: "sy", name: "سوريا" },
+  { code: "961", iso: "lb", name: "لبنان" },
+  { code: "970", iso: "ps", name: "فلسطين" },
+  { code: "967", iso: "ye", name: "اليمن" },
+  { code: "218", iso: "ly", name: "ليبيا" },
+  { code: "216", iso: "tn", name: "تونس" },
+  { code: "213", iso: "dz", name: "الجزائر" },
+  { code: "212", iso: "ma", name: "المغرب" },
+  { code: "249", iso: "sd", name: "السودان" },
+  { code: "222", iso: "mr", name: "موريتانيا" },
+  { code: "252", iso: "so", name: "الصومال" },
+  { code: "253", iso: "dj", name: "جيبوتي" },
+  { code: "269", iso: "km", name: "جزر القمر" },
+  { code: "1",   iso: "us", name: "أمريكا" },
+  { code: "44",  iso: "gb", name: "بريطانيا" }
+];
+
 interface AdminPanelViewProps {
   tenant: Tenant;
   categories: Category[];
@@ -240,6 +267,8 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   const [facebookUrl, setFacebookUrl] = useState(tenant.facebookUrl || "");
   const [instagramUrl, setInstagramUrl] = useState(tenant.instagramUrl || "");
   const [tiktokUrl, setTiktokUrl] = useState(tenant.tiktokUrl || "");
+  const [locationUrl, setLocationUrl] = useState(tenant.locationUrl || "");
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Sync state when tenant prop changes (e.g. on save or tenant switch)
@@ -250,7 +279,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     setThemeColor(tenant.themeColor);
     const rawPhone = tenant.phone || "";
     const cleanPhone = rawPhone.replace(/[^0-9]/g, "");
-    const codes = ["966", "971", "974", "965", "968", "973", "20", "962", "90", "1", "44"];
+    const codes = ["966", "971", "974", "965", "968", "973", "20", "962", "90", "963", "961", "970", "967", "218", "216", "213", "212", "249", "222", "252", "253", "269", "1", "44"];
     let matchedCode = "966";
     let localNum = cleanPhone;
     for (const code of codes) {
@@ -275,6 +304,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     setFacebookUrl(tenant.facebookUrl || "");
     setInstagramUrl(tenant.instagramUrl || "");
     setTiktokUrl(tenant.tiktokUrl || "");
+    setLocationUrl(tenant.locationUrl || "");
   }, [tenant]);
 
   // New Category State
@@ -423,7 +453,8 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
       isOpen,
       facebookUrl,
       instagramUrl,
-      tiktokUrl
+      tiktokUrl,
+      locationUrl
     };
 
     try {
@@ -563,7 +594,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     <div className="space-y-6 animate-in fade-in duration-200" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       {/* Top Banner & Tabs */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-800 text-3xl flex items-center justify-center border border-slate-200 shadow-2xs overflow-hidden">
             <RestaurantLogo logo={tenant.logo} />
@@ -908,30 +939,41 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
       {/* TAB 2: BRANDING & SETTINGS */}
       {activeTab === "branding" && (
-        <form onSubmit={handleSaveBranding} className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+        <form onSubmit={handleSaveBranding} className="space-y-6">
+          
+          {/* Header Action Banner */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-200">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <Palette className="w-5 h-5 text-emerald-600" />
-                <span>{lang === 'ar' ? 'إعدادات الهوية البصرية والمطعم (Brand Customization)' : lang === 'tr' ? 'Restoran Kimliği ve Ayarları (Brand Customization)' : 'Restaurant Branding & Settings (Brand Customization)'}</span>
+                <span>{lang === 'ar' ? 'إعدادات الهوية البصرية والمطعم' : lang === 'tr' ? 'Restoran Kimliği ve Ayarları' : 'Restaurant Branding & Settings'}</span>
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 {lang === 'ar' ? 'التغييرات ستنعكس فوراً على لوحة الكاشير، قائمة الطعام الرقمية، والإيصالات الضريبية' : lang === 'tr' ? 'Değişiklikler kasiyer paneline, dijital menüye ve vergi faturalarına anında yansıyacaktır' : 'Changes will reflect instantly on POS cashier screen, digital menu, and tax receipts'}
               </p>
             </div>
-            {saveSuccess && (
-              <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-4 py-1.5 rounded-full flex items-center gap-1.5 animate-bounce">
-                <Check className="w-4 h-4" />
-                <span>{lang === 'ar' ? 'تم حفظ الإعدادات بنجاح!' : lang === 'tr' ? 'Ayarlar başarıyla kaydedildi!' : 'Settings saved successfully!'}</span>
-              </span>
-            )}
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              {saveSuccess && (
+                <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1.5 animate-bounce shadow-2xs">
+                  <Check className="w-4 h-4" />
+                  <span>{lang === 'ar' ? 'تم الحفظ بنجاح!' : lang === 'tr' ? 'Kaydedildi!' : 'Saved successfully!'}</span>
+                </span>
+              )}
+              <button
+                type="submit"
+                className={`px-6 py-2.5 rounded-xl ${theme.primaryBg} ${theme.primaryHover} text-white font-bold text-xs shadow-md transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-2`}
+              >
+                <span>💾</span>
+                <span>{lang === 'ar' ? 'حفظ التعديلات' : lang === 'tr' ? 'Değişiklikleri Kaydet' : 'Save Changes'}</span>
+              </button>
+            </div>
           </div>
 
-          {/* Restaurant Status (Open / Closed) Switcher */}
-          <div className="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Restaurant Status Switcher */}
+          <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-200">
             <div className="space-y-0.5 text-center sm:text-right">
-              <label className="block text-base font-bold text-slate-900 dark:text-white flex items-center justify-center sm:justify-start gap-2">
-                <span>🔔 {lang === 'ar' ? 'حالة استقبال الطلبات (Restaurant Status)' : lang === 'tr' ? 'Restoran Durumu (Restaurant Status)' : 'Restaurant Order Status (Restaurant Status)'}</span>
+              <label className="block text-sm font-black text-slate-900 dark:text-white flex items-center justify-center sm:justify-start gap-2">
+                <span>🔔 {lang === 'ar' ? 'حالة استقبال الطلبات' : lang === 'tr' ? 'Restoran Durumu' : 'Restaurant Order Status'}</span>
               </label>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {lang === 'ar' ? 'تحكم في إمكانية استقبال الطلبات عبر المنيو الرقمي (مفتوح / مغلق).' : 'Dijital menü üzerinden sipariş alımını kontrol edin (Açık / Kapalı).'}
@@ -948,7 +990,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-14 h-8 rounded-full p-1 transition-colors duration-300 focus:outline-none relative shadow-inner cursor-pointer bg-slate-250 dark:bg-slate-700"
+                className="w-14 h-8 rounded-full p-1 transition-colors duration-300 focus:outline-none relative shadow-inner cursor-pointer bg-slate-200 dark:bg-slate-700"
                 style={{ backgroundColor: isOpen ? '#10b981' : undefined }}
               >
                 <div
@@ -960,413 +1002,460 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'اسم المطعم بالعربية' : lang === 'tr' ? 'Arapça Restoran Adı' : 'Arabic Restaurant Name'}</label>
-              <input
-                type="text"
-                value={nameAr}
-                onChange={(e) => setNameAr(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
-              />
-            </div>
+          {/* TWO-COLUMN GRID LAYOUT */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-200">
+            
+            {/* COLUMN 1: Basic Information & Socials (7 cols) */}
+            <div className="lg:col-span-7 space-y-6">
+              
+              {/* Card 1 */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                  <span>{lang === 'ar' ? 'معلومات المطعم والاتصال' : 'Restaurant & Contact Details'}</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'اسم المطعم بالعربية' : 'Arabic Restaurant Name'} *</label>
+                    <input
+                      type="text"
+                      required
+                      value={nameAr}
+                      onChange={(e) => setNameAr(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'شعار المطعم / نوع المطبخ (Slogan)' : lang === 'tr' ? 'Restoran Sloganı / Mutfak Türü' : 'Restaurant Slogan / Kitchen Type'}</label>
-              <input
-                type="text"
-                value={slogan}
-                onChange={(e) => setSlogan(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
-            </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'شعار المطعم / نوع المطبخ (Slogan)' : 'Slogan / Kitchen Type'}</label>
+                    <input
+                      type="text"
+                      value={slogan}
+                      onChange={(e) => setSlogan(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'رقم الهاتف (الواتساب المستلم للطلبات)' : lang === 'tr' ? 'Telefon Numarası (Sipariş WhatsApp)' : 'Phone Number (Order WhatsApp)'}</label>
-              <div className="flex gap-2" dir="ltr">
-                <select
-                  value={adminPhoneCountryCode}
-                  onChange={(e) => setAdminPhoneCountryCode(e.target.value)}
-                  className="px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm outline-none cursor-pointer"
-                >
-                  <option value="966">🇸🇦 +966</option>
-                  <option value="971">🇦🇪 +971</option>
-                  <option value="974">🇶🇦 +974</option>
-                  <option value="965">🇰🇼 +965</option>
-                  <option value="968">🇴🇲 +968</option>
-                  <option value="973">🇧🇭 +973</option>
-                  <option value="20">🇪🇬 +20</option>
-                  <option value="962">🇯🇴 +962</option>
-                  <option value="90">🇹🇷 +90</option>
-                  <option value="1">🇺🇸 +1</option>
-                  <option value="44">🇬🇧 +44</option>
-                </select>
-                <input
-                  type="text"
-                  required
-                  placeholder="5xxxxxxxx"
-                  value={adminPhoneLocalNumber}
-                  onChange={(e) => setAdminPhoneLocalNumber(e.target.value.replace(/[^0-9]/g, ""))}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm outline-none"
-                />
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'رقم الهاتف (الواتساب المستلم للطلبات)' : 'WhatsApp Number'}</label>
+                    <div className="flex gap-2 w-full" dir="ltr">
+                      {(() => {
+                        const selectedCountry = countriesList.find(c => c.code === adminPhoneCountryCode) || countriesList[0];
+                        return (
+                          <div className="relative flex-initial shrink-0" dir="rtl">
+                            <button
+                              type="button"
+                              onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                              className="w-[95px] h-9 px-2.5 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs flex items-center justify-between gap-1 cursor-pointer shadow-3xs hover:bg-slate-50 dark:hover:bg-slate-750"
+                            >
+                              <span className="text-[8px] text-slate-405 shrink-0">▼</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-sans text-[11px] font-black text-slate-750 dark:text-white">+{selectedCountry.code}</span>
+                                <img
+                                  src={`https://flagcdn.com/w40/${selectedCountry.iso}.png`}
+                                  alt={selectedCountry.name}
+                                  className="w-5 h-3.5 rounded-xs object-cover border border-slate-200/50 shrink-0"
+                                />
+                              </div>
+                            </button>
+
+                            {showCountryDropdown && (
+                              <>
+                                <div 
+                                  className="fixed inset-0 z-40" 
+                                  onClick={() => setShowCountryDropdown(false)}
+                                />
+                                <div className="absolute right-0 mt-1.5 w-[210px] max-h-56 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 p-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                                  {countriesList.map((c) => (
+                                    <button
+                                      key={c.code}
+                                      type="button"
+                                      onClick={() => {
+                                        setAdminPhoneCountryCode(c.code);
+                                        setShowCountryDropdown(false);
+                                      }}
+                                      className="w-full px-3 py-2 rounded-xl text-right text-xs font-bold flex items-center gap-2.5 transition-colors cursor-pointer text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                                    >
+                                      <img
+                                        src={`https://flagcdn.com/w40/${c.iso}.png`}
+                                        alt={c.name}
+                                        className="w-5 h-3.5 rounded-xs object-cover border border-slate-200/50"
+                                      />
+                                      <span>{c.name} (+{c.code})</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })()}
+                      <input
+                        type="text"
+                        required
+                        placeholder="5xxxxxxxx"
+                        value={adminPhoneLocalNumber}
+                        onChange={(e) => setAdminPhoneLocalNumber(e.target.value.replace(/[^0-9]/g, ""))}
+                        className="flex-1 h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'العنوان وموقع الفرع' : 'Branch Address & Location'}</label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+              
+              {/* Card 2 */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span>{lang === 'ar' ? 'الإعدادات الضريبية والواي فاي' : 'Taxation & WiFi Configuration'}</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'نسبة الضريبة المضافة (VAT %)' : 'VAT Rate %'}</label>
+                    <input
+                      type="number"
+                      value={taxRate}
+                      onChange={(e) => setTaxRate(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'نسبة ضريبة القيمة المضافة (VAT %)' : lang === 'tr' ? 'KDV Oranı (KDV %)' : 'Value Added Tax (VAT %)'}</label>
-              <input
-                type="number"
-                value={taxRate}
-                onChange={(e) => setTaxRate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
-              />
-            </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'البلد والعملة الرسمية' : 'Country & Currency'}</label>
+                    <select
+                      value={
+                        ["ر.س", "د.إ", "د.ك", "ر.ق", "د.ب", "ر.ع", "ج.م", "د.أ", "د.ع", "ر.ي", "ل.س", "ل.ل", "₪", "ج.س", "د.ل", "د.ت", "د.ج", "د.م", "أ.م", "ش.ص", "ف.ج", "ف.ق", "$"].includes(currency)
+                          ? currency
+                          : "custom"
+                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCurrency(val !== "custom" ? val : "");
+                      }}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                      <option value="ر.س">🇸🇦 {lang === 'ar' ? 'السعودية (ر.س)' : 'Saudi Arabia (SAR)'}</option>
+                      <option value="د.إ">🇦🇪 {lang === 'ar' ? 'الإمارات (د.إ)' : 'UAE (AED)'}</option>
+                      <option value="د.ك">🇰🇼 {lang === 'ar' ? 'الكويت (د.ك)' : 'Kuwait (KWD)'}</option>
+                      <option value="ر.ق">🇶🇦 {lang === 'ar' ? 'قطر (ر.ق)' : 'Qatar (QAR)'}</option>
+                      <option value="د.ب">🇧🇭 {lang === 'ar' ? 'البحرين (د.ب)' : 'Bahrain (BHD)'}</option>
+                      <option value="ر.ع">🇴🇲 {lang === 'ar' ? 'عمان (ر.ع)' : 'Oman (OMR)'}</option>
+                      <option value="ج.م">🇪🇬 {lang === 'ar' ? 'مصر (ج.م)' : 'Egypt (EGP)'}</option>
+                      <option value="د.أ">🇯🇴 {lang === 'ar' ? 'الأردن (د.أ)' : 'Jordan (JOD)'}</option>
+                      <option value="د.ع">🇮🇶 {lang === 'ar' ? 'العراق (د.ع)' : 'Iraq (IQD)'}</option>
+                      <option value="ر.ي">🇾🇪 {lang === 'ar' ? 'اليمن (ر.ي)' : 'Yemen (YER)'}</option>
+                      <option value="ل.س">🇸🇾 {lang === 'ar' ? 'سوريا (ل.س)' : 'Syria (SYP)'}</option>
+                      <option value="ل.ل">🇱🇧 {lang === 'ar' ? 'لبنان (ل.ل)' : 'Lebanon (LBP)'}</option>
+                      <option value="₪">🇵🇸 {lang === 'ar' ? 'فلسطين (₪)' : 'Palestine (ILS)'}</option>
+                      <option value="ج.س">🇸🇩 {lang === 'ar' ? 'السودان (ج.س)' : 'Sudan (SDG)'}</option>
+                      <option value="د.ل">🇱🇾 {lang === 'ar' ? 'ليبيا (د.ل)' : 'Libya (LYD)'}</option>
+                      <option value="د.ت">🇹🇳 {lang === 'ar' ? 'تونس (د.ت)' : 'Tunisia (TND)'}</option>
+                      <option value="د.ج">🇩🇿 {lang === 'ar' ? 'الجزائر (د.ج)' : 'Algeria (DZD)'}</option>
+                      <option value="د.م">🇲🇦 {lang === 'ar' ? 'المغرب (د.م)' : 'Morocco (MAD)'}</option>
+                      <option value="أ.م">🇲🇷 {lang === 'ar' ? 'موريتانيا (أ.م)' : 'Mauritania (MRU)'}</option>
+                      <option value="ش.ص">🇸🇴 {lang === 'ar' ? 'الصومال (ش.ص)' : 'Somalia (SOS)'}</option>
+                      <option value="ف.ج">🇩🇯 {lang === 'ar' ? 'جيبوتي (ف.ج)' : 'Djibouti (DJF)'}</option>
+                      <option value="ف.ق">🇰🇲 {lang === 'ar' ? 'جزر القمر (ف.ق)' : 'Comoros (KMF)'}</option>
+                      <option value="$">🇺🇸 {lang === 'ar' ? 'دولار أمريكي ($)' : 'US Dollar ($)'}</option>
+                      <option value="custom">⚙️ {lang === 'ar' ? 'رمز عملة مخصص...' : 'Custom Symbol...'}</option>
+                    </select>
+                  </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'البلد والعملة الرسمية' : lang === 'tr' ? 'Ülke ve Resmi Para Birimi' : 'Country & Official Currency'}</label>
-              <select
-                value={
-                  ["ر.س", "د.إ", "د.ك", "ر.ق", "د.ب", "ر.ع", "ج.م", "د.أ", "د.ع", "$"].includes(currency)
-                    ? currency
-                    : "custom"
-                }
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val !== "custom") {
-                    setCurrency(val);
-                  } else {
-                    setCurrency("");
-                  }
-                }}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold mb-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-              >
-                <option value="ر.س">{lang === 'ar' ? 'المملكة العربية السعودية (ر.س)' : lang === 'tr' ? 'Suudi Arabistan (SAR)' : 'Saudi Arabia (SAR)'}</option>
-                <option value="د.إ">{lang === 'ar' ? 'الإمارات العربية المتحدة (د.إ)' : lang === 'tr' ? 'Birleşik Arap Emirlikleri (AED)' : 'United Arab Emirates (AED)'}</option>
-                <option value="د.ك">{lang === 'ar' ? 'الكويت (د.ك)' : lang === 'tr' ? 'Kuveyt (KWD)' : 'Kuwait (KWD)'}</option>
-                <option value="ر.ق">{lang === 'ar' ? 'قطر (ر.ق)' : lang === 'tr' ? 'Katar (QAR)' : 'Qatar (QAR)'}</option>
-                <option value="د.ب">{lang === 'ar' ? 'البحرين (د.ب)' : lang === 'tr' ? 'Bahreyn (BHD)' : 'Bahrain (BHD)'}</option>
-                <option value="ر.ع">{lang === 'ar' ? 'سلطنة عمان (ر.ع)' : lang === 'tr' ? 'Umman (OMR)' : 'Oman (OMR)'}</option>
-                <option value="ج.م">{lang === 'ar' ? 'جمهورية مصر العربية (ج.م)' : lang === 'tr' ? 'Mısır (EGP)' : 'Egypt (EGP)'}</option>
-                <option value="د.أ">{lang === 'ar' ? 'المملكة الأردنية الهاشمية (د.أ)' : lang === 'tr' ? 'Ürdün (JOD)' : 'Jordan (JOD)'}</option>
-                <option value="د.ع">{lang === 'ar' ? 'العراق (د.ع)' : lang === 'tr' ? 'Irak (IQD)' : 'Iraq (IQD)'}</option>
-                <option value="$">{lang === 'ar' ? 'الولايات المتحدة / عملة دولية ($)' : lang === 'tr' ? 'ABD / Uluslararası ($)' : 'United States / Global ($)'}</option>
-                <option value="custom">{lang === 'ar' ? 'عملة مخصصة أخرى...' : lang === 'tr' ? 'Diğer özel para birimi...' : 'Other custom currency...'}</option>
-              </select>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'اسم شبكة الواي فاي (WiFi SSID)' : 'WiFi SSID'}</label>
+                    <input
+                      type="text"
+                      placeholder={lang === 'ar' ? 'اتركه فارغاً إذا لم يتوفر' : 'Leave empty if none'}
+                      value={wifiName}
+                      onChange={(e) => setWifiName(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
 
-              {!["ر.س", "د.إ", "د.ك", "ر.ق", "د.ب", "ر.ع", "ج.م", "د.أ", "د.ع", "$"].includes(currency) && (
-                <input
-                  type="text"
-                  placeholder={lang === 'ar' ? "اكتب رمز العملة المخصصة هنا (مثال: د.ت)" : lang === 'tr' ? "Özel para birimi simgesini buraya yazın (Örn: TL)" : "Type custom currency symbol here (e.g. TL)"}
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none font-sans"
-                />
-              )}
-            </div>
-
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'اسم شبكة واي فاي المطعم (WiFi SSID)' : lang === 'tr' ? 'Restoran WiFi Adı (WiFi SSID)' : 'Restaurant WiFi Name (WiFi SSID)'}</label>
-                <input
-                  type="text"
-                  placeholder={lang === 'ar' ? 'اتركه فارغاً إذا لم يتوفر' : lang === 'tr' ? 'Mevcut değilse boş bırakın' : 'Leave empty if not available'}
-                  value={wifiName}
-                  onChange={(e) => setWifiName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                />
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1">{lang === 'ar' ? 'كلمة مرور واي فاي المطعم' : 'WiFi Password'}</label>
+                    <input
+                      type="text"
+                      placeholder={lang === 'ar' ? 'اتركه فارغاً إذا لم يتوفر' : 'Leave empty if none'}
+                      value={wifiPass}
+                      onChange={(e) => setWifiPass(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
               </div>
+              
+              {/* Card 3 */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                  <span>{lang === 'ar' ? 'روابط شبكات التواصل الاجتماعي' : 'Social Media Integration'}</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1 flex items-center gap-1.5">
+                      <Facebook className="w-3.5 h-3.5 text-blue-600" />
+                      <span>فيسبوك (Facebook)</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="facebook.com/username"
+                      value={facebookUrl}
+                      onChange={(e) => setFacebookUrl(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-indigo-550 focus:outline-none"
+                      dir="ltr"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'كلمة مرور واي فاي المطعم (لعملائك)' : lang === 'tr' ? 'Restoran WiFi Şifresi (Müşteriler için)' : 'Restaurant WiFi Password (For customers)'}</label>
-                <input
-                  type="text"
-                  placeholder={lang === 'ar' ? 'اتركه فارغاً إذا لم يتوفر' : lang === 'tr' ? 'Mevcut değilse boş bırakın' : 'Leave empty if not available'}
-                  value={wifiPass}
-                  onChange={(e) => setWifiPass(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                />
-              </div>
-            </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1 flex items-center gap-1.5">
+                      <Instagram className="w-3.5 h-3.5 text-pink-600" />
+                      <span>انستغرام (Instagram)</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="instagram.com/username"
+                      value={instagramUrl}
+                      onChange={(e) => setInstagramUrl(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-indigo-550 focus:outline-none"
+                      dir="ltr"
+                    />
+                  </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{lang === 'ar' ? 'العنوان وموقع الفرع' : lang === 'tr' ? 'Restoran Adresi ve Konumu' : 'Branch Address & Location'}</label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
-            </div>
-          </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1 flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 text-slate-950 dark:text-white fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm5.75 8.16a3.52 3.52 0 0 1-2.07-.67v4.61a4.35 4.35 0 1 1-4.35-4.35 4.31 4.31 0 0 1 1 .12v2.24a2.15 2.15 0 0 0-1-.24 2.11 2.11 0 1 0 2.11 2.11V7.75h2.24a3.53 3.53 0 0 1 2.07 2.07v.34z"/>
+                      </svg>
+                      <span>تيك توك (TikTok)</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="tiktok.com/@username"
+                      value={tiktokUrl}
+                      onChange={(e) => setTiktokUrl(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-indigo-550 focus:outline-none"
+                      dir="ltr"
+                    />
+                  </div>
 
-          {/* Logo Selection & Customization */}
-          <div className="space-y-4 p-5 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-700">
-              <div>
-                <label className="block text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Image className="w-5 h-5 text-emerald-600" />
-                  <span>{lang === 'ar' ? 'شعار المطعم (Logo Options)' : lang === 'tr' ? 'Restoran Logosu (Logo Options)' : 'Restaurant Logo (Logo Options)'}</span>
-                </label>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {lang === 'ar' ? 'يمكنك اختيار أيقونة تعبيرية، أو كتابة حروف واختصار مخصص، أو رفع صورة الشعار الخاص بالمطعم.' : lang === 'tr' ? 'Bir emoji seçebilir, özel harfler yazabilir veya restoran logonuzun resmini yükleyebilirsiniz.' : 'You can choose an emoji icon, write custom text/initials, or upload your restaurant logo image.'}
-                </p>
-              </div>
-
-              {/* Live Preview Badge */}
-              <div className="flex items-center gap-2.5 bg-white dark:bg-slate-800 px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 font-sans">
-                <span className="text-xs text-slate-500 font-bold">{lang === 'ar' ? 'معاينة الشعار:' : lang === 'tr' ? 'Logo Önizleme:' : 'Logo Preview:'}</span>
-                <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 flex items-center justify-center text-2xl overflow-hidden shadow-sm">
-                  <RestaurantLogo logo={logo} />
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-405 mb-1 flex items-center gap-1.5">
+                      <span className="w-3.5 h-3.5 flex items-center justify-center text-xs">📍</span>
+                      <span>موقع قوقل ماب (Location)</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://maps.google.com/..."
+                      value={locationUrl}
+                      onChange={(e) => setLocationUrl(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-slate-350 dark:border-slate-750 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-indigo-550 focus:outline-none"
+                      dir="ltr"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Option 1: File Upload / Image URL / Custom Text */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
-              <div className="sm:col-span-7">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {lang === 'ar' ? 'كتابة حروف ورمز مخصص للشعار (مثال: ✨ أو KF)' : lang === 'tr' ? 'Özel Metin (Örn: ✨ veya KF)' : 'Custom Text/Initials (e.g. ✨ or KF)'}
-                </label>
-                <input
-                  type="text"
-                  placeholder={lang === 'ar' ? "اكتب رمز شعارك أو اختصاره هنا..." : "Type your logo symbol or initials here..."}
-                  value={logo?.startsWith("data:") || logo?.startsWith("http") ? "" : logo}
-                  onChange={(e) => setLogo(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                />
+            
+            {/* COLUMN 2: Branding Customizations & Previews (5 cols) */}
+            <div className="lg:col-span-5 space-y-4 max-w-[380px] w-full">
+              
+              {/* Card 4: Brand Theme Color Selection */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-pink-500" />
+                  <span>{lang === 'ar' ? 'اللون الأساسي للواجهات (Theme Color)' : 'Brand Color Theme'}</span>
+                </h3>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  {colors.map((col) => {
+                    const colorName = lang === 'ar' ? col.name :
+                      lang === 'tr' ? (
+                        col.id === 'emerald' ? 'Zümrüt Yeşili' :
+                        col.id === 'amber' ? 'Altın Sarısı' :
+                        col.id === 'rose' ? 'Gül Pembesi' :
+                        col.id === 'indigo' ? 'Çivit Mavisi' :
+                        col.id === 'violet' ? 'Menekşe Moru' :
+                        col.id === 'slate' ? 'Kömür Grisi' :
+                        col.id === 'cyan' ? 'Açık Mavi' : 'Turuncu'
+                      ) : (
+                        col.id === 'emerald' ? 'Emerald Green' :
+                        col.id === 'amber' ? 'Amber Gold' :
+                        col.id === 'rose' ? 'Rose Pink' :
+                        col.id === 'indigo' ? 'Indigo Blue' :
+                        col.id === 'violet' ? 'Violet Purple' :
+                        col.id === 'slate' ? 'Charcoal Gray' :
+                        col.id === 'cyan' ? 'Cyan Blue' : 'Orange'
+                      );
+                    return (
+                      <button
+                        key={col.id}
+                        type="button"
+                        onClick={() => setThemeColor(col.id)}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all cursor-pointer text-xs w-full ${
+                          themeColor === col.id 
+                            ? "border-slate-900 dark:border-white ring-2 ring-emerald-500/30 bg-slate-50 dark:bg-slate-800 font-bold" 
+                            : "border-slate-150 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                        }`}
+                      >
+                        <span className={`w-4 h-4 rounded-full ${col.bg} shadow-xs flex items-center justify-center text-white shrink-0`}>
+                          {themeColor === col.id && <Check className="w-2.5 h-2.5 stroke-[3.5]" />}
+                        </span>
+                        <span className="truncate">{colorName}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="sm:col-span-5 flex items-end">
-                <label className="w-full cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all transform hover:-translate-y-0.5 text-center">
-                  <Upload className="w-4 h-4 shrink-0 animate-bounce" />
-                  <span>{lang === 'ar' ? '📂 رفع صورة شعار من جهازك' : lang === 'tr' ? '📂 Cihazınızdan Logo Yükleyin' : '📂 Upload Logo from Device'}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-
-            {/* Option 2: Ready Emojis */}
-            <div className="pt-2">
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                {lang === 'ar' ? 'أو اختر من الرموز التعبيرية الجاهزة للمطاعم والكافيهات:' : lang === 'tr' ? 'Veya restoran ve kafeler için hazır emojilerden seçin:' : 'Or choose from ready-to-use emojis for restaurants & cafes:'}
-              </label>
-              <div className="flex flex-wrap gap-2 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 max-h-48 overflow-y-auto">
-                {emojis.map((em) => (
-                  <button
-                    key={em}
-                    type="button"
-                    onClick={() => setLogo(em)}
-                    className={`w-11 h-11 rounded-xl text-2xl flex items-center justify-center transition-transform hover:scale-110 overflow-hidden shrink-0 cursor-pointer ${
-                      logo === em ? "bg-emerald-500 text-white shadow-md ring-2 ring-emerald-600 scale-110" : "bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-white hover:bg-slate-100 shadow-2xs"
-                    }`}
-                  >
-                    <RestaurantLogo logo={em} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Cover Photo / Banner Customization */}
-          <div className="space-y-4 p-5 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700">
-            <div>
-              <label className="block text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Image className="w-5 h-5 text-emerald-600" />
-                <span>{lang === 'ar' ? 'صورة الغلاف للمنيو الرقمي (Digital Menu Cover Banner)' : lang === 'tr' ? 'Dijital Menü Kapak Resmi (Digital Menu Cover Banner)' : 'Digital Menu Cover Photo (Digital Menu Cover Banner)'}</span>
-              </label>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {lang === 'ar' ? 'اختر صورة غلاف تظهر في أعلى المنيو الرقمي لعملائك (مثل صفحات الفيسبوك والانستغرام).' : lang === 'tr' ? 'Facebook ve Instagram profillerinde olduğu gibi, müşterileriniz için dijital menünün üst kısmında görünecek bir kapak resmi seçin.' : 'Choose a cover banner to display at the top of your digital menu for your customers (like Facebook/Instagram profiles).'}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-              <div className="md:col-span-8">
-                <label className="w-full cursor-pointer bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs py-3.5 px-6 rounded-xl flex items-center justify-center gap-2.5 shadow-sm transition-all transform hover:-translate-y-0.5 text-center">
-                  <Upload className="w-4 h-4 shrink-0 animate-bounce" />
-                  <span>{lang === 'ar' ? '📂 رفع صورة غلاف مخصصة من جهازك' : lang === 'tr' ? '📂 Cihazınızdan Kapak Yükleyin' : '📂 Upload Cover Photo from Device'}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleBannerImageUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* Cover Live Preview */}
-              <div className="md:col-span-4 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden h-24 relative bg-slate-100 dark:bg-slate-800">
-                {bannerImage ? (
-                  <img src={bannerImage} alt="Cover Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 font-bold">
-                    {lang === 'ar' ? 'لا توجد صورة غلاف حالية' : lang === 'tr' ? 'Mevcut kapak resmi yok' : 'No current cover image'}
+              {/* Card 5: Restaurant Logo Customization */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wider">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span>{lang === 'ar' ? 'شعار المطعم (Logo)' : 'Restaurant Logo'}</span>
+                  </h3>
+                  
+                  {/* Miniature live preview */}
+                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-200/60 dark:border-slate-700">
+                    <span className="text-[9px] text-slate-500 font-bold">{lang === 'ar' ? 'معاينة:' : 'Preview:'}</span>
+                    <div className="w-8 h-8 rounded-lg bg-white border border-slate-350 dark:border-slate-650 flex items-center justify-center text-lg overflow-hidden shadow-2xs">
+                      <RestaurantLogo logo={logo} />
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* Curated Unsplash Cover Options */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                {lang === 'ar' ? 'أو اختر صورة غلاف جاهزة وعالية الجودة بنقرة واحدة:' : lang === 'tr' ? 'Veya tek tıkla hazır yüksek kaliteli kapak resimlerinden seçin:' : 'Or choose a ready-to-use high-quality cover photo with one click:'}
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                {[
-                  {
-                    name: lang === 'ar' ? '🍔 برجر وأكلات سريعة' : 'Burgers',
-                    url: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=600'
-                  },
-                  {
-                    name: lang === 'ar' ? '🍕 بيتزا ومعجنات' : 'Pizza',
-                    url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600'
-                  },
-                  {
-                    name: lang === 'ar' ? '☕ كافيه وحلويات' : 'Cafe & Bakery',
-                    url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=600'
-                  },
-                  {
-                    name: lang === 'ar' ? '🥩 مشاوي ولحوم' : 'Steakhouse',
-                    url: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600'
-                  },
-                  {
-                    name: lang === 'ar' ? '🥗 أكلات صحية وسلطات' : 'Salads & Healthy',
-                    url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600'
-                  }
-                ].map((option) => (
-                  <button
-                    key={option.url}
-                    type="button"
-                    onClick={() => setBannerImage(option.url)}
-                    className={`rounded-xl border overflow-hidden p-1.5 flex flex-col items-center justify-center gap-1.5 transition-all text-center hover:opacity-95 cursor-pointer ${
-                      bannerImage === option.url ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 ring-2 ring-emerald-500/25' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
-                    }`}
-                  >
-                    <img src={option.url} alt={option.name} className="w-full h-12 rounded-lg object-cover animate-fade-in" />
-                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate w-full">{option.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-450 mb-1">{lang === 'ar' ? 'كتابة رمز/حروف شعار مخصص (مثال: ✨ أو KF)' : 'Symbol / Initials'}</label>
+                    <input
+                      type="text"
+                      placeholder={lang === 'ar' ? "اكتب رمزاً أو حروفاً هنا..." : "Symbol or initials..."}
+                      value={logo?.startsWith("data:") || logo?.startsWith("http") ? "" : logo}
+                      onChange={(e) => setLogo(e.target.value)}
+                      className="w-full  px-2 py-1 rounded-md text-[11px] border border-slate-350 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                  </div>
 
-          {/* Social Media Links Customization */}
-          <div className="space-y-4 p-5 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700">
-            <div>
-              <label className="block text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-emerald-600 animate-pulse" />
-                <span>{lang === 'ar' ? 'روابط شبكات التواصل الاجتماعي (Social Media)' : lang === 'tr' ? 'Sosyal Medya Bağlantıları' : 'Social Media Links'}</span>
-              </label>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {lang === 'ar' ? 'أدخل روابط صفحات المطعم الرسمية لتظهر لعملائك أسفل المنيو الرقمي.' : 'Add official page links to display in your digital menu footer.'}
-              </p>
-            </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-450 mb-1">{lang === 'ar' ? 'أو ارفع صورة الشعار الخاص بمطعمك' : 'Or Upload Logo Image'}</label>
+                    <label className="w-full  cursor-pointer bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center justify-center gap-2 shadow-3xs transition-all">
+                      <Upload className="w-3.5 h-3.5 shrink-0" />
+                      <span>{lang === 'ar' ? '📂 اختيار ملف شعار' : '📂 Choose Logo Image'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                  <Facebook className="w-4 h-4 text-blue-600" />
-                  <span>فيسبوك (Facebook)</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://facebook.com/username"
-                  value={facebookUrl}
-                  onChange={(e) => setFacebookUrl(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  dir="ltr"
-                />
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-450 mb-1">{lang === 'ar' ? 'أو اختر سريعاً من الرموز الجاهزة:' : 'Or Quick Emojis Selector:'}</label>
+                    <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-slate-800 max-h-32 overflow-y-auto no-scrollbar w-full ">
+                      {emojis.map((em) => (
+                        <button
+                          key={em}
+                          type="button"
+                          onClick={() => setLogo(em)}
+                          className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                            logo === em ? "bg-emerald-500 text-white shadow-xs ring-2 ring-emerald-600 scale-105" : "bg-white dark:bg-slate-850 text-slate-700 dark:text-white hover:bg-slate-100 shadow-3xs border"
+                          }`}
+                        >
+                          <RestaurantLogo logo={em} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                  <Instagram className="w-4 h-4 text-pink-600" />
-                  <span>انستغرام (Instagram)</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://instagram.com/username"
-                  value={instagramUrl}
-                  onChange={(e) => setInstagramUrl(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  dir="ltr"
-                />
+              {/* Card 6: Digital Menu Cover Photo (Banner) */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-violet-500" />
+                  <span>{lang === 'ar' ? 'صورة غلاف المنيو' : 'Menu Cover Banner'}</span>
+                </h3>
+
+                <div className="space-y-3">
+                  {/* Live Cover Preview */}
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-755 overflow-hidden h-20 relative bg-slate-50 dark:bg-slate-850 shadow-inner">
+                    {bannerImage ? (
+                      <img src={bannerImage} alt="Cover Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400 font-bold">
+                        {lang === 'ar' ? 'لا توجد صورة غلاف حالياً' : 'No Cover Selected'}
+                      </div>
+                    )}
+                  </div>
+
+                  <label className="w-full cursor-pointer bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-850 dark:text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-2 shadow-3xs transition-all">
+                    <Upload className="w-3.5 h-3.5 shrink-0" />
+                    <span>{lang === 'ar' ? '📂 رفع صورة غلاف مخصصة' : '📂 Upload Custom Cover'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBannerImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">{lang === 'ar' ? 'أو اختر غلافاً جاهزاً عالي الجودة بنقرة واحدة:' : 'Or Select Premium Cover:'}</label>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {[
+                        {
+                          name: lang === 'ar' ? '🍔' : '🍔',
+                          url: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=600'
+                        },
+                        {
+                          name: lang === 'ar' ? '🍕' : '🍕',
+                          url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600'
+                        },
+                        {
+                          name: lang === 'ar' ? '☕' : '☕',
+                          url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=600'
+                        },
+                        {
+                          name: lang === 'ar' ? '🥩' : '🥩',
+                          url: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600'
+                        },
+                        {
+                          name: lang === 'ar' ? '🥗' : '🥗',
+                          url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600'
+                        }
+                      ].map((option) => (
+                        <button
+                          key={option.url}
+                          type="button"
+                          onClick={() => setBannerImage(option.url)}
+                          className={`rounded-lg border overflow-hidden p-1 flex flex-col items-center justify-center transition-all cursor-pointer ${
+                            bannerImage === option.url ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20 scale-105' : 'border-slate-200 bg-white hover:opacity-90 shadow-3xs'
+                          }`}
+                        >
+                          <img src={option.url} alt={option.name} className="w-full h-8 rounded object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-slate-900 dark:text-white shrink-0 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm5.75 8.16a3.52 3.52 0 0 1-2.07-.67v4.61a4.35 4.35 0 1 1-4.35-4.35 4.31 4.31 0 0 1 1 .12v2.24a2.15 2.15 0 0 0-1-.24 2.11 2.11 0 1 0 2.11 2.11V7.75h2.24a3.53 3.53 0 0 1 2.07 2.07v.34z"/>
-                  </svg>
-                  <span>تيك توك (TikTok)</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://tiktok.com/@username"
-                  value={tiktokUrl}
-                  onChange={(e) => setTiktokUrl(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  dir="ltr"
-                />
-              </div>
             </div>
-          </div>
-
-          {/* Brand Color Theme Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{lang === 'ar' ? 'اللون الأساسي للواجهات (Brand Theme)' : lang === 'tr' ? 'Arayüzler İçin Ana Renk (Brand Theme)' : 'Primary Interface Color (Brand Theme)'}</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {colors.map((col) => {
-                const colorName = lang === 'ar' ? col.name :
-                  lang === 'tr' ? (
-                    col.id === 'emerald' ? 'Zümrüt Yeşili' :
-                    col.id === 'amber' ? 'Altın Sarısı' :
-                    col.id === 'rose' ? 'Gül Pembesi' :
-                    col.id === 'indigo' ? 'Çivit Mavisi' :
-                    col.id === 'violet' ? 'Menekşe Moru' :
-                    col.id === 'slate' ? 'Kömür Grisi' :
-                    col.id === 'cyan' ? 'Açık Mavi' : 'Turuncu'
-                  ) : (
-                    col.id === 'emerald' ? 'Emerald Green' :
-                    col.id === 'amber' ? 'Amber Gold' :
-                    col.id === 'rose' ? 'Rose Pink' :
-                    col.id === 'indigo' ? 'Indigo Blue' :
-                    col.id === 'violet' ? 'Violet Purple' :
-                    col.id === 'slate' ? 'Charcoal Gray' :
-                    col.id === 'cyan' ? 'Cyan Blue' : 'Orange'
-                  );
-                return (
-                  <button
-                    key={col.id}
-                    type="button"
-                    onClick={() => setThemeColor(col.id)}
-                    className={`flex items-center gap-2 p-3 rounded-2xl border transition-all cursor-pointer ${
-                      themeColor === col.id 
-                        ? "border-slate-900 dark:border-white ring-2 ring-emerald-500 shadow-md bg-slate-100 dark:bg-slate-800 font-bold" 
-                        : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                    }`}
-                  >
-                    <span className={`w-6 h-6 rounded-full ${col.bg} shadow-sm flex items-center justify-center text-white`}>
-                      {themeColor === col.id && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                    </span>
-                    <span className="text-sm text-slate-800 dark:text-slate-200">{colorName}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-            <button
-              type="submit"
-              className={`px-8 py-3 rounded-xl ${theme.primaryBg} ${theme.primaryHover} text-white font-bold text-sm shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer`}
-            >
-              {lang === 'ar' ? 'حفظ التعديلات وتحديث الهوية' : lang === 'tr' ? 'Değişiklikleri Kaydet ve Kimliği Güncelle' : 'Save Changes & Update Brand'}
-            </button>
           </div>
         </form>
       )}
@@ -1751,24 +1840,24 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
             <form onSubmit={handleSaveItem} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالعربية *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالعربية *</label>
                   <input
                     type="text"
                     required
                     placeholder="مثال: كباب لحم نعيمي"
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">القسم *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">القسم *</label>
                   <select
                     value={itemCat}
                     onChange={(e) => setItemCat(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none font-bold"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none font-bold"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -1778,30 +1867,30 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالإنجليزية (English)</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالإنجليزية (English)</label>
                   <input
                     type="text"
                     placeholder="مثال: Grilled Kabab"
                     value={itemNameEn}
                     onChange={(e) => setItemNameEn(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالتركية (Türkçe)</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم الطبق بالتركية (Türkçe)</label>
                   <input
                     type="text"
                     placeholder="مثال: Izgara Kebap"
                     value={itemNameTr}
                     onChange={(e) => setItemNameTr(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">سعر البيع للزبون ({tenant.currency}) *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">سعر البيع للزبون ({tenant.currency}) *</label>
                   <input
                     type="number"
                     step="0.5"
@@ -1809,19 +1898,19 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     placeholder="0"
                     value={itemPrice}
                     onChange={(e) => setItemPrice(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">تكلفة المواد الخام (Cost Price) *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">تكلفة المواد الخام (Cost Price) *</label>
                   <input
                     type="number"
                     step="0.5"
                     placeholder="لحساب هامش الربح"
                     value={itemCost}
                     onChange={(e) => setItemCost(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
@@ -1854,36 +1943,36 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                   placeholder="وصف المكونات والنكهة وطريقة التحضير..."
                   value={itemDesc}
                   onChange={(e) => setItemDesc(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
+                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                  <div>
+                  <div className="flex flex-col items-start">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">وصف الطبق بالإنجليزية (English)</label>
                     <textarea
                       rows={2}
                       placeholder="English description..."
                       value={itemDescEn}
                       onChange={(e) => setItemDescEn(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
+                      className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
                     />
                   </div>
-                  <div>
+                  <div className="flex flex-col items-start">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">وصف الطبق بالتركية (Türkçe)</label>
                     <textarea
                       rows={2}
                       placeholder="Türkçe açıklama..."
                       value={itemDescTr}
                       onChange={(e) => setItemDescTr(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
+                      className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none leading-relaxed"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">صورة الطبق (Item Image)</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">صورة الطبق (Item Image)</label>
                   <label className="w-full cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all transform hover:-translate-y-0.5 text-center">
                     <Upload className="w-4 h-4 shrink-0 animate-bounce" />
                     <span>{lang === 'ar' ? '📂 رفع صورة الطبق من جهازك' : '📂 Upload Dish Image'}</span>
@@ -1947,13 +2036,13 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مدة التحضير المتوقعة (بالدقائق)</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مدة التحضير المتوقعة (بالدقائق)</label>
                   <input
                     type="number"
                     value={itemPrep}
                     onChange={(e) => setItemPrep(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono font-bold text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
@@ -2021,38 +2110,38 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               }} className="text-slate-400 cursor-pointer"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالعربية *' : lang === 'tr' ? 'Arapça Kategori Adı *' : 'Category Name in Arabic *'}</label>
+              <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالعربية *' : lang === 'tr' ? 'Arapça Kategori Adı *' : 'Category Name in Arabic *'}</label>
                 <input
                   type="text"
                   placeholder={lang === 'ar' ? "مثال: مقبلات ساخنة" : lang === 'tr' ? "Örnek: Sıcak Başlangıçlar" : "e.g. Hot Appetizers"}
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالإنجليزية (English)' : lang === 'tr' ? 'İngilizce Kategori Adı' : 'Category Name in English'}</label>
+              <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالإنجليزية (English)' : lang === 'tr' ? 'İngilizce Kategori Adı' : 'Category Name in English'}</label>
                 <input
                   type="text"
                   placeholder="e.g. Hot Appetizers"
                   value={newCatNameEn}
                   onChange={(e) => setNewCatNameEn(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالتركية (Türkçe)' : lang === 'tr' ? 'Türkçe Kategori Adı' : 'Category Name in Turkish'}</label>
+              <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{lang === 'ar' ? 'اسم القسم بالتركية (Türkçe)' : lang === 'tr' ? 'Türkçe Kategori Adı' : 'Category Name in Turkish'}</label>
                 <input
                   type="text"
                   placeholder="Örnek: Sıcak Başlangıçlar"
                   value={newCatNameTr}
                   onChange={(e) => setNewCatNameTr(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   {lang === 'ar' ? 'رمز القسم (Emoji)' : lang === 'tr' ? 'Kategori Simgesi (Emoji)' : 'Category Icon (Emoji)'}
                 </label>
                 <div className="flex gap-2">
@@ -2060,7 +2149,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                     type="text"
                     value={newCatIcon?.startsWith("data:") || newCatIcon?.startsWith("http") ? "" : newCatIcon}
                     onChange={(e) => setNewCatIcon(e.target.value)}
-                    className="flex-1 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-center outline-none"
+                    className="flex-1 px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-center outline-none"
                     placeholder={lang === 'ar' ? "مثال: 🍔" : "E.g. 🍔"}
                   />
                   <label className="cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[10px] px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition-all shrink-0">
@@ -2164,24 +2253,24 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
             <form onSubmit={handleSavePrinter} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">اسم الطابعة (مثال: طابعة المطبخ) *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">اسم الطابعة (مثال: طابعة المطبخ) *</label>
                   <input
                     type="text"
                     required
                     value={editingPrinter.name || ""}
                     onChange={e => setEditingPrinter(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none"
                     placeholder="طابعة المطبخ"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">نوع الاتصال *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">نوع الاتصال *</label>
                   <select
                     value={editingPrinter.connectionType || "network"}
                     onChange={e => setEditingPrinter(prev => ({ ...prev, connectionType: e.target.value as any }))}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
                   >
                     <option value="network">IP شبكة (Network Ethernet/WiFi)</option>
                     <option value="usb">USB (محلي للمتصفح)</option>
@@ -2199,42 +2288,42 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                       required
                       value={editingPrinter.ipAddress || ""}
                       onChange={e => setEditingPrinter(prev => ({ ...prev, ipAddress: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
+                      className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
                       placeholder="192.168.1.100"
                     />
                   </div>
-                  <div>
+                  <div className="flex flex-col items-start">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">المنفذ (Port)</label>
                     <input
                       type="number"
                       required
                       value={editingPrinter.port || 9100}
                       onChange={e => setEditingPrinter(prev => ({ ...prev, port: Number(e.target.value) }))}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
+                      className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
                     />
                   </div>
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">حجم الورق *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">حجم الورق *</label>
                   <select
                     value={editingPrinter.paperSize || "80mm"}
                     onChange={e => setEditingPrinter(prev => ({ ...prev, paperSize: e.target.value as any }))}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
                   >
                     <option value="80mm">80mm (الحجم القياسي)</option>
                     <option value="58mm">58mm (الورق الصغير)</option>
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">دور الطابعة الأساسي *</label>
+                <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 text-right">دور الطابعة الأساسي *</label>
                   <select
                     value={editingPrinter.printerRole || "receipt"}
                     onChange={e => setEditingPrinter(prev => ({ ...prev, printerRole: e.target.value as any }))}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
+                    className="w-full px-2 py-1 rounded-md text-[11px] border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"
                   >
                     <option value="receipt">طابعة الفواتير (الكاشير)</option>
                     <option value="kitchen">طابعة المطبخ (أكلات رئيسية)</option>
@@ -2244,8 +2333,8 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 text-right">ربط توجيه الأقسام تلقائياً:</label>
+              <div className="flex flex-col items-start">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 text-right">ربط توجيه الأقسام تلقائياً:</label>
                 <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-2xl p-3 bg-slate-50 dark:bg-slate-800/40">
                   {categories.map(cat => {
                     const isChecked = (editingPrinter.assignedCategories || []).includes(cat.id);

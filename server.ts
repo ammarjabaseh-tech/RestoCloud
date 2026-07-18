@@ -105,6 +105,7 @@ function mapTenant(row: any) {
     facebookUrl: row.facebook_url || "",
     instagramUrl: row.instagram_url || "",
     tiktokUrl: row.tiktok_url || "",
+    locationUrl: row.location_url || "",
     createdAt: row.created_at ? row.created_at.toISOString().split("T")[0] : "",
   };
 }
@@ -391,6 +392,7 @@ app.put("/api/tenants/:id", async (req, res) => {
       facebookUrl: "facebook_url",
       instagramUrl: "instagram_url",
       tiktokUrl: "tiktok_url",
+      locationUrl: "location_url",
     };
     
     // Filter to keys that are either mapped or represent valid columns

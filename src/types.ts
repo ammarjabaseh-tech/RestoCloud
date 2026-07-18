@@ -27,6 +27,7 @@ export interface Tenant {
   facebookUrl?: string;
   instagramUrl?: string;
   tiktokUrl?: string;
+  locationUrl?: string;
 }
 
 export interface Category {

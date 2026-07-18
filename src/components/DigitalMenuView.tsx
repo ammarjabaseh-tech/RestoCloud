@@ -531,7 +531,8 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               {/* Social Media Profiles */}
               {((tenant.facebookUrl && tenant.facebookUrl.trim() !== "") || 
                 (tenant.instagramUrl && tenant.instagramUrl.trim() !== "") || 
-                (tenant.tiktokUrl && tenant.tiktokUrl.trim() !== "")) && (
+                (tenant.tiktokUrl && tenant.tiktokUrl.trim() !== "") ||
+                (tenant.locationUrl && tenant.locationUrl.trim() !== "")) && (
                 <div className="flex items-center gap-2 shrink-0 animate-in fade-in duration-200">
                   {tenant.facebookUrl && tenant.facebookUrl.trim() !== "" && (
                     <a 
@@ -566,6 +567,17 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                       <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                         <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm5.75 8.16a3.52 3.52 0 0 1-2.07-.67v4.61a4.35 4.35 0 1 1-4.35-4.35 4.31 4.31 0 0 1 1 .12v2.24a2.15 2.15 0 0 0-1-.24 2.11 2.11 0 1 0 2.11 2.11V7.75h2.24a3.53 3.53 0 0 1 2.07 2.07v.34z"/>
                       </svg>
+                    </a>
+                  )}
+                  {tenant.locationUrl && tenant.locationUrl.trim() !== "" && (
+                    <a 
+                      href={tenant.locationUrl.startsWith("http") ? tenant.locationUrl : `https://${tenant.locationUrl}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-950/60 text-slate-600 hover:text-rose-600 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
+                      title={lang === 'ar' ? "موقع المطعم" : "Restaurant Location"}
+                    >
+                      <MapPin className="w-4 h-4" />
                     </a>
                   )}
                 </div>

@@ -55,6 +55,9 @@ pool.query(`
       -- Add updated constraints
       ALTER TABLE tenants ADD CONSTRAINT tenants_subscription_plan_check CHECK (subscription_plan IN ('lite', 'starter', 'pro', 'enterprise'));
       ALTER TABLE invoices ADD CONSTRAINT invoices_plan_check CHECK (plan IN ('lite', 'starter', 'pro', 'enterprise'));
+      
+      -- Add location_url column
+      ALTER TABLE tenants ADD COLUMN IF NOT EXISTS location_url TEXT;
     EXCEPTION
       WHEN OTHERS THEN
         RAISE NOTICE 'Migration error: %', SQLERRM;
