@@ -235,8 +235,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 shrink-0">
-              <UtensilsCrossed className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center shadow-lg shadow-indigo-500/25 shrink-0 bg-slate-900">
+              <img src="/logo.jpg" alt="RestoCloud Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-lg sm:text-xl font-black tracking-tight text-white hidden sm:inline">{t.brand}</span>
           </div>

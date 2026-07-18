@@ -150,11 +150,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Right Section: Brand & Tenant Switcher */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 font-bold text-base tracking-tight text-slate-900">
-              <span className="bg-indigo-600 text-white font-bold px-2 py-1 rounded-lg text-xs flex items-center gap-1 shadow-sm">
-                <Store className="w-3.5 h-3.5 text-white" />
-                <span className="hidden sm:inline">ريستو كلاود (RestoCloud)</span>
-              </span>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg overflow-hidden border border-slate-200/80 shadow-3xs flex items-center justify-center shrink-0">
+                <img src="/logo.jpg" alt="RestoCloud Logo" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-extrabold text-sm text-slate-900">ريستو كلاود <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(RestoCloud)</span></span>
             </div>
 
             <div className="h-5 w-px bg-slate-200 mx-0.5 hidden sm:block"></div>
