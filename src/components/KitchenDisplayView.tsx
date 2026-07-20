@@ -455,7 +455,15 @@ export const KitchenDisplayView: React.FC<KitchenDisplayViewProps> = ({ tenant, 
               </span>
             </div>
             <div className="text-[10px] text-slate-500 font-medium">
-              <span>{kdsTranslations[lang].cashierLabel} {order.cashierName || (lang === 'ar' ? "الكاشير" : lang === 'tr' ? "Kasiyer" : "Cashier")}</span>
+              <span>
+                {order.cashierName === "طلب ذاتي (QR Menu)" ? (
+                  lang === 'ar' ? "📱 طلب ذاتي (QR)" : lang === 'tr' ? "📱 Self Servis (QR)" : "📱 Self Order (QR)"
+                ) : order.cashierName && order.cashierName !== "الكاشير العام" && order.cashierName !== "General Cashier" && order.cashierName !== "Genel Kasiyer" ? (
+                  `${lang === 'ar' ? "👤 الويتر:" : lang === 'tr' ? "👤 Garson:" : "👤 Waiter:"} ${order.cashierName}`
+                ) : (
+                  `${lang === 'ar' ? "💼 الكاشير" : lang === 'tr' ? "💼 Kasiyer" : "💼 Cashier"}`
+                )}
+              </span>
               {order.customerName && order.orderType !== "dine_in" && (
                 <span className="mr-1.5 font-bold text-slate-400">({order.customerName})</span>
               )}

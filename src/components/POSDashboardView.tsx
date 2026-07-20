@@ -2543,10 +2543,20 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                           {order.orderType === 'dine_in' ? `طاولة ${order.tableNumber}` : order.orderType === 'takeaway' ? 'سفري' : 'توصيل'}
                         </span>
                       </div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">
+                      <div className="text-[10px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-1">
                         <span>{order.createdAt}</span>
-                        <span className="mx-1">•</span>
+                        <span>•</span>
                         <span>{order.customerName || 'عميل'}</span>
+                        {order.cashierName && order.cashierName !== posTranslations[lang].generalCashier && (
+                          <>
+                            <span>•</span>
+                            <span className="text-[9px] text-indigo-600 dark:text-indigo-400 font-black bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded-full border border-indigo-100 dark:border-indigo-900/30">
+                              👤 {order.cashierName === "طلب ذاتي (QR Menu)" 
+                                ? (lang === 'ar' ? 'طلب ذاتي' : 'Self Order')
+                                : order.cashierName}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
 
