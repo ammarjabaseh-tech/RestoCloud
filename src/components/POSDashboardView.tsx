@@ -658,33 +658,35 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   }, [tenant.id, tables, lang]);
 
   // Mobile hardware back button handling to close active modals instead of exiting the app
+  const lastHasModalRef = React.useRef(false);
   React.useEffect(() => {
     const hasModal = !!(showWaiterOrderModal || waiterActiveTable || activeOrderSession || showMobileCart);
 
     const handlePopState = (e: PopStateEvent) => {
-      if (showWaiterOrderModal) {
-        setShowWaiterOrderModal(false);
-        setWaiterCart([]);
-      } else if (waiterActiveTable) {
-        setWaiterActiveTable(null);
-      } else if (activeOrderSession) {
-        setActiveOrderSession(null);
-        setCart([]);
-      } else if (showMobileCart) {
-        setShowMobileCart(false);
-      }
+      setShowWaiterOrderModal(false);
+      setWaiterCart([]);
+      setWaiterActiveTable(null);
+      setActiveOrderSession(null);
+      setCart([]);
+      setShowMobileCart(false);
     };
 
-    if (hasModal) {
+    if (hasModal && !lastHasModalRef.current) {
       window.history.pushState({ modalOpen: true }, "");
+      lastHasModalRef.current = true;
+    } else if (!hasModal && lastHasModalRef.current) {
+      if (window.history.state?.modalOpen) {
+        window.history.back();
+      }
+      lastHasModalRef.current = false;
+    }
+
+    if (hasModal) {
       window.addEventListener("popstate", handlePopState);
     }
 
     return () => {
       window.removeEventListener("popstate", handlePopState);
-      if (window.history.state?.modalOpen) {
-        window.history.back();
-      }
     };
   }, [showWaiterOrderModal, waiterActiveTable, activeOrderSession, showMobileCart]);
 
