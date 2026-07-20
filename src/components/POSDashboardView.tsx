@@ -348,6 +348,15 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [offlineQueueCount, setOfflineQueueCount] = useState<number>(0);
   const [activeNotifications, setActiveNotifications] = useState<{ id: string; message: string; type: "pending" | "ready" }[]>([]);
 
+  // Dedicated Waiter Screen States
+  const [waiterActiveTable, setWaiterActiveTable] = useState<RestaurantTable | null>(null);
+  const [showWaiterOrderModal, setShowWaiterOrderModal] = useState<boolean>(false);
+  const [waiterCart, setWaiterCart] = useState<OrderItem[]>([]);
+  const [waiterCategory, setWaiterCategory] = useState<string>("all");
+  const [waiterSearch, setWaiterSearch] = useState<string>("");
+  const [waiterSubmitting, setWaiterSubmitting] = useState<boolean>(false);
+  const [waiterFilterStatus, setWaiterFilterStatus] = useState<string>("all");
+
   React.useEffect(() => {
     if (activeNotifications.length > 0) {
       const timer = setTimeout(() => {
@@ -1287,6 +1296,604 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     );
   };
 
+
+  const handleWaiterUpdateTableStatus = async (tableId: string, status: "available" | "occupied" | "reserved" | "needs_cleaning") => {
+    if (!waiterActiveTable) return;
+    onUpdateTableStatus(tableId, status);
+    setWaiterActiveTable(prev => prev ? { ...prev, status } : null);
+  };
+
+  const handleWaiterSubmitOrder = async () => {
+    if (waiterCart.length === 0 || !waiterActiveTable) return;
+    setWaiterSubmitting(true);
+    
+    const subtotal = waiterCart.reduce((sum, i) => sum + (Number(i.price) * i.quantity), 0);
+    const taxAmount = Number((subtotal * 0.15).toFixed(2));
+    const finalTotal = Number((subtotal + taxAmount).toFixed(2));
+
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderType: "dine_in",
+          tableNumber: waiterActiveTable.tableNumber,
+          customerName: `طاولة ${waiterActiveTable.tableNumber}`,
+          items: waiterCart,
+          subtotal,
+          taxAmount,
+          discountAmount: 0,
+          total: finalTotal,
+          paymentMethod: "pending",
+          paymentStatus: "pending",
+          cashierName: currentUser?.name || "ويتر الصالة"
+        })
+      });
+
+      if (res.ok) {
+        const newOrder = await res.json();
+        onOrderCreated(newOrder);
+        setHistoryOrders(prev => [newOrder, ...prev]);
+        onUpdateTableStatus(waiterActiveTable.id, "occupied");
+        
+        setWaiterCart([]);
+        setShowWaiterOrderModal(false);
+        setWaiterActiveTable(null);
+        alert("✅ تم إرسال الطلب للمطبخ بنجاح!");
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to place order");
+      }
+    } catch (e: any) {
+      console.error("Waiter order error:", e);
+      alert("❌ حدث خطأ أثناء إرسال الطلب: " + e.message);
+    } finally {
+      setWaiterSubmitting(false);
+    }
+  };
+
+  const renderWaiterView = () => {
+    const filteredTables = tables.filter(t => {
+      if (waiterFilterStatus === "all") return true;
+      return t.status === waiterFilterStatus;
+    });
+
+    const getCount = (status: string) => tables.filter(t => t.status === status).length;
+
+    const labelAr = {
+      available: "متاح",
+      occupied: "مشغول",
+      reserved: "محجوز",
+      needs_cleaning: "تحتاج تنظيف"
+    };
+
+    return (
+      <div className="space-y-6 max-w-5xl mx-auto pb-24 font-sans select-none" dir="rtl">
+        {/* Waiter Header Card */}
+        <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-lg relative overflow-hidden flex items-center justify-between">
+          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl border border-white/10 overflow-hidden">
+              <RestaurantLogo logo={tenant.logo} />
+            </div>
+            <div>
+              <h2 className="text-base font-black tracking-wide text-white">
+                {lang === 'ar' ? 'شاشة الويتر والخدمة الذكية' : 'Smart Waiter Dashboard'}
+              </h2>
+              <p className="text-[10px] text-indigo-200 mt-0.5">
+                {lang === 'ar' 
+                  ? `الويتر: ${currentUser?.name || "مقدم الخدمة"} | ${tenant.nameAr}` 
+                  : `Server: ${currentUser?.name || "Waiter"} | ${tenant.nameEn || tenant.nameAr}`}
+              </p>
+            </div>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black border border-emerald-500/30 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            {lang === 'ar' ? 'متصل بالصالون' : 'Active'}
+          </span>
+        </div>
+
+        {/* Table Filters Scrollable Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          <button
+            onClick={() => setWaiterFilterStatus("all")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 cursor-pointer ${
+              waiterFilterStatus === "all"
+                ? "bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 shadow-sm"
+                : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200"
+            }`}
+          >
+            {lang === 'ar' ? 'الكل' : 'All'} ({tables.length})
+          </button>
+          <button
+            onClick={() => setWaiterFilterStatus("available")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              waiterFilterStatus === "available"
+                ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                : "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100/60"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            {lang === 'ar' ? 'متاح' : 'Available'} ({getCount("available")})
+          </button>
+          <button
+            onClick={() => setWaiterFilterStatus("occupied")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              waiterFilterStatus === "occupied"
+                ? "bg-rose-600 text-white border-rose-600 shadow-sm"
+                : "bg-rose-50 text-rose-700 border-rose-100 hover:bg-rose-100/60"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            {lang === 'ar' ? 'مشغول' : 'Occupied'} ({getCount("occupied")})
+          </button>
+          <button
+            onClick={() => setWaiterFilterStatus("reserved")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              waiterFilterStatus === "reserved"
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                : "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100/60"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            {lang === 'ar' ? 'محجوز' : 'Reserved'} ({getCount("reserved")})
+          </button>
+          <button
+            onClick={() => setWaiterFilterStatus("needs_cleaning")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              waiterFilterStatus === "needs_cleaning"
+                ? "bg-amber-600 text-white border-amber-600 shadow-sm"
+                : "bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100/60"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            {lang === 'ar' ? 'تحتاج لتنظيف' : 'Needs Cleaning'} ({getCount("needs_cleaning")})
+          </button>
+        </div>
+
+        {/* Waiter Tables Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          {filteredTables.map((t) => {
+            const hasReadyOrder = historyOrders.some(o => 
+              (o.tableId === t.id || o.tableId === t.tableNumber || o.tableNumber === t.tableNumber) && 
+              o.orderStatus === "ready"
+            );
+            
+            const hasPendingOrder = historyOrders.some(o => 
+              (o.tableId === t.id || o.tableId === t.tableNumber || o.tableNumber === t.tableNumber) && 
+              (o.orderStatus === "pending" || o.orderStatus === "preparing")
+            );
+
+            const statusDot = {
+              available: "bg-emerald-500",
+              occupied: "bg-rose-500",
+              reserved: "bg-blue-500",
+              needs_cleaning: "bg-amber-500"
+            };
+
+            const statusStyles = {
+              available: "bg-emerald-50/50 border-emerald-200 text-emerald-800",
+              occupied: "bg-rose-50/50 border-rose-200 text-rose-800",
+              reserved: "bg-blue-50/50 border-blue-200 text-blue-800",
+              needs_cleaning: "bg-amber-50/50 border-amber-200 text-amber-800"
+            };
+
+            return (
+              <button
+                key={t.id}
+                onClick={() => setWaiterActiveTable(t)}
+                className={`p-5 rounded-3xl border text-center transition-all flex flex-col items-center justify-center gap-2 cursor-pointer shadow-3xs relative overflow-hidden active:scale-98 ${
+                  hasReadyOrder
+                    ? "bg-emerald-100 border-emerald-550 animate-pulse ring-4 ring-emerald-500/30 text-emerald-950 font-black shadow-md scale-102"
+                    : statusStyles[t.status] || "bg-slate-50 text-slate-700 border-slate-200"
+                }`}
+              >
+                {/* Status indicator on top corner */}
+                <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-white/80 px-2 py-0.5 rounded-full border border-slate-100">
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusDot[t.status]}`} />
+                  <span className="text-[8px] font-black text-slate-700">{labelAr[t.status]}</span>
+                </div>
+
+                {hasReadyOrder && (
+                  <div className="absolute -left-6 top-3 bg-rose-500 text-white text-[8px] font-black px-6 py-0.5 -rotate-45 shadow-sm uppercase tracking-widest animate-bounce">
+                    جاهز 🔔
+                  </div>
+                )}
+
+                <span className="text-[10px] text-slate-400 font-bold uppercase mt-2">
+                  {lang === 'ar' ? 'طاولة' : 'Table'}
+                </span>
+                <span className="text-4xl font-mono font-black leading-none text-slate-900">
+                  {t.tableNumber}
+                </span>
+                <span className="text-[9px] text-slate-500 font-medium">
+                  👥 {t.capacity} {lang === 'ar' ? 'كراسي' : 'Seats'}
+                </span>
+
+                {/* Badges for active orders */}
+                {hasReadyOrder ? (
+                  <span className="mt-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[8px] font-black uppercase">
+                    وجبة جاهزة للتوصيل
+                  </span>
+                ) : hasPendingOrder ? (
+                  <span className="mt-1 px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[8px] font-bold">
+                    تحت التحضير
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Empty State */}
+        {filteredTables.length === 0 && (
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-3">
+            <span className="text-4xl">🍽️</span>
+            <p className="text-sm font-bold text-slate-800">لا توجد طاولات تطابق اختيارك</p>
+          </div>
+        )}
+
+        {/* Table Action Sheet (Bottom Drawer style on mobile, popup on desktop) */}
+        {waiterActiveTable && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md p-6 relative space-y-6 animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 duration-300">
+              <button
+                onClick={() => setWaiterActiveTable(null)}
+                className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center space-y-1">
+                <span className="text-4xl">🍽️</span>
+                <h3 className="text-xl font-black text-slate-900">
+                  {lang === 'ar' ? `إدارة طاولة رقم ${waiterActiveTable.tableNumber}` : `Manage Table ${waiterActiveTable.tableNumber}`}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  السعة: {waiterActiveTable.capacity} كراسي | الحالة الحالية: <strong className="text-indigo-600">{labelAr[waiterActiveTable.status]}</strong>
+                </p>
+              </div>
+
+              {/* Status Stepper buttons (1-click status update) */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider text-right">{lang === 'ar' ? 'تحديث حالة الطاولة:' : 'Update Table Status:'}</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleWaiterUpdateTableStatus(waiterActiveTable.id, "available")}
+                    className={`py-3 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      waiterActiveTable.status === "available"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                        : "bg-emerald-50/50 hover:bg-emerald-100/50 text-emerald-800 border-emerald-100"
+                    }`}
+                  >
+                    <span>🟢</span>
+                    <span>{lang === 'ar' ? 'متاح' : 'Available'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleWaiterUpdateTableStatus(waiterActiveTable.id, "occupied")}
+                    className={`py-3 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      waiterActiveTable.status === "occupied"
+                        ? "bg-rose-600 text-white border-rose-600 shadow-sm"
+                        : "bg-rose-50/50 hover:bg-rose-100/50 text-rose-800 border-rose-100"
+                    }`}
+                  >
+                    <span>🔴</span>
+                    <span>{lang === 'ar' ? 'مشغول' : 'Occupied'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleWaiterUpdateTableStatus(waiterActiveTable.id, "reserved")}
+                    className={`py-3 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      waiterActiveTable.status === "reserved"
+                        ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                        : "bg-blue-50/50 hover:bg-blue-100/50 text-blue-800 border-blue-100"
+                    }`}
+                  >
+                    <span>🔵</span>
+                    <span>{lang === 'ar' ? 'محجوز' : 'Reserved'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleWaiterUpdateTableStatus(waiterActiveTable.id, "needs_cleaning")}
+                    className={`py-3 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      waiterActiveTable.status === "needs_cleaning"
+                        ? "bg-amber-600 text-white border-amber-600 shadow-sm"
+                        : "bg-amber-50/50 hover:bg-amber-100/50 text-amber-800 border-amber-100"
+                    }`}
+                  >
+                    <span>🟡</span>
+                    <span>{lang === 'ar' ? 'تحتاج تنظيف' : 'Needs Cleaning'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Ready / active orders for this table */}
+              {(() => {
+                const tableOrders = historyOrders.filter(o => 
+                  (o.tableId === waiterActiveTable.id || o.tableId === waiterActiveTable.tableNumber || o.tableNumber === waiterActiveTable.tableNumber) &&
+                  o.orderStatus !== "delivered" && o.orderStatus !== "cancelled"
+                );
+
+                if (tableOrders.length === 0) return null;
+
+                return (
+                  <div className="space-y-2 border-t border-slate-100 pt-4 text-right">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{lang === 'ar' ? 'الطلبات النشطة للطاولة:' : 'Active Table Orders:'}</h4>
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                      {tableOrders.map(order => (
+                        <div key={order.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
+                          <div className="text-right">
+                            <div className="flex items-center gap-1.5 font-bold">
+                              <span>طلب #{order.orderNumber}</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                                order.orderStatus === "ready"
+                                  ? "bg-emerald-500 text-white animate-pulse"
+                                  : "bg-amber-100 text-amber-855"
+                              }`}>
+                                {order.orderStatus === "ready" ? "جاهز للتسليم 🔔" : "تحت التحضير"}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-1">{order.items.map(i => `${i.nameAr} x${i.quantity}`).join("، ")}</p>
+                          </div>
+
+                          {order.orderStatus === "ready" && (
+                            <button
+                              onClick={async () => {
+                                const res = await fetch(`/api/tenants/${tenant.id}/orders/${order.id}`, {
+                                  method: "PUT",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ orderStatus: "delivered" })
+                                });
+                                if (res.ok) {
+                                  const updated = await res.json();
+                                  setHistoryOrders(prev => prev.map(o => o.id === order.id ? updated : o));
+                                }
+                              }}
+                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[10px] shadow-sm cursor-pointer transition-colors flex items-center gap-1"
+                            >
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>توصيل</span>
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Big Order Action Buttons */}
+              <div className="border-t border-slate-100 pt-4 flex gap-2">
+                <button
+                  onClick={() => {
+                    setWaiterCart([]);
+                    setShowWaiterOrderModal(true);
+                  }}
+                  className="w-full py-3.5 bg-indigo-650 hover:bg-indigo-700 text-white text-sm font-black rounded-2xl shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>{lang === 'ar' ? 'تسجيل طلب جديد للطاولة' : 'Take New Order'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dedicated Fullscreen Ordering Drawer Overlay */}
+        {showWaiterOrderModal && waiterActiveTable && (
+          <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex justify-end animate-in fade-in duration-200" dir="rtl">
+            <div className="bg-slate-50 w-full max-w-lg h-full flex flex-col shadow-2xl relative slide-in-from-left duration-300 font-sans">
+              
+              {/* Overlay Header */}
+              <div className="bg-white border-b border-slate-205 p-4 flex items-center justify-between shadow-xs">
+                <div className="text-right">
+                  <h3 className="text-sm font-black text-slate-900">
+                    {lang === 'ar' ? `إضافة طلب جديد للـطاولة ${waiterActiveTable.tableNumber}` : `New Order - Table ${waiterActiveTable.tableNumber}`}
+                  </h3>
+                  <p className="text-[10px] text-slate-500">اختر الوجبات والمشروبات لإرسالها للمطبخ</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowWaiterOrderModal(false);
+                    setWaiterCart([]);
+                  }}
+                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Search & Categories Horizontal Scroll */}
+              <div className="bg-white border-b border-slate-100 p-3 space-y-3 shrink-0">
+                {/* Search Bar */}
+                <div className="relative">
+                  <span className="absolute right-3 top-2 text-slate-400 text-sm">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="ابحث عن صنف..."
+                    value={waiterSearch}
+                    onChange={(e) => setWaiterSearch(e.target.value)}
+                    className="w-full pr-9 pl-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-1 focus:ring-indigo-500 outline-none transition-all text-right text-slate-900"
+                  />
+                </div>
+
+                {/* Categories */}
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
+                  <button
+                    onClick={() => setWaiterCategory("all")}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all shrink-0 cursor-pointer ${
+                      waiterCategory === "all"
+                        ? "bg-indigo-600 border-indigo-650 text-white shadow-sm"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    {lang === 'ar' ? 'الكل' : 'All'}
+                  </button>
+                  {categories.map(cat => {
+                    const count = items.filter(i => i.categoryId === cat.id && i.isAvailable).length;
+                    if (count === 0) return null;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setWaiterCategory(cat.id)}
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all shrink-0 cursor-pointer ${
+                          waiterCategory === cat.id
+                            ? "bg-indigo-600 border-indigo-650 text-white shadow-sm"
+                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        {lang === 'en' && cat.nameEn ? cat.nameEn : cat.nameAr}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Items List scrollable container */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
+                {items.filter(item => {
+                  if (!item.isAvailable) return false;
+                  const matchCategory = waiterCategory === "all" || item.categoryId === waiterCategory;
+                  const matchSearch = waiterSearch.trim() === "" || 
+                                      item.nameAr.toLowerCase().includes(waiterSearch.toLowerCase()) ||
+                                      (item.nameEn && item.nameEn.toLowerCase().includes(waiterSearch.toLowerCase()));
+                  return matchCategory && matchSearch;
+                }).map(item => {
+                  const cartItem = waiterCart.find(i => i.itemId === item.id);
+                  const qty = cartItem?.quantity || 0;
+
+                  const handleAdd = () => {
+                    setWaiterCart(prev => {
+                      const exist = prev.find(i => i.itemId === item.id);
+                      if (exist) {
+                        return prev.map(i => i.itemId === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+                      }
+                      return [...prev, {
+                        id: `oi-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                        itemId: item.id,
+                        nameAr: item.nameAr,
+                        price: item.price,
+                        quantity: 1
+                      }];
+                    });
+                  };
+
+                  const handleSub = () => {
+                    setWaiterCart(prev => {
+                      const exist = prev.find(i => i.itemId === item.id);
+                      if (exist && exist.quantity > 1) {
+                        return prev.map(i => i.itemId === item.id ? { ...i, quantity: i.quantity - 1 } : i);
+                      }
+                      return prev.filter(i => i.itemId !== item.id);
+                    });
+                  };
+
+                  return (
+                    <div key={item.id} className="bg-white border border-slate-150 p-3 rounded-2xl flex items-center justify-between gap-3 shadow-3xs text-right">
+                      {/* Image / Emoji */}
+                      <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-100 flex items-center justify-center text-xl shrink-0">
+                        {item.image ? <img src={item.image} alt="" className="w-full h-full object-cover rounded-xl" /> : "🍽️"}
+                      </div>
+                      
+                      {/* Details */}
+                      <div className="flex-1 text-right min-w-0">
+                        <h4 className="text-xs font-bold text-slate-900 truncate">{lang === 'en' && item.nameEn ? item.nameEn : item.nameAr}</h4>
+                        <p className="text-[10px] text-slate-400 mt-0.5 truncate">{lang === 'en' && item.descriptionEn ? item.descriptionEn : item.descriptionAr}</p>
+                        <p className="text-[11px] font-black text-indigo-650 mt-1 font-sans">{item.price} {tenant.currency}</p>
+                      </div>
+
+                      {/* Stepper controls */}
+                      <div className="shrink-0">
+                        {qty === 0 ? (
+                          <button
+                            onClick={handleAdd}
+                            className="px-4 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-black hover:bg-slate-850 cursor-pointer shadow-sm transition-all"
+                          >
+                            + إضافة
+                          </button>
+                        ) : (
+                          <div className="flex items-center gap-2 bg-slate-150 p-1 rounded-xl border border-slate-200 font-mono font-bold text-xs">
+                            <button onClick={handleSub} className="w-6 h-6 rounded-lg bg-white border border-slate-250/70 hover:bg-slate-50 text-slate-600 flex items-center justify-center cursor-pointer shadow-3xs">-</button>
+                            <span className="w-4 text-center font-black text-slate-900">{qty}</span>
+                            <button onClick={handleAdd} className="w-6 h-6 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center justify-center cursor-pointer shadow-3xs">+</button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom Sticky Action Cart Summary */}
+              {waiterCart.length > 0 && (
+                <div className="bg-white border-t border-slate-250/60 p-4 space-y-3 shrink-0 shadow-lg animate-in slide-in-from-bottom duration-250">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-500">عدد الوجبات: {waiterCart.reduce((sum, i) => sum + i.quantity, 0)}</span>
+                    <div className="font-sans font-black text-slate-800 text-sm">
+                      المجموع: {waiterCart.reduce((sum, i) => sum + (i.price * i.quantity), 0).toFixed(0)} {tenant.currency}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setWaiterCart([])}
+                      className="px-4 py-3 rounded-xl border border-slate-250 hover:bg-slate-50 text-slate-600 text-xs font-bold cursor-pointer"
+                    >
+                      مسح
+                    </button>
+                    <button
+                      onClick={handleWaiterSubmitOrder}
+                      disabled={waiterSubmitting}
+                      className="flex-1 py-3 rounded-xl bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-650/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                    >
+                      {waiterSubmitting ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>جاري الإرسال...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>إرسال الطلب للمطبخ 🛎️</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Global Floating Toast Notifications for ready orders */}
+        <div className="fixed bottom-6 left-6 z-[9999] space-y-3 max-w-sm w-full pointer-events-none">
+          {activeNotifications.map((notif) => (
+            <div
+              key={notif.id}
+              className={`p-4 rounded-2xl border shadow-xl flex items-center justify-between gap-3 pointer-events-auto animate-in slide-in-from-left-8 duration-300 ${
+                notif.type === "pending"
+                  ? "bg-indigo-650 border-indigo-500 shadow-indigo-600/20 text-white"
+                  : "bg-emerald-650 border-emerald-500 shadow-emerald-600/20 text-white"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-lg shrink-0">{notif.type === "pending" ? "🛎️" : "🍽️"}</span>
+                <p className="text-xs font-bold leading-relaxed">{notif.message}</p>
+              </div>
+              <button
+                onClick={() => setActiveNotifications(prev => prev.filter(n => n.id !== notif.id))}
+                className="text-white/60 hover:text-white text-xs shrink-0 cursor-pointer font-bold px-1"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  if (currentUser?.role === 'waiter') {
+    return renderWaiterView();
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-in fade-in duration-200" dir="rtl">
