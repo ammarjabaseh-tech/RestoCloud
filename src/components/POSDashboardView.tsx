@@ -657,6 +657,37 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     return () => clearInterval(interval);
   }, [tenant.id, tables, lang]);
 
+  // Mobile hardware back button handling to close active modals instead of exiting the app
+  React.useEffect(() => {
+    const hasModal = !!(showWaiterOrderModal || waiterActiveTable || activeOrderSession || showMobileCart);
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (showWaiterOrderModal) {
+        setShowWaiterOrderModal(false);
+        setWaiterCart([]);
+      } else if (waiterActiveTable) {
+        setWaiterActiveTable(null);
+      } else if (activeOrderSession) {
+        setActiveOrderSession(null);
+        setCart([]);
+      } else if (showMobileCart) {
+        setShowMobileCart(false);
+      }
+    };
+
+    if (hasModal) {
+      window.history.pushState({ modalOpen: true }, "");
+      window.addEventListener("popstate", handlePopState);
+    }
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (window.history.state?.modalOpen) {
+        window.history.back();
+      }
+    };
+  }, [showWaiterOrderModal, waiterActiveTable, activeOrderSession, showMobileCart]);
+
   const handleApproveOrder = async (orderId: string) => {
     try {
       const res = await fetch(`/api/tenants/${tenant.id}/orders/${orderId}`, {
