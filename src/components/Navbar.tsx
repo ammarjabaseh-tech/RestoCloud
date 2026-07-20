@@ -17,7 +17,8 @@ import {
   Users,
   FileText,
   LogOut,
-  ChefHat
+  ChefHat,
+  LayoutGrid
 } from "lucide-react";
 
 const navTranslations = {
@@ -276,8 +277,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
-                <CreditCard className="w-3.5 h-3.5" />
-                <span className="hidden lg:inline">{navTranslations[lang].pos}</span>
+                {currentUser?.role === "waiter" ? (
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                ) : (
+                  <CreditCard className="w-3.5 h-3.5" />
+                )}
+                <span className="hidden lg:inline">
+                  {currentUser?.role === "waiter"
+                    ? (lang === 'ar' ? 'إدارة الطاولات' : 'Tables Management')
+                    : navTranslations[lang].pos
+                  }
+                </span>
               </button>
             )}
 
@@ -296,17 +306,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
 
-            <button
-              onClick={() => onSelectView("digital_menu")}
-              className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
-                activeView === "digital_menu"
-                  ? `${theme.primaryBg} text-white font-bold shadow-sm`
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              }`}
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span className="hidden lg:inline">{navTranslations[lang].menu}</span>
-            </button>
+            {(!currentUser || currentUser.role !== "waiter") && (
+              <button
+                onClick={() => onSelectView("digital_menu")}
+                className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
+                  activeView === "digital_menu"
+                    ? `${theme.primaryBg} text-white font-bold shadow-sm`
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">{navTranslations[lang].menu}</span>
+              </button>
+            )}
 
             {(!currentUser || currentUser.permissions.canViewReports) && currentTenant?.subscriptionPlan !== "lite" && (
               <button
@@ -322,7 +334,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {currentUser && currentTenant?.subscriptionPlan !== "lite" && (
+            {currentUser && currentUser.role !== "waiter" && currentTenant?.subscriptionPlan !== "lite" && (
               <button
                 onClick={() => onSelectView("kitchen_display")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
