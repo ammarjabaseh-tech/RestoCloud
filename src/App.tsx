@@ -74,6 +74,12 @@ export default function App() {
     }
   }, [activeView]);
 
+  useEffect(() => {
+    if (currentUser && currentUser.role === 'waiter' && activeView !== 'pos_dashboard') {
+      setActiveView('pos_dashboard');
+    }
+  }, [currentUser, activeView]);
+
   // Handle login success from SaaSAuthView
   const handleLoginSuccess = (isSuperAdmin: boolean, user?: TenantUser, tenant?: Tenant) => {
     if (isSuperAdmin) {
@@ -86,7 +92,9 @@ export default function App() {
       fetchTenants();
       
       // Route based on user plan and permissions
-      if (user.permissions.canManagePOS && tenant.subscriptionPlan !== "lite") {
+      if (user.role === 'waiter') {
+        setActiveView('pos_dashboard');
+      } else if (user.permissions.canManagePOS && tenant.subscriptionPlan !== "lite") {
         setActiveView('pos_dashboard');
       } else if (user.permissions.canManageMenu) {
         setActiveView('admin_panel');
@@ -192,20 +200,24 @@ export default function App() {
         // If they are logged in, we preserve their dashboard view instead of throwing them to login/landing!
         else if (currentTenant && currentUser) {
           console.log("[App Router] Logged in user detected. Restoring dashboard session...");
-          const saved = localStorage.getItem("activeView");
-          // If they manually opened /menu, let them see the digital menu even if they are logged in
-          if (originalPathname === '/menu' || originalPathname.includes('/menu')) {
-            setActiveView('digital_menu');
-          } else if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login' && saved !== 'landing_page') {
-            setActiveView(saved as ActivePortalView);
+          if (currentUser.role === 'waiter') {
+            setActiveView('pos_dashboard');
           } else {
-            // Fallback based on permissions
-            if (currentUser.permissions.canManagePOS) {
-              setActiveView('pos_dashboard');
-            } else if (currentUser.permissions.canManageMenu) {
-              setActiveView('admin_panel');
-            } else {
+            const saved = localStorage.getItem("activeView");
+            // If they manually opened /menu, let them see the digital menu even if they are logged in
+            if (originalPathname === '/menu' || originalPathname.includes('/menu')) {
               setActiveView('digital_menu');
+            } else if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login' && saved !== 'landing_page') {
+              setActiveView(saved as ActivePortalView);
+            } else {
+              // Fallback based on permissions
+              if (currentUser.permissions.canManagePOS) {
+                setActiveView('pos_dashboard');
+              } else if (currentUser.permissions.canManageMenu) {
+                setActiveView('admin_panel');
+              } else {
+                setActiveView('digital_menu');
+              }
             }
           }
         }

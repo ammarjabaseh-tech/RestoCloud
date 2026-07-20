@@ -806,12 +806,25 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       onOrderCreated(newOrder);
       setCompletedOrder(newOrder);
       
+      // Auto update table status to occupied if it was dine-in
+      if (orderType === "dine_in" && selectedTable) {
+        const tblObj = tables.find(t => t.tableNumber === selectedTable);
+        if (tblObj) {
+          onUpdateTableStatus(tblObj.id, "occupied");
+        }
+      }
+
       // Reset cart
       setCart([]);
       setCustomerName("");
       setCustomerPhone("");
       setCustomerAddress("");
       setDiscountAmount(0);
+
+      // Redirect waiter to tables view
+      if (currentUser?.role === 'waiter') {
+        setPosMode("tables");
+      }
     } catch (err: any) {
       console.error("Order submission error:", err);
       
@@ -864,6 +877,14 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
         onOrderCreated(offlineOrder as any);
         setCompletedOrder(offlineOrder as any);
         
+        // Auto update table status to occupied if it was dine-in
+        if (orderType === "dine_in" && selectedTable) {
+          const tblObj = tables.find(t => t.tableNumber === selectedTable);
+          if (tblObj) {
+            onUpdateTableStatus(tblObj.id, "occupied");
+          }
+        }
+
         setCart([]);
         setDiscountAmount(0);
         setCustomerName("");
@@ -871,6 +892,11 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
         setCustomerAddress("");
         
         setOfflineQueueCount(queue.length);
+
+        // Redirect waiter to tables view
+        if (currentUser?.role === 'waiter') {
+          setPosMode("tables");
+        }
         
         alert(lang === 'ar' 
           ? "🔴 انقطع الاتصال بالإنترنت! تم حفظ الفاتورة محلياً بنجاح وسنقوم بمزامنتها تلقائياً عند عودة الشبكة. يمكنك الاستمرار في العمل وطباعة الفاتورة."
@@ -1228,10 +1254,10 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               onClick={() => handleCheckout('pending')}
               disabled={cart.length === 0 || isSubmitting}
               className="col-span-3 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 font-bold text-xs transition-colors flex flex-col sm:flex-row items-center justify-center gap-1 disabled:opacity-40"
-              title={posTranslations[lang].holdInvoice}
+              title={currentUser?.role === 'waiter' ? (lang === 'ar' ? "إرسال للمطبخ" : "Send to Kitchen") : posTranslations[lang].holdInvoice}
             >
               <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span>{posTranslations[lang].holdInvoice}</span>
+              <span>{currentUser?.role === 'waiter' ? (lang === 'ar' ? "إرسال للمطبخ" : "Send to Kitchen") : posTranslations[lang].holdInvoice}</span>
             </button>
 
             <button
@@ -1247,7 +1273,11 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               ) : (
                 <>
                   <Receipt className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="truncate">{posTranslations[lang].completeAndPrint} ({total.toFixed(0)} {tenant.currency})</span>
+                  <span className="truncate">
+                    {currentUser?.role === "waiter" 
+                      ? (lang === 'ar' ? 'تأكيد وإرسال الطلب' : 'Confirm & Send Order')
+                      : `${posTranslations[lang].completeAndPrint} (${total.toFixed(0)} ${tenant.currency})`}
+                  </span>
                 </>
               )}
             </button>
@@ -1335,7 +1365,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             )}
           </div>
 
-          {currentUser?.role !== "waiter" && (
+          {currentUser && (
             <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl overflow-x-auto border border-slate-200 no-scrollbar">
               <button
                 onClick={() => setPosMode("sales")}
@@ -1915,6 +1945,20 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                 السعة الاستيعابية: {editingTableStatus.capacity} كراسي
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedTable(editingTableStatus.tableNumber);
+                setOrderType("dine_in");
+                setPosMode("sales");
+                setEditingTableStatus(null);
+              }}
+              className="w-full py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>🛒</span>
+              <span>{lang === 'ar' ? 'تسجيل طلب جديد لهذه الطاولة' : lang === 'tr' ? 'Masa için Yeni Sipariş Al' : 'Take New Order for Table'}</span>
+            </button>
 
             <div className="grid grid-cols-2 gap-2 font-sans">
               {(["available", "occupied", "reserved", "needs_cleaning"] as const).map((status) => {
