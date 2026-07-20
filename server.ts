@@ -173,6 +173,7 @@ function mapOrder(row: any) {
     paymentStatus: row.payment_status,
     orderStatus: row.order_status,
     cashierName: row.cashier_name,
+    deliveryDriverName: row.delivery_driver_name,
     createdAt: row.created_at
       ? new Date(row.created_at).toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })
       : "",
@@ -1330,8 +1331,8 @@ app.post("/api/tenants/:tenantId/orders", async (req, res) => {
       `INSERT INTO orders
         (id, order_number, tenant_id, order_type, table_number, customer_name, customer_phone,
          customer_address, subtotal, tax_amount, discount_amount, total,
-         payment_method, payment_status, order_status, cashier_name)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+         payment_method, payment_status, order_status, cashier_name, delivery_driver_name)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
       [orderId, orderNumber, tenantId, b.orderType || "dine_in",
        b.tableNumber ? Number(b.tableNumber) : null,
        b.customerName || (b.orderType === "dine_in" ? `طاولة رقم ${b.tableNumber}` : "زبون سفري"),
@@ -1339,7 +1340,7 @@ app.post("/api/tenants/:tenantId/orders", async (req, res) => {
        b.subtotal || 0, b.taxAmount || 0, b.discountAmount || 0, b.total || 0,
        b.paymentMethod || "cash", b.paymentStatus || "paid",
        b.orderStatus || ((b.cashierName === "طلب ذاتي (QR Menu)") ? "pending" : "preparing"),
-       b.cashierName || "الكاشير العام"]
+       b.cashierName || "الكاشير العام", b.deliveryDriverName || null]
     );
 
     // Insert order items
@@ -1401,9 +1402,16 @@ app.put("/api/tenants/:tenantId/orders/:id", async (req, res) => {
       `UPDATE orders SET
         order_status = COALESCE($2, order_status),
         payment_status = COALESCE($3, payment_status),
-        payment_method = COALESCE($4, payment_method)
+        payment_method = COALESCE($4, payment_method),
+        delivery_driver_name = $5
        WHERE id = $1 RETURNING *`,
-      [id, b.orderStatus, b.paymentStatus, b.paymentMethod]
+      [
+        id, 
+        b.orderStatus, 
+        b.paymentStatus, 
+        b.paymentMethod, 
+        b.deliveryDriverName !== undefined ? b.deliveryDriverName : prev.rows[0].delivery_driver_name
+      ]
     );
 
     const updatedOrder = result.rows[0];

@@ -63,6 +63,8 @@ const usersTranslations = {
     cashierLabel: "كاشير (Cashier)",
     waiterLabel: "ويتر / مقدم طعام (Waiter)",
     workerLabel: "عامل / موظف (Worker)",
+    deliveryLabel: "عامل توصيل / سائق (Delivery)",
+    deliveries: "عمال التوصيل",
     confirmDelete: "هل أنت متأكد من حذف الموظف",
     deleteSuccess: "تم حذف الموظف بنجاح 🗑️",
     addSuccess: "تمت إضافة الموظف بنجاح ✅",
@@ -128,6 +130,8 @@ const usersTranslations = {
     cashierLabel: "Cashier (Cashier)",
     waiterLabel: "Waiter / Server (Waiter)",
     workerLabel: "Worker / Employee (Worker)",
+    deliveryLabel: "Delivery Driver (Delivery)",
+    deliveries: "Delivery Drivers",
     confirmDelete: "Are you sure you want to delete employee",
     deleteSuccess: "Employee deleted successfully 🗑️",
     addSuccess: "Employee added successfully ✅",
@@ -193,6 +197,8 @@ const usersTranslations = {
     cashierLabel: "Kasiyer (Cashier)",
     waiterLabel: "Garson / Servis Elemanı (Waiter)",
     workerLabel: "İşçi / Çalışan (Worker)",
+    deliveryLabel: "Kurye / Sürücü (Delivery)",
+    deliveries: "Kuryeler",
     confirmDelete: "Personeli silmek istediğinizden emin misiniz:",
     deleteSuccess: "Personel başarıyla silindi 🗑️",
     addSuccess: "Personel başarıyla eklendi ✅",
@@ -414,6 +420,8 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
         return <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold border border-emerald-300 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {usersTranslations[lang].waiterLabel}</span>;
       case "worker":
         return <span className="px-2.5 py-1 bg-slate-100 text-slate-800 rounded-lg text-xs font-bold border border-slate-300 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {usersTranslations[lang].workerLabel}</span>;
+      case "delivery":
+        return <span className="px-2.5 py-1 bg-sky-100 text-sky-800 rounded-lg text-xs font-bold border border-sky-300 flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {usersTranslations[lang].deliveryLabel}</span>;
     }
   };
 
@@ -499,6 +507,15 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
               <div className="text-xs text-slate-400 font-bold">{usersTranslations[lang].waiters}</div>
               <div className="text-lg font-black text-slate-800 font-sans">
                 {users.filter(u => u.role === "waiter").length} {usersTranslations[lang].usersUnit}
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm flex items-center gap-3">
+            <div className="w-11 h-11 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center text-xl">🛵</div>
+            <div>
+              <div className="text-xs text-slate-400 font-bold">{usersTranslations[lang].deliveries}</div>
+              <div className="text-lg font-black text-slate-800 font-sans">
+                {users.filter(u => u.role === "delivery").length} {usersTranslations[lang].usersUnit}
               </div>
             </div>
           </div>
@@ -676,6 +693,7 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
                     <option value="manager">👔 {usersTranslations[lang].managerLabel}</option>
                     <option value="owner">👨‍🍳 {usersTranslations[lang].ownerLabel}</option>
                     <option value="worker">👷 {usersTranslations[lang].workerLabel}</option>
+                    <option value="delivery">🛵 {usersTranslations[lang].deliveryLabel}</option>
                   </select>
                 </div>
               </div>

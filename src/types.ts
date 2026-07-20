@@ -104,11 +104,12 @@ export interface Order {
   createdAt: string;
   createdAtIso?: string;
   cashierName: string;
+  deliveryDriverName?: string;
 }
 
 export type ActivePortalView = 'landing_page' | 'auth_login' | 'auth_signup' | 'terms' | 'super_admin_dashboard' | 'super_admin_login' | 'saas_portal' | 'pos_dashboard' | 'admin_panel' | 'digital_menu' | 'postgres_export' | 'ai_assistant' | 'tenant_login' | 'tenant_users' | 'saas_subscriptions';
 
-export type UserRole = 'owner' | 'manager' | 'cashier' | 'waiter' | 'worker';
+export type UserRole = 'owner' | 'manager' | 'cashier' | 'waiter' | 'worker' | 'delivery';
 
 export interface TenantUser {
   id: string;
