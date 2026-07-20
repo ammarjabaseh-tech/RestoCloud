@@ -197,6 +197,8 @@ function mapUser(row: any) {
       canManageUsers: row.can_manage_users,
       canViewReports: row.can_view_reports,
       canManageSettings: row.can_manage_settings,
+      canAccessWaiter: row.can_access_waiter,
+      canAccessDelivery: row.can_access_delivery,
     },
     createdAt: row.created_at ? row.created_at.toISOString().split("T")[0] : "",
   };

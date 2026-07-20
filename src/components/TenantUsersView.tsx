@@ -65,6 +65,10 @@ const usersTranslations = {
     workerLabel: "عامل / موظف (Worker)",
     deliveryLabel: "عامل توصيل / سائق (Delivery)",
     deliveries: "عمال التوصيل",
+    permWaiter: "🍽️ شاشة الويتر",
+    permWaiterDesc: "صلاحية شاشة الويتر (إدارة طلبات وحالات الطاولات)",
+    permDelivery: "🛵 شاشة التوصيل",
+    permDeliveryDesc: "صلاحية شاشة التوصيل (استلام الطلبات وتوصيلها وتتبعها)",
     confirmDelete: "هل أنت متأكد من حذف الموظف",
     deleteSuccess: "تم حذف الموظف بنجاح 🗑️",
     addSuccess: "تمت إضافة الموظف بنجاح ✅",
@@ -132,6 +136,10 @@ const usersTranslations = {
     workerLabel: "Worker / Employee (Worker)",
     deliveryLabel: "Delivery Driver (Delivery)",
     deliveries: "Delivery Drivers",
+    permWaiter: "🍽️ Waiter Screen",
+    permWaiterDesc: "Access to Waiter Dashboard (ordering & tables)",
+    permDelivery: "🛵 Delivery Screen",
+    permDeliveryDesc: "Access to Delivery Dashboard (claims & status tracking)",
     confirmDelete: "Are you sure you want to delete employee",
     deleteSuccess: "Employee deleted successfully 🗑️",
     addSuccess: "Employee added successfully ✅",
@@ -199,6 +207,10 @@ const usersTranslations = {
     workerLabel: "İşçi / Çalışan (Worker)",
     deliveryLabel: "Kurye / Sürücü (Delivery)",
     deliveries: "Kuryeler",
+    permWaiter: "🍽️ Garson Ekranı",
+    permWaiterDesc: "Garson paneline erişim ve masa siparişi yönetimi",
+    permDelivery: "🛵 Kurye Ekranı",
+    permDeliveryDesc: "Kurye paneline erişim ve sipariş takip yönetimi",
     confirmDelete: "Personeli silmek istediğinizden emin misiniz:",
     deleteSuccess: "Personel başarıyla silindi 🗑️",
     addSuccess: "Personel başarıyla eklendi ✅",
@@ -232,7 +244,9 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
     canManageMenu: false,
     canManageUsers: false,
     canViewReports: false,
-    canManageSettings: false
+    canManageSettings: false,
+    canAccessWaiter: false,
+    canAccessDelivery: false
   });
 
   const fetchUsers = async () => {
@@ -262,7 +276,9 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
         canManageMenu: true,
         canManageUsers: true,
         canViewReports: true,
-        canManageSettings: true
+        canManageSettings: true,
+        canAccessWaiter: true,
+        canAccessDelivery: true
       });
     } else if (newRole === "manager") {
       setPermissions({
@@ -270,7 +286,9 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
         canManageMenu: true,
         canManageUsers: false,
         canViewReports: true,
-        canManageSettings: false
+        canManageSettings: false,
+        canAccessWaiter: true,
+        canAccessDelivery: true
       });
     } else if (newRole === "cashier") {
       setPermissions({
@@ -278,15 +296,29 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
         canManageMenu: false,
         canManageUsers: false,
         canViewReports: false,
-        canManageSettings: false
+        canManageSettings: false,
+        canAccessWaiter: false,
+        canAccessDelivery: false
       });
     } else if (newRole === "waiter") {
       setPermissions({
-        canManagePOS: true,
+        canManagePOS: false,
         canManageMenu: false,
         canManageUsers: false,
         canViewReports: false,
-        canManageSettings: false
+        canManageSettings: false,
+        canAccessWaiter: true,
+        canAccessDelivery: false
+      });
+    } else if (newRole === "delivery") {
+      setPermissions({
+        canManagePOS: false,
+        canManageMenu: false,
+        canManageUsers: false,
+        canViewReports: false,
+        canManageSettings: false,
+        canAccessWaiter: false,
+        canAccessDelivery: true
       });
     } else if (newRole === "worker") {
       setPermissions({
@@ -294,7 +326,9 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
         canManageMenu: false,
         canManageUsers: false,
         canViewReports: false,
-        canManageSettings: false
+        canManageSettings: false,
+        canAccessWaiter: false,
+        canAccessDelivery: false
       });
     }
   };
@@ -608,6 +642,16 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
                               {usersTranslations[lang].permSettings}
                             </span>
                           )}
+                          {u.permissions.canAccessWaiter && (
+                            <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[11px] font-bold border border-emerald-200">
+                              {usersTranslations[lang].permWaiter || (lang === 'ar' ? '🍽️ شاشة الويتر' : '🍽️ Waiter')}
+                            </span>
+                          )}
+                          {u.permissions.canAccessDelivery && (
+                            <span className="bg-sky-50 text-sky-700 px-2 py-0.5 rounded text-[11px] font-bold border border-sky-200">
+                              {usersTranslations[lang].permDelivery || (lang === 'ar' ? '🛵 شاشة التوصيل' : '🛵 Delivery')}
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="py-4 px-4 text-center">
@@ -792,6 +836,32 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
                       className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
                     />
                     <span className="font-bold text-slate-800 dark:text-slate-200">{usersTranslations[lang].permSettingsDesc}</span>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 p-1.5 rounded-lg transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={permissions.canAccessWaiter || false}
+                      onChange={(e) => setPermissions(prev => ({ ...prev, canAccessWaiter: e.target.checked }))}
+                      className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <div>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 block">{usersTranslations[lang].permWaiter || (lang === 'ar' ? '🍽️ شاشة الويتر' : '🍽️ Waiter Screen')}</span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">{usersTranslations[lang].permWaiterDesc || (lang === 'ar' ? 'صلاحية شاشة الويتر (إدارة طلبات وحالات الطاولات)' : 'Access to waiter dashboard')}</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 p-1.5 rounded-lg transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={permissions.canAccessDelivery || false}
+                      onChange={(e) => setPermissions(prev => ({ ...prev, canAccessDelivery: e.target.checked }))}
+                      className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <div>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 block">{usersTranslations[lang].permDelivery || (lang === 'ar' ? '🛵 شاشة التوصيل' : '🛵 Delivery Screen')}</span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">{usersTranslations[lang].permDeliveryDesc || (lang === 'ar' ? 'صلاحية شاشة التوصيل (استلام الطلبات وتوصيلها وتتبعها)' : 'Access to delivery dashboard')}</span>
+                    </div>
                   </label>
                 </div>
               </div>

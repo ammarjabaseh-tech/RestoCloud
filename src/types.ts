@@ -126,6 +126,8 @@ export interface TenantUser {
     canManageUsers: boolean;     // صلاحية إدارة الموظفين والمستخدمين
     canViewReports: boolean;     // صلاحية التقارير المالية والذكاء الاصطناعي
     canManageSettings: boolean;  // صلاحية إعدادات المطعم والاشتراك
+    canAccessWaiter: boolean;    // صلاحية شاشة الويتر
+    canAccessDelivery: boolean;  // صلاحية شاشة التوصيل
   };
   createdAt: string;
   avatar?: string;
