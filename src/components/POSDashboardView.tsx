@@ -1047,24 +1047,46 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   {tables.filter(t => t.status === "available").length} {posTranslations[lang].tablesAvailable}
                 </span>
               </div>
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 max-h-40 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-700/60 rounded-2xl bg-slate-50/50 dark:bg-slate-900/10 no-scrollbar">
                 {tables.map((t) => {
-                  const isOccupied = t.status === "occupied";
                   const isSelected = selectedTable === t.tableNumber;
+                  const statusDot = {
+                    available: "bg-emerald-500",
+                    occupied: "bg-rose-500",
+                    reserved: "bg-blue-500",
+                    needs_cleaning: "bg-amber-500"
+                  }[t.status] || "bg-slate-400";
+
+                  const statusStyles = isSelected
+                    ? "bg-indigo-600 text-white border-indigo-650 ring-2 ring-indigo-500/30"
+                    : {
+                        available: "bg-emerald-50/30 text-emerald-800 border-emerald-150/70 hover:bg-emerald-50/60",
+                        occupied: "bg-rose-50/30 text-rose-800 border-rose-150/70 hover:bg-rose-50/60",
+                        reserved: "bg-blue-50/30 text-blue-800 border-blue-150/70 hover:bg-blue-50/60",
+                        needs_cleaning: "bg-amber-50/30 text-amber-800 border-amber-150/70 hover:bg-amber-50/60"
+                      }[t.status] || "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+
+                  const labelAr = {
+                    available: "متاح",
+                    occupied: "مشغول",
+                    reserved: "محجوز",
+                    needs_cleaning: "تنظيف"
+                  }[t.status] || "";
+
                   return (
                     <button
                       key={t.id}
+                      type="button"
                       onClick={() => setSelectedTable(t.tableNumber)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 border transition-all flex items-center gap-1.5 ${
-                        isSelected
-                          ? "bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-500/30"
-                          : isOccupied
-                          ? "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/60"
-                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-500"
-                      }`}
+                      className={`py-2 px-1 rounded-xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-3xs relative overflow-hidden ${statusStyles}`}
                     >
-                      <span>{posTranslations[lang].table} {t.tableNumber}</span>
-                      <span className={`w-2 h-2 rounded-full ${isOccupied ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                      <span className="font-mono text-[10px] font-black">
+                        {posTranslations[lang].table} {t.tableNumber}
+                      </span>
+                      <span className="text-[7px] opacity-75 font-normal flex items-center gap-0.5">
+                        <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white' : statusDot}`} />
+                        {labelAr}
+                      </span>
                     </button>
                   );
                 })}
