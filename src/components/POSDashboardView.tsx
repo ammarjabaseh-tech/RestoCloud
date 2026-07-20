@@ -1047,7 +1047,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   {tables.filter(t => t.status === "available").length} {posTranslations[lang].tablesAvailable}
                 </span>
               </div>
-              <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 max-h-40 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-700/60 rounded-2xl bg-slate-50/50 dark:bg-slate-900/10 no-scrollbar">
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-2 border border-slate-200 dark:border-slate-700/50 rounded-2xl bg-slate-50/30 dark:bg-slate-900/5 no-scrollbar">
                 {tables.map((t) => {
                   const isSelected = selectedTable === t.tableNumber;
                   const statusDot = {
@@ -1057,14 +1057,18 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     needs_cleaning: "bg-amber-500"
                   }[t.status] || "bg-slate-400";
 
-                  const statusStyles = isSelected
-                    ? "bg-indigo-600 text-white border-indigo-650 ring-2 ring-indigo-500/30"
+                  const badgeStyles = isSelected
+                    ? "bg-white/20 text-white border-transparent"
                     : {
-                        available: "bg-emerald-50/30 text-emerald-800 border-emerald-150/70 hover:bg-emerald-50/60",
-                        occupied: "bg-rose-50/30 text-rose-800 border-rose-150/70 hover:bg-rose-50/60",
-                        reserved: "bg-blue-50/30 text-blue-800 border-blue-150/70 hover:bg-blue-50/60",
-                        needs_cleaning: "bg-amber-50/30 text-amber-800 border-amber-150/70 hover:bg-amber-50/60"
-                      }[t.status] || "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+                        available: "bg-emerald-500/10 text-emerald-700 border-emerald-500/15 dark:bg-emerald-500/5 dark:text-emerald-400 dark:border-emerald-500/10",
+                        occupied: "bg-rose-500/10 text-rose-700 border-rose-500/15 dark:bg-rose-500/5 dark:text-rose-400 dark:border-rose-500/10",
+                        reserved: "bg-blue-500/10 text-blue-700 border-blue-500/15 dark:bg-blue-500/5 dark:text-blue-400 dark:border-blue-500/10",
+                        needs_cleaning: "bg-amber-500/10 text-amber-700 border-amber-500/15 dark:bg-amber-500/5 dark:text-amber-400 dark:border-amber-500/10"
+                      }[t.status] || "bg-slate-100 text-slate-700 border-slate-200";
+
+                  const buttonStyles = isSelected
+                    ? "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white border-indigo-650 shadow-sm scale-98"
+                    : "bg-white hover:bg-slate-50 text-slate-800 border-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-750 dark:border-slate-750 dark:text-slate-200 hover:border-indigo-500/30";
 
                   const labelAr = {
                     available: "متاح",
@@ -1078,14 +1082,14 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                       key={t.id}
                       type="button"
                       onClick={() => setSelectedTable(t.tableNumber)}
-                      className={`py-2 px-1 rounded-xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-3xs relative overflow-hidden ${statusStyles}`}
+                      className={`py-2 px-1 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-3xs duration-200 relative overflow-hidden ${buttonStyles}`}
                     >
-                      <span className="font-mono text-[10px] font-black">
+                      <span className="font-sans text-[10px] font-black tracking-wide">
                         {posTranslations[lang].table} {t.tableNumber}
                       </span>
-                      <span className="text-[7px] opacity-75 font-normal flex items-center gap-0.5">
-                        <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white' : statusDot}`} />
-                        {labelAr}
+                      <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-bold border flex items-center justify-center gap-1 shrink-0 ${badgeStyles}`}>
+                        <span className={`w-1 h-1 rounded-full shrink-0 ${isSelected ? 'bg-white' : statusDot}`} />
+                        <span>{labelAr}</span>
                       </span>
                     </button>
                   );
