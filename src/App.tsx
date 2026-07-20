@@ -371,6 +371,26 @@ export default function App() {
       console.error("Failed to fetch tenant data:", err);
     }
   };
+  // Silent polling for tables every 5 seconds to keep table status updated in real-time live!
+  useEffect(() => {
+    if (!currentTenant) return;
+    
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/tenants/${currentTenant.id}/tables`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setTables(data);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to poll tables:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentTenant?.id]);
 
   // Handlers for state updates
   const handleTenantCreated = (newTenant: Tenant) => {

@@ -1338,7 +1338,7 @@ app.post("/api/tenants/:tenantId/orders", async (req, res) => {
        b.customerPhone || null, b.customerAddress || null,
        b.subtotal || 0, b.taxAmount || 0, b.discountAmount || 0, b.total || 0,
        b.paymentMethod || "cash", b.paymentStatus || "paid",
-       (b.cashierName === "طلب ذاتي (QR Menu)") ? "pending" : "preparing",
+       b.orderStatus || ((b.cashierName === "طلب ذاتي (QR Menu)") ? "pending" : "preparing"),
        b.cashierName || "الكاشير العام"]
     );
 

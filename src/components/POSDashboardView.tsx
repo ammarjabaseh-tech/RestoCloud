@@ -1326,6 +1326,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           total: finalTotal,
           paymentMethod: "pending",
           paymentStatus: "pending",
+          orderStatus: "pending",
           cashierName: currentUser?.name || "ويتر الصالة"
         })
       });
@@ -1788,9 +1789,14 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
 
                   return (
                     <div key={item.id} className="bg-white border border-slate-150 p-3 rounded-2xl flex items-center justify-between gap-3 shadow-3xs text-right">
-                      {/* Image / Emoji */}
-                      <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-100 flex items-center justify-center text-xl shrink-0">
-                        {item.image ? <img src={item.image} alt="" className="w-full h-full object-cover rounded-xl" /> : "🍽️"}
+                      {/* Image / Fallback */}
+                      <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-100 flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                        <img
+                          src={item.image && item.image.trim() !== "" ? item.image : (tenant.logo || "/logo.jpg")}
+                          onError={(e) => { (e.target as HTMLImageElement).src = (tenant.logo || "/logo.jpg"); }}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       
                       {/* Details */}
@@ -2136,7 +2142,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   {/* Image & Badges */}
                   <div className="relative h-14 w-full overflow-hidden bg-slate-50 border-b border-slate-100">
                     <img
-                      src={item.image}
+                      src={item.image && item.image.trim() !== "" ? item.image : (tenant.logo || "/logo.jpg")}
+                      onError={(e) => { (e.target as HTMLImageElement).src = (tenant.logo || "/logo.jpg"); }}
                       alt={itemName}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
