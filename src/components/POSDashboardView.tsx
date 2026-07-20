@@ -1111,7 +1111,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                       }[t.status] || "bg-slate-100 text-slate-700 border-slate-200";
 
                   const buttonStyles = isSelected
-                    ? "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white border-indigo-650 shadow-sm scale-98"
+                    ? "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white border-indigo-600 shadow-sm scale-98"
                     : "bg-white hover:bg-slate-50 text-slate-800 border-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-750 dark:border-slate-750 dark:text-slate-200 hover:border-indigo-500/30";
 
                   const labelAr = {
@@ -1739,7 +1739,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     setWaiterCart([]);
                     setShowWaiterOrderModal(true);
                   }}
-                  className="w-full py-3.5 bg-indigo-650 hover:bg-indigo-700 text-white text-sm font-black rounded-2xl shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-black rounded-2xl shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>{lang === 'ar' ? 'تسجيل طلب جديد للطاولة' : 'Take New Order'}</span>
@@ -1793,7 +1793,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     onClick={() => setWaiterCategory("all")}
                     className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all shrink-0 cursor-pointer ${
                       waiterCategory === "all"
-                        ? "bg-indigo-600 border-indigo-650 text-white shadow-sm"
+                        ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
                         : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
@@ -1808,7 +1808,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                         onClick={() => setWaiterCategory(cat.id)}
                         className={`px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all shrink-0 cursor-pointer ${
                           waiterCategory === cat.id
-                            ? "bg-indigo-600 border-indigo-650 text-white shadow-sm"
+                            ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
                             : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                         }`}
                       >
@@ -1874,7 +1874,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                       <div className="flex-1 text-right min-w-0">
                         <h4 className="text-xs font-bold text-slate-900 truncate">{lang === 'en' && item.nameEn ? item.nameEn : item.nameAr}</h4>
                         <p className="text-[10px] text-slate-400 mt-0.5 truncate">{lang === 'en' && item.descriptionEn ? item.descriptionEn : item.descriptionAr}</p>
-                        <p className="text-[11px] font-black text-indigo-650 mt-1 font-sans">{item.price} {tenant.currency}</p>
+                        <p className="text-[11px] font-black text-indigo-600 mt-1 font-sans">{item.price} {tenant.currency}</p>
                       </div>
 
                       {/* Stepper controls */}
@@ -1919,7 +1919,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     <button
                       onClick={handleWaiterSubmitOrder}
                       disabled={waiterSubmitting}
-                      className="flex-1 py-3 rounded-xl bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-650/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                      className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
                       {waiterSubmitting ? (
                         <>
@@ -1947,8 +1947,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               key={notif.id}
               className={`p-4 rounded-2xl border shadow-xl flex items-center justify-between gap-3 pointer-events-auto animate-in slide-in-from-left-8 duration-300 ${
                 notif.type === "pending"
-                  ? "bg-indigo-650 border-indigo-500 shadow-indigo-600/20 text-white"
-                  : "bg-emerald-650 border-emerald-500 shadow-emerald-600/20 text-white"
+                  ? "bg-indigo-600 border-indigo-500 shadow-indigo-600/20 text-white"
+                  : "bg-emerald-600 border-emerald-500 shadow-emerald-600/20 text-white"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -3126,7 +3126,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
         <div className="lg:hidden fixed bottom-6 left-6 right-6 z-45">
           <button
             onClick={() => setShowMobileCart(true)}
-            className="w-full flex items-center justify-between px-6 py-4 bg-indigo-650 hover:bg-indigo-700 text-white rounded-2xl shadow-xl font-bold animate-bounce cursor-pointer border border-indigo-500/30"
+            className="w-full flex items-center justify-between px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl font-bold animate-bounce cursor-pointer border border-indigo-500/30"
           >
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2 rounded-xl">
@@ -3160,8 +3160,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             key={notif.id}
             className={`p-4 rounded-2xl border shadow-xl flex items-center justify-between gap-3 pointer-events-auto animate-in slide-in-from-left-8 duration-300 ${
               notif.type === "pending"
-                ? "bg-indigo-650 border-indigo-500 shadow-indigo-600/20 text-white"
-                : "bg-emerald-650 border-emerald-500 shadow-emerald-600/20 text-white"
+                ? "bg-indigo-600 border-indigo-500 shadow-indigo-600/20 text-white"
+                : "bg-emerald-600 border-emerald-500 shadow-emerald-600/20 text-white"
             }`}
           >
             <div className="flex items-center gap-2.5">
