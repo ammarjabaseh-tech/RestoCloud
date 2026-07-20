@@ -363,6 +363,21 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     tableNumber?: number;
   } | null>(null);
 
+  // Delivery Drivers list state for cashier driver assignment
+  const [deliveryDrivers, setDeliveryDrivers] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    fetch(`/api/tenants/${tenant.id}/users`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const drivers = data.filter((u: any) => u.role === "delivery" && u.status === "active");
+          setDeliveryDrivers(drivers);
+        }
+      })
+      .catch(err => console.error("Failed to load delivery drivers:", err));
+  }, [tenant.id]);
+
   const handleStartOrderSession = (type: "dine_in" | "takeaway" | "delivery", tableNum?: number) => {
     setCart([]);
     setDiscountAmount(0);
@@ -2596,6 +2611,36 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                       );
                     })}
                   </div>
+
+                  {/* Delivery driver assignment (only for delivery orders) */}
+                  {order.orderType === "delivery" && order.orderStatus !== "delivered" && order.orderStatus !== "cancelled" && (
+                    <div className="pt-2 pb-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                      <span className="text-[10px] text-slate-450 dark:text-slate-400 font-black">🛵 سائق التوصيل:</span>
+                      <select
+                        value={order.deliveryDriverName || ""}
+                        onChange={async (e) => {
+                          const val = e.target.value;
+                          const res = await fetch(`/api/tenants/${tenant.id}/orders/${order.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ deliveryDriverName: val || null })
+                          });
+                          if (res.ok) {
+                            const updated = await res.json();
+                            setHistoryOrders(prev => prev.map(o => o.id === order.id ? updated : o));
+                          }
+                        }}
+                        className="px-2 py-1 rounded-lg text-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-850 dark:text-white font-bold outline-none cursor-pointer"
+                      >
+                        <option value="">-- غير معين --</option>
+                        {deliveryDrivers.map(driver => (
+                          <option key={driver.id} value={driver.name}>
+                            {driver.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {/* Pricing and Actions */}
                   <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4 mt-2">
