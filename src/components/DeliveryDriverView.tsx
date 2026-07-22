@@ -18,6 +18,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'ready' | 'mine' | 'done'>('ready');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -39,6 +40,14 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchOrders();
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 600);
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string, driverName?: string) => {
     setUpdatingId(orderId);
     try {
@@ -51,29 +60,41 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       });
       if (res.ok) {
         await fetchOrders();
+        if (newStatus === "out_for_delivery") {
+          setActiveTab("mine");
+        }
+      } else {
+        let errMsg = "فشل في تحديث حالة الطلب";
+        try {
+          const errData = await res.json();
+          if (errData.error) errMsg = errData.error;
+        } catch (e) {}
+        alert(errMsg);
       }
     } catch (e) {
       console.error("DeliveryView: failed to update order", e);
+      alert("تعذر الاتصال بالخادم لتحديث الطلب");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  // Ready delivery orders (no driver assigned yet)
+  // Ready delivery orders (unassigned or assigned to current user, not yet out for delivery)
   const readyOrders = orders.filter(
     (o) =>
       o.orderType === "delivery" &&
-      o.orderStatus === "ready" &&
-      (!o.deliveryDriverName || o.deliveryDriverName.trim() === "")
+      o.orderStatus !== "delivered" &&
+      o.orderStatus !== "cancelled" &&
+      o.orderStatus !== "out_for_delivery" &&
+      (!o.deliveryDriverName || o.deliveryDriverName.trim() === "" || o.deliveryDriverName === currentUser.name)
   );
 
-  // My active orders (assigned to me, not yet delivered)
+  // My active orders (out for delivery with my name)
   const myActiveOrders = orders.filter(
     (o) =>
       o.orderType === "delivery" &&
       o.deliveryDriverName === currentUser.name &&
-      o.orderStatus !== "delivered" &&
-      o.orderStatus !== "cancelled"
+      o.orderStatus === "out_for_delivery"
   );
 
   // My completed orders today
@@ -88,6 +109,8 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
 
   const statusBadge = (status: string) => {
     const map: Record<string, { label: string; color: string }> = {
+      pending: { label: "بانتظار التأكيد ⏳", color: "bg-amber-100 text-amber-800" },
+      preparing: { label: "في المطبخ 👨‍🍳", color: "bg-indigo-100 text-indigo-800" },
       ready: { label: "جاهز للتوصيل 🟢", color: "bg-emerald-100 text-emerald-800" },
       out_for_delivery: { label: "في الطريق 🛵", color: "bg-sky-100 text-sky-800" },
       delivered: { label: "تم التوصيل ✅", color: "bg-slate-100 text-slate-600" },
@@ -110,6 +133,14 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
         </div>
         {statusBadge(order.orderStatus)}
       </div>
+
+      {/* Driver Assignment Badge */}
+      {order.deliveryDriverName && (
+        <div className="text-[11px] font-bold text-sky-700 bg-sky-50 rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-sky-100">
+          <span>🛵 السائق المحدد:</span>
+          <span>{order.deliveryDriverName}</span>
+        </div>
+      )}
 
       {/* Address */}
       {order.customerAddress && (
@@ -151,20 +182,20 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       {/* Actions */}
       {showActions && (
         <div className="grid grid-cols-2 gap-2 pt-1">
-          {order.orderStatus === "ready" && !order.deliveryDriverName && (
+          {order.orderStatus !== "out_for_delivery" && order.orderStatus !== "delivered" && (
             <button
               disabled={updatingId === order.id}
               onClick={() => updateOrderStatus(order.id, "out_for_delivery", currentUser.name)}
-              className="col-span-2 bg-gradient-to-r from-sky-600 to-indigo-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer"
+              className="col-span-2 bg-gradient-to-r from-sky-600 to-indigo-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
             >
               {updatingId === order.id ? "⏳ جاري التحديث..." : "🛵 استلام الطلب والخروج للتوصيل"}
             </button>
           )}
-          {order.orderStatus === "out_for_delivery" && order.deliveryDriverName === currentUser.name && (
+          {order.orderStatus === "out_for_delivery" && (
             <button
               disabled={updatingId === order.id}
               onClick={() => updateOrderStatus(order.id, "delivered")}
-              className="col-span-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer"
+              className="col-span-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
             >
               {updatingId === order.id ? "⏳ جاري التحديث..." : "✅ تم التوصيل بنجاح"}
             </button>
@@ -207,11 +238,11 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       <div className="max-w-2xl mx-auto px-4 pt-4 grid grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-emerald-600">{readyOrders.length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">طلبات جاهزة</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">طلبات مريضة/متاحة</p>
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-sky-600">{myActiveOrders.length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">طلباتي الحالية</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">في الطريق 🛵</p>
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-slate-700">{myDoneOrders.length}</p>
@@ -235,7 +266,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
               {tab === "ready"
                 ? `جاهزة (${readyOrders.length})`
                 : tab === "mine"
-                ? `طلباتي (${myActiveOrders.length})`
+                ? `في الطريق (${myActiveOrders.length})`
                 : `منجزة (${myDoneOrders.length})`}
             </button>
           ))}
@@ -243,7 +274,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       </div>
 
       {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-24 space-y-3">
+      <div className="max-w-2xl mx-auto px-4 pt-4 pb-28 space-y-3">
         {loading ? (
           <div className="text-center py-16 text-slate-400">
             <div className="w-10 h-10 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto mb-3" />
@@ -254,7 +285,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
             <div className="text-center py-16 text-slate-400">
               <p className="text-4xl mb-3">🛵</p>
               <p className="text-sm font-bold">لا توجد طلبات جاهزة للتوصيل حالياً</p>
-              <p className="text-xs mt-1">ستظهر هنا الطلبات التي انتهت من المطبخ</p>
+              <p className="text-xs mt-1">ستظهر هنا الطلبات فور إرسالها من الكاشير أو تحضيرها في المطبخ</p>
             </div>
           ) : (
             readyOrders.map((o) => (
@@ -267,7 +298,8 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
           myActiveOrders.length === 0 ? (
             <div className="text-center py-16 text-slate-400">
               <p className="text-4xl mb-3">📦</p>
-              <p className="text-sm font-bold">لا توجد طلبات قيد التوصيل حالياً</p>
+              <p className="text-sm font-bold">لا توجد طلبات قيد التوصيل في الطريق</p>
+              <p className="text-xs mt-1">استلم الطلبات من تبويب "جاهزة" للبدء بالتوصيل</p>
             </div>
           ) : (
             myActiveOrders.map((o) => (
@@ -281,11 +313,11 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
             {myDoneOrders.length === 0 ? (
               <div className="text-center py-16 text-slate-400">
                 <p className="text-4xl mb-3">✅</p>
-                <p className="text-sm font-bold">لم تُنجز أي طلبات بعد</p>
+                <p className="text-sm font-bold">لم تُنجز أي طلبات بعد اليوم</p>
               </div>
             ) : (
               <>
-                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl p-4 flex justify-between items-center">
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl p-4 flex justify-between items-center shadow-md">
                   <div>
                     <p className="text-[11px] text-emerald-100">إجمالي المبالغ المحصلة</p>
                     <p className="text-2xl font-black mt-0.5">{totalEarnings.toFixed(2)} {tenant.currency}</p>
@@ -304,12 +336,14 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       </div>
 
       {/* Refresh Button */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20">
         <button
-          onClick={fetchOrders}
-          className="bg-sky-600 text-white text-xs font-bold px-6 py-3 rounded-2xl shadow-lg hover:bg-sky-700 transition-all cursor-pointer flex items-center gap-2"
+          onClick={handleManualRefresh}
+          disabled={isRefreshing}
+          className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-black px-6 py-3 rounded-2xl shadow-xl transition-all cursor-pointer flex items-center gap-2 active:scale-95 disabled:opacity-75"
         >
-          🔄 تحديث الطلبات
+          <span className={`inline-block text-sm ${isRefreshing ? "animate-spin" : ""}`}>🔄</span>
+          <span>{isRefreshing ? "جاري التحديث..." : "تحديث الطلبات"}</span>
         </button>
       </div>
     </div>
