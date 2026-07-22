@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [showTenantDropdown, setShowTenantDropdown] = React.useState(false);
   const [showLangDropdown, setShowLangDropdown] = React.useState(false);
-  const theme = getThemeClasses(currentTenant.themeColor);
+  const theme = getThemeClasses(currentTenant?.themeColor || 'indigo');
 
   const getRestaurantMenuUrl = () => {
     const host = window.location.host;
@@ -123,9 +123,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
 
     if (isIPAddress(host)) {
-      return `${protocol}//${host}/menu?tenant=${currentTenant.subdomain}`;
+      return `${protocol}//${host}/menu?tenant=${currentTenant?.subdomain || ''}`;
     } else {
-      return `${protocol}//${currentTenant.subdomain}.${getBaseDomain()}/menu`;
+      return `${protocol}//${currentTenant?.subdomain || ''}.${getBaseDomain()}/menu`;
     }
   };
 
@@ -165,9 +165,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               {currentUser ? (
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-800 shadow-xs">
                   <span className="w-5 h-5 flex items-center justify-center text-base overflow-hidden rounded shrink-0">
-                    <RestaurantLogo logo={currentTenant.logo} />
+                    <RestaurantLogo logo={currentTenant?.logo} />
                   </span>
-                  <span className="max-w-[80px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
+                  <span className="max-w-[80px] sm:max-w-[150px] truncate font-bold">{currentTenant?.nameAr || ''}</span>
                   <a
                     href={getRestaurantMenuUrl()}
                     target="_blank"
@@ -175,8 +175,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-1 rounded-full border border-indigo-200/50 transition-colors shadow-3xs"
                     title="فتح المنيو الرقمي للزبائن"
                   >
-                    <span className="hidden md:inline">{currentTenant.subdomain}.resto-cloud.com</span>
-                    <span className="hidden sm:inline md:hidden">{currentTenant.subdomain}</span>
+                    <span className="hidden md:inline">{currentTenant?.subdomain || ''}.resto-cloud.com</span>
+                    <span className="hidden sm:inline md:hidden">{currentTenant?.subdomain || ''}</span>
                     <span className="sm:hidden">🔗</span>
                     <span className="hidden sm:inline text-[9px]">🔗</span>
                   </a>
@@ -188,9 +188,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold transition-all duration-200 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 shadow-xs cursor-pointer"
                   >
                     <span className="w-5 h-5 flex items-center justify-center text-base overflow-hidden rounded shrink-0">
-                      <RestaurantLogo logo={currentTenant.logo} />
+                      <RestaurantLogo logo={currentTenant?.logo} />
                     </span>
-                    <span className="max-w-[80px] sm:max-w-[150px] truncate font-bold">{currentTenant.nameAr}</span>
+                    <span className="max-w-[80px] sm:max-w-[150px] truncate font-bold">{currentTenant?.nameAr || ''}</span>
                     <a
                       href={getRestaurantMenuUrl()}
                       target="_blank"
@@ -199,8 +199,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onClick={(e) => e.stopPropagation()} // Prevent dropdown toggle
                       title="فتح المنيو الرقمي للزبائن"
                     >
-                      <span className="hidden md:inline">🔗 {currentTenant.subdomain}.resto-cloud.com</span>
-                      <span className="hidden sm:inline md:hidden">🔗 {currentTenant.subdomain}</span>
+                      <span className="hidden md:inline">🔗 {currentTenant?.subdomain || ''}.resto-cloud.com</span>
+                      <span className="hidden sm:inline md:hidden">🔗 {currentTenant?.subdomain || ''}</span>
                       <span className="sm:hidden">🔗</span>
                     </a>
                     <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showTenantDropdown ? 'rotate-180' : ''}`} />
@@ -230,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                                 setShowTenantDropdown(false);
                               }}
                               className={`w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-slate-50 transition-colors ${
-                                currentTenant.id === t.id ? "bg-indigo-50/70 text-indigo-700 font-bold border-r-4 border-indigo-600" : "text-slate-700 font-medium"
+                                currentTenant?.id === t.id ? "bg-indigo-50/70 text-indigo-700 font-bold border-r-4 border-indigo-600" : "text-slate-700 font-medium"
                               }`}
                             >
                               <div className="flex items-center gap-2 truncate">

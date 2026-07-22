@@ -721,7 +721,7 @@ export default function App() {
     );
   }
 
-  const theme = getThemeClasses(currentTenant.themeColor);
+  const theme = getThemeClasses(currentTenant?.themeColor || "indigo");
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans transition-colors duration-200" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
