@@ -111,10 +111,8 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
 
   const openGoogleMaps = (address: string) => {
     if (!address) return;
-    const cleanAddr = address.trim();
-    const encoded = encodeURIComponent(cleanAddr);
-    // Universal URL supporting mobile app & desktop browser
-    const mapsUrl = `https://maps.google.com/?q=${encoded}`;
+    const match = address.match(/https?:\/\/[^\s]+/);
+    const mapsUrl = match ? match[0] : `https://maps.google.com/?q=${encodeURIComponent(address.trim())}`;
     window.open(mapsUrl, "_blank", "noopener,noreferrer");
   };
 

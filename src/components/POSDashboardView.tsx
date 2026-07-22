@@ -2464,6 +2464,13 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     );
   };
 
+  const getCleanMapUrl = (address: string): string => {
+    if (!address) return "";
+    const match = address.match(/https?:\/\/[^\s]+/);
+    if (match) return match[0];
+    return `https://maps.google.com/?q=${encodeURIComponent(address.trim())}`;
+  };
+
   const renderCashierDeliveryStatus = () => {
     const deliveryOrders = historyOrders.filter(o => o.orderType === "delivery");
     const readyDelivery = deliveryOrders.filter(o => o.orderStatus === "ready");
@@ -2574,12 +2581,15 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{ord.customerName || "زبون"} · 📞 {ord.customerPhone || "بدون هاتف"}</p>
                     {ord.customerAddress && (
                       <a
-                        href={`https://maps.google.com/?q=${encodeURIComponent(ord.customerAddress)}`}
+                        href={getCleanMapUrl(ord.customerAddress)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-bold flex items-center gap-1"
+                        className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-bold flex items-center gap-1.5 bg-sky-50 dark:bg-sky-950/40 p-2 rounded-xl border border-sky-200 dark:border-sky-800/60 mt-1"
+                        title="انقر لفتح موقع التوصيل على خرائط جوجل Google Maps"
                       >
-                        📍 {ord.customerAddress} 🗺️
+                        <span className="text-base shrink-0">📍</span>
+                        <span className="truncate">{ord.customerAddress}</span>
+                        <span className="shrink-0 text-[10px] font-black bg-sky-600 text-white px-2 py-0.5 rounded-md shadow-3xs">فتح الخريطة 🗺️ ↗</span>
                       </a>
                     )}
                   </div>
