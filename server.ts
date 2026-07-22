@@ -265,6 +265,7 @@ async function initTenantUsersSchema() {
       ALTER TABLE tenant_users DROP CONSTRAINT IF EXISTS tenant_users_role_check;
       ALTER TABLE tenant_users ADD CONSTRAINT tenant_users_role_check 
         CHECK (role IN ('owner', 'manager', 'cashier', 'waiter', 'worker', 'delivery'));
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_driver_name VARCHAR(255);
     `);
   } catch (err: any) {
     console.error("[Schema Init Error]:", err.message);
