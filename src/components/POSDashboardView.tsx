@@ -337,7 +337,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     const saved = localStorage.getItem("currentUser");
     return saved ? JSON.parse(saved) : null;
   }, [propCurrentUser]);
-  const [posMode, setPosMode] = useState<"sales" | "orders" | "tables">(() => {
+  const [posMode, setPosMode] = useState<"sales" | "orders" | "tables" | "delivery">(() => {
     const savedUser = localStorage.getItem("currentUser");
     if (savedUser) {
       try {
@@ -2464,6 +2464,142 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     );
   };
 
+  const renderCashierDeliveryStatus = () => {
+    const deliveryOrders = historyOrders.filter(o => o.orderType === "delivery");
+    const readyDelivery = deliveryOrders.filter(o => o.orderStatus === "ready");
+    const activeDelivery = deliveryOrders.filter(o => o.orderStatus === "out_for_delivery");
+    const kitchenDelivery = deliveryOrders.filter(o => o.orderStatus === "preparing" || o.orderStatus === "pending");
+    const completedDelivery = deliveryOrders.filter(o => o.orderStatus === "delivered");
+    const totalCashDelivered = completedDelivery.reduce((sum, o) => sum + Number(o.total || 0), 0);
+
+    return (
+      <div className="lg:col-span-12 space-y-6 font-sans select-none animate-in fade-in duration-200" dir="rtl">
+        {/* Top Header Card */}
+        <div className="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 text-white p-5 rounded-3xl border border-slate-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl border border-white/10 shrink-0">
+              🛵
+            </div>
+            <div>
+              <h2 className="text-base font-black text-white flex items-center gap-2">
+                <span>{lang === 'ar' ? 'متابعة وحالة طلبيات التوصيل (الدليفري)' : 'Delivery Orders Live Status'}</span>
+              </h2>
+              <p className="text-xs text-sky-200 mt-0.5">
+                {lang === 'ar' ? 'عرض حي وتتبع جميع طلبات التوصيل وتكليف السائقين' : 'Live tracking of all delivery orders & driver assignments'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => fetchHistoryOrders()}
+            className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-sm flex items-center gap-2 shrink-0 self-start md:self-auto active:scale-95"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>تحديث البيانات</span>
+          </button>
+        </div>
+
+        {/* Stats Summary Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 font-bold">في المطبخ / تحضير 👨‍🍳</p>
+            <p className="text-2xl font-black text-indigo-600 mt-1">{kitchenDelivery.length}</p>
+          </div>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 font-bold">جاهزة للتوصيل 🟢</p>
+            <p className="text-2xl font-black text-emerald-600 mt-1">{readyDelivery.length}</p>
+          </div>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 font-bold">في الطريق مع السائق 🛵</p>
+            <p className="text-2xl font-black text-sky-600 mt-1">{activeDelivery.length}</p>
+          </div>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 font-bold">تم توصيلها اليوم ✅</p>
+            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1">{completedDelivery.length}</p>
+            <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{totalCashDelivered.toFixed(0)} {tenant.currency}</p>
+          </div>
+        </div>
+
+        {/* Available Drivers Bar */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <h3 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>كباتن السائقين المتاحين بالمطعم ({deliveryDrivers.length})</span>
+          </h3>
+          {deliveryDrivers.length === 0 ? (
+            <p className="text-xs text-slate-400">لا يوجد سائقين مسجلين بصلاحية توصيل حالياً. يمكنك إضافة سائقين من لوحة إدارة الموظفين.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {deliveryDrivers.map((driver) => {
+                const driverActiveOrders = activeDelivery.filter(o => o.deliveryDriverName === driver.name);
+                return (
+                  <div key={driver.id} className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 dark:text-white">🛵 {driver.name}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{driver.phone || "بدون هاتف"}</p>
+                    </div>
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-full ${driverActiveOrders.length > 0 ? "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}`}>
+                      {driverActiveOrders.length > 0 ? `في الطريق (${driverActiveOrders.length})` : "متاح 🟢"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Delivery Orders Live Tracking List */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h3 className="text-xs font-black text-slate-900 dark:text-white">قائمة وتفاصيل طلبات التوصيل وتتبع السائقين</h3>
+          {deliveryOrders.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <p className="text-3xl mb-2">🛵</p>
+              <p className="text-xs font-bold">لا توجد طلبات توصيل مسجلة حالياً</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {deliveryOrders.map((ord) => (
+                <div key={ord.id} className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-xs text-slate-900 dark:text-white">#{ord.orderNumber}</span>
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                        ord.orderStatus === "delivered" ? "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300" :
+                        ord.orderStatus === "out_for_delivery" ? "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300" :
+                        ord.orderStatus === "ready" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                      }`}>
+                        {ord.orderStatus === "delivered" ? "تم التوصيل ✅" :
+                         ord.orderStatus === "out_for_delivery" ? "في الطريق مع السائق 🛵" :
+                         ord.orderStatus === "ready" ? "جاهز للتوصيل 🟢" : "قيد التحضير في المطبخ 👨‍🍳"}
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{ord.customerName || "زبون"} · 📞 {ord.customerPhone || "بدون هاتف"}</p>
+                    {ord.customerAddress && (
+                      <a
+                        href={`https://maps.google.com/?q=${encodeURIComponent(ord.customerAddress)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-bold flex items-center gap-1"
+                      >
+                        📍 {ord.customerAddress} 🗺️
+                      </a>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-left">
+                      <p className="text-xs font-black text-slate-900 dark:text-white">{ord.total.toFixed(2)} {tenant.currency}</p>
+                      <p className="text-[11px] text-sky-700 dark:text-sky-300 font-bold mt-0.5">
+                        {ord.deliveryDriverName ? `🛵 السائق: ${ord.deliveryDriverName}` : "⚡ غير محدد بعد (بانتظار السائق)"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (currentUser?.role === 'waiter') {
     return renderWaiterView();
   }
@@ -2588,6 +2724,20 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                 }`}
               >
                 <span>{lang === 'ar' ? 'حالة الطاولات' : lang === 'tr' ? 'Masa Durumu' : 'Tables Status'}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setPosMode("delivery");
+                  fetchHistoryOrders();
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  posMode === "delivery"
+                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
+                    : "text-slate-600 hover:bg-white/70"
+                }`}
+              >
+                <Bike className="w-3.5 h-3.5" />
+                <span>{lang === 'ar' ? 'حالة التوصيل 🛵' : lang === 'tr' ? 'Teslimat Durumu 🛵' : 'Delivery Status 🛵'}</span>
               </button>
             </div>
           )}
@@ -3309,6 +3459,9 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Delivery Live Tracking View */}
+      {posMode === "delivery" && renderCashierDeliveryStatus()}
 
       {/* Table Status Edit Modal */}
       {editingTableStatus && (

@@ -19,9 +19,30 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
   const [activeTab, setActiveTab] = useState<'ready' | 'mine' | 'done'>('ready');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    return typeof Notification !== "undefined" && Notification.permission === "granted";
+  });
   const prevOrderCountRef = useRef<number | null>(null);
 
-  const playNotificationSound = () => {
+  const requestNotificationPermission = async () => {
+    if (typeof Notification !== "undefined") {
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        setNotificationsEnabled(true);
+        triggerNotification("تم تفعيل الإشعارات 🔔", "ستتلقى تنبيهاً فورياً عند إضافة أو تجهيز أي طلب توصيل!");
+      }
+    }
+  };
+
+  const triggerNotification = (title: string, body: string) => {
+    // 1. Mobile Physical Vibration
+    try {
+      if ("vibrate" in navigator) {
+        navigator.vibrate([300, 100, 300, 100, 300]);
+      }
+    } catch (e) {}
+
+    // 2. Audio Chime Sound
     try {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       const ctx = new AudioContextClass();
@@ -32,10 +53,20 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       osc.type = "sine";
       osc.frequency.setValueAtTime(587.33, ctx.currentTime);
       osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.5, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.4);
+      osc.stop(ctx.currentTime + 0.5);
+    } catch (e) {}
+
+    // 3. Browser Native Notification
+    try {
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        new Notification(title, {
+          body,
+          icon: tenant.logo || "🛵",
+        });
+      }
     } catch (e) {}
   };
 
@@ -50,7 +81,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
           ).length;
 
           if (prevOrderCountRef.current !== null && currentDeliveryCount > prevOrderCountRef.current) {
-            playNotificationSound();
+            triggerNotification("🛵 طلب توصيل جديد!", `مطعم ${tenant.nameAr} - تم إضافة طلب توصيل جديد!`);
           }
           prevOrderCountRef.current = currentDeliveryCount;
 
@@ -66,7 +97,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 6000);
+    const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
@@ -76,6 +107,15 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
     setTimeout(() => {
       setIsRefreshing(false);
     }, 600);
+  };
+
+  const openGoogleMaps = (address: string) => {
+    if (!address) return;
+    const cleanAddr = address.trim();
+    const encoded = encodeURIComponent(cleanAddr);
+    // Universal URL supporting mobile app & desktop browser
+    const mapsUrl = `https://maps.google.com/?q=${encoded}`;
+    window.open(mapsUrl, "_blank", "noopener,noreferrer");
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string, driverName?: string) => {
@@ -89,7 +129,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
         body: JSON.stringify(body),
       });
       if (res.ok) {
-        playNotificationSound();
+        triggerNotification("تم تحديث الطلب 🛵", newStatus === "out_for_delivery" ? "خرجت للتوصيل!" : "تم تسليم الطلب بنجاح!");
         await fetchOrders();
         if (newStatus === "out_for_delivery") {
           setActiveTab("mine");
@@ -154,99 +194,110 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
     );
   };
 
-  const OrderCard = ({ order, showActions }: { order: Order; showActions?: boolean }) => (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="font-black text-slate-800 text-sm">#{order.orderNumber || order.id.slice(-6)}</p>
-          <p className="text-xs text-slate-500 mt-0.5">{order.customerName || "زبون"}</p>
-        </div>
-        {statusBadge(order.orderStatus)}
-      </div>
+  const OrderCard = ({ order, showActions }: { order: Order; showActions?: boolean }) => {
+    const isKitchenReady = order.orderStatus === "ready";
 
-      {/* Driver Assignment Badge */}
-      {order.deliveryDriverName && (
-        <div className="text-[11px] font-bold text-sky-700 bg-sky-50 rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-sky-100">
-          <span>🛵 السائق المحدد:</span>
-          <span>{order.deliveryDriverName}</span>
-        </div>
-      )}
-
-      {/* Address / Google Maps Link */}
-      {order.customerAddress && (
-        <a
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.customerAddress)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-start gap-2.5 bg-sky-50/70 hover:bg-sky-100/80 rounded-xl p-3 text-sky-900 border border-sky-100 transition-all cursor-pointer group"
-          title="انقر لفتح العنوان في خرائط جوجل Google Maps"
-        >
-          <span className="text-lg shrink-0 group-hover:scale-110 transition-transform">📍</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold leading-relaxed">{order.customerAddress}</p>
-            <span className="text-[10px] text-sky-600 font-extrabold flex items-center gap-1 mt-1 underline">
-              <span>فتح الموقع في الخريطة (Google Maps)</span>
-              <span>🗺️</span>
-            </span>
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="font-black text-slate-800 text-sm">#{order.orderNumber || order.id.slice(-6)}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{order.customerName || "زبون"}</p>
           </div>
-        </a>
-      )}
+          {statusBadge(order.orderStatus)}
+        </div>
 
-      {/* Phone */}
-      {order.customerPhone && (
-        <a
-          href={`tel:${order.customerPhone}`}
-          className="flex items-center gap-2 bg-emerald-50 rounded-xl p-3 text-emerald-700 hover:bg-emerald-100 transition-colors"
-        >
-          <span className="text-base">📞</span>
-          <span className="text-xs font-bold">{order.customerPhone}</span>
-        </a>
-      )}
+        {/* Driver Assignment Badge */}
+        {order.deliveryDriverName && (
+          <div className="text-[11px] font-bold text-sky-700 bg-sky-50 rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-sky-100">
+            <span>🛵 السائق المحدد:</span>
+            <span>{order.deliveryDriverName}</span>
+          </div>
+        )}
 
-      {/* Items */}
-      {order.items && order.items.length > 0 && (
-        <div className="space-y-1">
-          {order.items.map((item, i) => (
-            <div key={i} className="flex justify-between text-xs text-slate-600">
-              <span>{item.nameAr} × {item.quantity}</span>
-              <span className="font-bold">{(item.price * item.quantity).toFixed(2)} {tenant.currency}</span>
+        {/* Address / Google Maps Link */}
+        {order.customerAddress && (
+          <div
+            onClick={() => openGoogleMaps(order.customerAddress!)}
+            className="flex items-start gap-2.5 bg-sky-50/80 hover:bg-sky-100/90 rounded-xl p-3 text-sky-900 border border-sky-200/80 transition-all cursor-pointer group shadow-2xs active:scale-98"
+            title="انقر لفتح العنوان في خرائط جوجل Google Maps"
+          >
+            <span className="text-xl shrink-0 group-hover:scale-110 transition-transform">📍</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold leading-relaxed">{order.customerAddress}</p>
+              <span className="text-[11px] text-sky-700 font-black flex items-center gap-1 mt-1 underline">
+                <span>فتح الموقع في الخريطة (Google Maps)</span>
+                <span>🗺️ ↗</span>
+              </span>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Total */}
-      <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-        <span className="text-xs text-slate-500">المجموع</span>
-        <span className="font-black text-slate-800 text-sm">{Number(order.total || 0).toFixed(2)} {tenant.currency}</span>
+        {/* Phone */}
+        {order.customerPhone && (
+          <a
+            href={`tel:${order.customerPhone}`}
+            className="flex items-center gap-2 bg-emerald-50 rounded-xl p-3 text-emerald-700 hover:bg-emerald-100 transition-colors"
+          >
+            <span className="text-base">📞</span>
+            <span className="text-xs font-bold">{order.customerPhone}</span>
+          </a>
+        )}
+
+        {/* Items */}
+        {order.items && order.items.length > 0 && (
+          <div className="space-y-1">
+            {order.items.map((item, i) => (
+              <div key={i} className="flex justify-between text-xs text-slate-600">
+                <span>{item.nameAr} × {item.quantity}</span>
+                <span className="font-bold">{(item.price * item.quantity).toFixed(2)} {tenant.currency}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Total */}
+        <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+          <span className="text-xs text-slate-500">المجموع</span>
+          <span className="font-black text-slate-800 text-sm">{Number(order.total || 0).toFixed(2)} {tenant.currency}</span>
+        </div>
+
+        {/* Actions */}
+        {showActions && (
+          <div className="grid grid-cols-1 gap-2 pt-1">
+            {order.orderStatus !== "out_for_delivery" && order.orderStatus !== "delivered" && (
+              isKitchenReady ? (
+                <button
+                  disabled={updatingId === order.id}
+                  onClick={() => updateOrderStatus(order.id, "out_for_delivery", currentUser.name)}
+                  className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
+                >
+                  {updatingId === order.id ? "⏳ جاري التحديث..." : "🛵 استلام الطلب والخروج للتوصيل"}
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="w-full bg-slate-100 text-slate-500 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed border border-slate-200 text-center flex items-center justify-center gap-1.5"
+                >
+                  <span>👨‍🍳 الطلب قيد التحضير في المطبخ (غير جاهز للاستلام بعد)</span>
+                </button>
+              )
+            )}
+            {order.orderStatus === "out_for_delivery" && (
+              <button
+                disabled={updatingId === order.id}
+                onClick={() => updateOrderStatus(order.id, "delivered")}
+                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
+              >
+                {updatingId === order.id ? "⏳ جاري التحديث..." : "✅ تم التوصيل بنجاح"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
-
-      {/* Actions */}
-      {showActions && (
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          {order.orderStatus !== "out_for_delivery" && order.orderStatus !== "delivered" && (
-            <button
-              disabled={updatingId === order.id}
-              onClick={() => updateOrderStatus(order.id, "out_for_delivery", currentUser.name)}
-              className="col-span-2 bg-gradient-to-r from-sky-600 to-indigo-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
-            >
-              {updatingId === order.id ? "⏳ جاري التحديث..." : "🛵 استلام الطلب والخروج للتوصيل"}
-            </button>
-          )}
-          {order.orderStatus === "out_for_delivery" && (
-            <button
-              disabled={updatingId === order.id}
-              onClick={() => updateOrderStatus(order.id, "delivered")}
-              className="col-span-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
-            >
-              {updatingId === order.id ? "⏳ جاري التحديث..." : "✅ تم التوصيل بنجاح"}
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <div
@@ -268,12 +319,23 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onLogout}
-            className="text-[11px] text-white/60 hover:text-white border border-white/20 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
-          >
-            خروج
-          </button>
+          <div className="flex items-center gap-2">
+            {!notificationsEnabled && (
+              <button
+                onClick={requestNotificationPermission}
+                className="text-[10px] bg-amber-500 hover:bg-amber-600 text-white font-black px-2.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm animate-pulse"
+                title="تفعيل إشعارات وتنبيهات التوصيل"
+              >
+                🔔 تفعيل الإشعارات
+              </button>
+            )}
+            <button
+              onClick={onLogout}
+              className="text-[11px] text-white/60 hover:text-white border border-white/20 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
+            >
+              خروج
+            </button>
+          </div>
         </div>
       </div>
 
@@ -281,7 +343,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       <div className="max-w-2xl mx-auto px-4 pt-4 grid grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-emerald-600">{readyOrders.length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">طلبات مريضة/متاحة</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">طلبات قيد المتابعة</p>
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-sky-600">{myActiveOrders.length}</p>
@@ -327,8 +389,8 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
           readyOrders.length === 0 ? (
             <div className="text-center py-16 text-slate-400">
               <p className="text-4xl mb-3">🛵</p>
-              <p className="text-sm font-bold">لا توجد طلبات جاهزة للتوصيل حالياً</p>
-              <p className="text-xs mt-1">ستظهر هنا الطلبات فور إرسالها من الكاشير أو تحضيرها في المطبخ</p>
+              <p className="text-sm font-bold">لا توجد طلبات توصيل متاحة حالياً</p>
+              <p className="text-xs mt-1">ستظهر هنا الطلبات فور إرسالها من الكاشير أو تجهيزها في المطبخ</p>
             </div>
           ) : (
             readyOrders.map((o) => (
@@ -342,7 +404,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
             <div className="text-center py-16 text-slate-400">
               <p className="text-4xl mb-3">📦</p>
               <p className="text-sm font-bold">لا توجد طلبات قيد التوصيل في الطريق</p>
-              <p className="text-xs mt-1">استلم الطلبات من تبويب "جاهزة" للبدء بالتوصيل</p>
+              <p className="text-xs mt-1">استلم الطلبات الجاهزة من تبويب "جاهزة" للبدء بالتوصيل</p>
             </div>
           ) : (
             myActiveOrders.map((o) => (
