@@ -195,7 +195,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
   const [selectedItemDetail, setSelectedItemDetail] = useState<MenuItem | null>(null);
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
 
-  const [activeOrder, setActiveOrder] = useState<{ id: string; orderNumber: string; orderStatus: OrderStatus } | null>(() => {
+  const [activeOrder, setActiveOrder] = useState<{ id: string; orderNumber: string; orderStatus: OrderStatus; orderType?: string; deliveryDriverName?: string } | null>(() => {
     const saved = localStorage.getItem("activeCustomerOrder");
     return saved ? JSON.parse(saved) : null;
   });
@@ -210,7 +210,12 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           const allOrders: Order[] = await res.json();
           const current = allOrders.find(o => o.id === activeOrder.id);
           if (current) {
-            setActiveOrder(prev => prev ? { ...prev, orderStatus: current.orderStatus } : null);
+            setActiveOrder(prev => prev ? { 
+              ...prev, 
+              orderStatus: current.orderStatus,
+              orderType: current.orderType,
+              deliveryDriverName: current.deliveryDriverName
+            } : null);
           }
         }
       } catch (e) {
@@ -218,7 +223,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
       }
     };
     checkStatus();
-    const interval = setInterval(checkStatus, 5000); // Check status every 5 seconds
+    const interval = setInterval(checkStatus, 4000);
     return () => clearInterval(interval);
   }, [activeOrder?.id, tenant.id]);
 
@@ -406,7 +411,13 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
 
       onOrderCreated(newOrder);
       setOrderSuccessNumber(newOrder.orderNumber);
-      const trackerData = { id: newOrder.id, orderNumber: newOrder.orderNumber, orderStatus: newOrder.orderStatus };
+      const trackerData = { 
+        id: newOrder.id, 
+        orderNumber: newOrder.orderNumber, 
+        orderStatus: newOrder.orderStatus,
+        orderType: newOrder.orderType,
+        deliveryDriverName: newOrder.deliveryDriverName 
+      };
       localStorage.setItem("activeCustomerOrder", JSON.stringify(trackerData));
       setActiveOrder(trackerData);
       setCart([]);
@@ -450,44 +461,56 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           </div>
 
           {/* Timeline steps */}
-          <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
-            <div className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 ${
+          <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-bold">
+            <div className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 ${
               activeOrder.orderStatus === 'pending'
                 ? "bg-amber-950/40 border-amber-500 text-amber-300 font-black shadow-md ring-2 ring-amber-500/20"
                 : "bg-slate-800/40 border-slate-800 text-slate-400"
             }`}>
               <span>⏳</span>
-              <span>بانتظار الكاشير</span>
+              <span>بانتظار التأكيد</span>
             </div>
 
-            <div className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 ${
+            <div className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 ${
               activeOrder.orderStatus === 'preparing'
                 ? "bg-indigo-950/40 border-indigo-500 text-indigo-300 font-black shadow-md ring-2 ring-indigo-500/20"
                 : "bg-slate-800/40 border-slate-800 text-slate-400"
             }`}>
               <span>👨‍🍳</span>
-              <span>جاري التحضير</span>
+              <span>في المطبخ</span>
             </div>
 
-            <div className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 ${
+            <div className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 ${
               activeOrder.orderStatus === 'ready'
                 ? "bg-emerald-950/40 border-emerald-500 text-emerald-300 font-black shadow-md ring-2 ring-emerald-500/20"
                 : "bg-slate-800/40 border-slate-800 text-slate-400"
             }`}>
-              <span>🎉</span>
-              <span>جاهز للاستلام</span>
+              <span>🟢</span>
+              <span>جاهز بالمطعم</span>
+            </div>
+
+            <div className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 ${
+              activeOrder.orderStatus === 'out_for_delivery'
+                ? "bg-sky-950/40 border-sky-500 text-sky-300 font-black shadow-md ring-2 ring-sky-500/30 animate-pulse"
+                : activeOrder.orderStatus === 'delivered'
+                ? "bg-emerald-950/40 border-emerald-500 text-emerald-300 font-black"
+                : "bg-slate-800/40 border-slate-800 text-slate-400"
+            }`}>
+              <span>🛵</span>
+              <span>{activeOrder.orderStatus === 'delivered' ? 'تم التوصيل' : 'في الطريق'}</span>
             </div>
           </div>
 
           {/* Alert Message */}
-          <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
-            <span>
-              {activeOrder.orderStatus === 'pending' && "تم إرسال طلبكم بنجاح وهو بانتظار موافقة الكاشير وقبول العملية."}
-              {activeOrder.orderStatus === 'preparing' && "تمت الموافقة على طلبكم من الكاشير! وبدأ الطاهي بتحضيره في المطبخ الآن."}
-              {activeOrder.orderStatus === 'ready' && "طلبكم جاهز للتسليم! تفضل بالتوجه لكونتر الاستلام واستلام وجبتك الشهية."}
-              {activeOrder.orderStatus === 'delivered' && "تم استلام وجبتكم بالهناء والشفاء! نتمنى لكم يوماً سعيداً."}
-              {activeOrder.orderStatus === 'cancelled' && "عذراً، تم إلغاء أو رفض طلبكم من قبل الكاشير. يرجى مراجعة الكاشير لمزيد من التفاصيل."}
+          <div className="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 text-xs text-slate-300 flex items-center gap-2.5">
+            <Clock className="w-5 h-5 text-sky-400 shrink-0" />
+            <span className="leading-relaxed">
+              {activeOrder.orderStatus === 'pending' && "تم إرسال طلبكم بنجاح وهو بانتظار موافقة وقبول الكاشير."}
+              {activeOrder.orderStatus === 'preparing' && "تمت الموافقة على طلبكم! بدأ المطبخ بتحضير وجبتكم الآن 👨‍🍳."}
+              {activeOrder.orderStatus === 'ready' && (activeOrder.orderType === 'delivery' ? "طلبكم جاهز في المطبخ! وبانتظار خروج كابتن التوصيل 🛵." : "طلبكم جاهز للتسليم! تفضل بالتوجه لكونتر الاستلام واستلام وجبتك الشهية 🎉.")}
+              {activeOrder.orderStatus === 'out_for_delivery' && `🛵 كابتن التوصيل ${activeOrder.deliveryDriverName ? `(${activeOrder.deliveryDriverName})` : ''} استلم طلبكم الآن وهو في الطريق إليكم!`}
+              {activeOrder.orderStatus === 'delivered' && "✅ تم توصيل وتسليم طلبكم بنجاح! نتمنى لكم وجبة شهية ويوم سعيد."}
+              {activeOrder.orderStatus === 'cancelled' && "عذراً، تم إلغاء الطلب من قبل إدارة المطعم."}
             </span>
           </div>
         </div>
