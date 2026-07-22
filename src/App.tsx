@@ -206,7 +206,9 @@ export default function App() {
         // If they are logged in, we preserve their dashboard view instead of throwing them to login/landing!
         else if (currentTenant && currentUser) {
           console.log("[App Router] Logged in user detected. Restoring dashboard session...");
-          if (currentUser.role === 'waiter' || currentUser.role === 'delivery') {
+          if (currentUser.role === 'delivery') {
+            setActiveView('delivery_view');
+          } else if (currentUser.role === 'waiter') {
             setActiveView('pos_dashboard');
           } else {
             const saved = localStorage.getItem("activeView");
@@ -635,7 +637,15 @@ export default function App() {
   if (activeView === 'terms') return <TermsView onSelectView={setActiveView} />;
 
   // Delivery Driver View - Standalone full screen (no navbar/footer)
-  if (activeView === 'delivery_view' && currentUser && currentTenant) {
+  if (activeView === 'delivery_view') {
+    if (!currentUser || !currentTenant) {
+      return (
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white p-6 text-center font-sans" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <div className="w-10 h-10 rounded-full border-4 border-sky-400 border-t-transparent animate-spin mb-4" />
+          <p className="text-sm font-bold">جاري تحميل شاشة التوصيل...</p>
+        </div>
+      );
+    }
     return (
       <DeliveryDriverView
         tenant={currentTenant}
