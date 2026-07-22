@@ -32,44 +32,44 @@ import { QRCodeModal } from "./QRCodeModal";
 
 const translations = {
   ar: {
-    menuTitle: "قائمة الطعام الرقمية",
-    slogan: "أشهى المأكولات والمشروبات الطازجة",
-    searchPlaceholder: "البحث عن وجبة أو طبق...",
-    allCategories: "كل الأطباق",
-    cart: "سلة المشتريات",
-    emptyCart: "سلة المشتريات فارغة",
-    emptyCartDesc: "أضف بعض الأطباق الشهية للمتابعة",
-    subtotal: "المجموع الفرعي",
+    menuTitle: "قائمة الطعام",
+    slogan: "أشهى الأطباق والمشروبات",
+    searchPlaceholder: "ابحث عن طبق...",
+    allCategories: "الكل",
+    cart: "السلة",
+    emptyCart: "السلة فارغة",
+    emptyCartDesc: "أضف أطباقك المفضلة للبدء",
+    subtotal: "المجموع",
     tax: "الضريبة والخدمة",
-    total: "الإجمالي النهائي",
+    total: "الإجمالي",
     orderType: "نوع الطلب",
-    dineIn: "🪑 تناول داخل المطعم",
-    takeaway: "🛍️ طلب خارجي / سفري",
-    delivery: "🛵 توصيل للمنزل",
-    tableNum: "رقم الطاولة",
-    notes: "ملاحظات خاصة (بدون بصل، إكسترا جبن...)",
-    notesPlaceholder: "مثال: بدون فلفل حار...",
-    customerName: "اسم الزبون (اختياري)",
-    customerNamePlaceholder: "اكتب اسمك هنا...",
-    customerPhone: "رقم الجوال (اختياري)",
-    customerPhonePlaceholder: "مثال: 05xxxxxxx",
-    sendOrder: "🚀 أرسل الطلب للمطبخ الآن",
-    activeOrderTitle: "متابعة طلبك الحالي في المطعم",
+    dineIn: "🪑 بالمطعم",
+    takeaway: "🛍️ سفري",
+    delivery: "🛵 توصيل",
+    tableNum: "الطاولة",
+    notes: "ملاحظة للطلب",
+    notesPlaceholder: "مثال: بدون بصل...",
+    customerName: "الاسم",
+    customerNamePlaceholder: "اكتب اسمك...",
+    customerPhone: "الجوال",
+    customerPhonePlaceholder: "05xxxxxxxx",
+    sendOrder: "🚀 إرسال الطلب",
+    activeOrderTitle: "متابعة الطلب",
     calories: "سعرة",
     bestSeller: "الأكثر طلباً",
-    preparationTime: "دقيقة تحضير",
-    addToCart: "إضافة للسلة",
+    preparationTime: "دقيقة",
+    addToCart: "إضافة",
     currency: "ر.س",
     close: "إغلاق",
-    orderNumber: "رقم الطلب",
-    orderStatus: "حالة الطلب",
-    statusPending: "⏳ بانتظار التأكيد",
-    statusPreparing: "👨‍🍳 جاري التحضير",
-    statusReady: "✅ جاهز للاستلام",
-    statusDelivered: "🍽️ تم التوصيل",
+    orderNumber: "الطلب",
+    orderStatus: "الحالة",
+    statusPending: "⏳ التأكيد",
+    statusPreparing: "👨‍🍳 المطبخ",
+    statusReady: "✅ جاهز",
+    statusDelivered: "🍽️ تم التسليم",
     statusCancelled: "❌ ملغي",
-    noItemsFound: "عذراً، لم نجد أصنافاً مطابقة",
-    noItemsFoundDesc: "جرب البحث بكلمات أخرى أو تصفح قسم آخر",
+    noItemsFound: "لا توجد أطباق مطابقة",
+    noItemsFoundDesc: "جرب البحث عن صنف آخر",
     price: "السعر"
   },
   en: {
@@ -441,11 +441,11 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <h3 className="font-extrabold text-sm text-slate-100">متابعة طلبك الحالي في المطعم</h3>
+              <h3 className="font-extrabold text-sm text-slate-100">{translations[lang].activeOrderTitle}</h3>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs text-indigo-400 font-black bg-indigo-950 px-2 py-0.5 rounded border border-indigo-900/60">
-                {activeOrder.orderNumber}
+                #{activeOrder.orderNumber}
               </span>
               <button
                 onClick={() => {
@@ -468,7 +468,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 : "bg-slate-800/40 border-slate-800 text-slate-400"
             }`}>
               <span>⏳</span>
-              <span>بانتظار التأكيد</span>
+              <span>التأكيد</span>
             </div>
 
             <div className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 ${
@@ -477,7 +477,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 : "bg-slate-800/40 border-slate-800 text-slate-400"
             }`}>
               <span>👨‍🍳</span>
-              <span>في المطبخ</span>
+              <span>المطبخ</span>
             </div>
 
             <div className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 ${
@@ -486,7 +486,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 : "bg-slate-800/40 border-slate-800 text-slate-400"
             }`}>
               <span>🟢</span>
-              <span>جاهز بالمطعم</span>
+              <span>جاهز</span>
             </div>
 
             <div className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 ${
@@ -497,20 +497,20 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                 : "bg-slate-800/40 border-slate-800 text-slate-400"
             }`}>
               <span>🛵</span>
-              <span>{activeOrder.orderStatus === 'delivered' ? 'تم التوصيل' : 'في الطريق'}</span>
+              <span>{activeOrder.orderStatus === 'delivered' ? 'مكتمل' : 'في الطريق'}</span>
             </div>
           </div>
 
           {/* Alert Message */}
-          <div className="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 text-xs text-slate-300 flex items-center gap-2.5">
-            <Clock className="w-5 h-5 text-sky-400 shrink-0" />
-            <span className="leading-relaxed">
-              {activeOrder.orderStatus === 'pending' && "تم إرسال طلبكم بنجاح وهو بانتظار موافقة وقبول الكاشير."}
-              {activeOrder.orderStatus === 'preparing' && "تمت الموافقة على طلبكم! بدأ المطبخ بتحضير وجبتكم الآن 👨‍🍳."}
-              {activeOrder.orderStatus === 'ready' && (activeOrder.orderType === 'delivery' ? "طلبكم جاهز في المطبخ! وبانتظار خروج كابتن التوصيل 🛵." : "طلبكم جاهز للتسليم! تفضل بالتوجه لكونتر الاستلام واستلام وجبتك الشهية 🎉.")}
-              {activeOrder.orderStatus === 'out_for_delivery' && `🛵 كابتن التوصيل ${activeOrder.deliveryDriverName ? `(${activeOrder.deliveryDriverName})` : ''} استلم طلبكم الآن وهو في الطريق إليكم!`}
-              {activeOrder.orderStatus === 'delivered' && "✅ تم توصيل وتسليم طلبكم بنجاح! نتمنى لكم وجبة شهية ويوم سعيد."}
-              {activeOrder.orderStatus === 'cancelled' && "عذراً، تم إلغاء الطلب من قبل إدارة المطعم."}
+          <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 text-xs text-slate-300 flex items-center gap-2.5">
+            <Clock className="w-4 h-4 text-sky-400 shrink-0" />
+            <span className="leading-relaxed font-bold">
+              {activeOrder.orderStatus === 'pending' && "تم الإرسال.. بانتظار موافقة الكاشير ⏳"}
+              {activeOrder.orderStatus === 'preparing' && "المطبخ يقوم بتحضير طلبك الآن 👨‍🍳"}
+              {activeOrder.orderStatus === 'ready' && (activeOrder.orderType === 'delivery' ? "الطلب جاهز بالمطبخ.. بانتظار خروج السائق 🛵" : "طلبك جاهز للتسليم، تفضل بالاستلام 🎉")}
+              {activeOrder.orderStatus === 'out_for_delivery' && `السائق ${activeOrder.deliveryDriverName ? activeOrder.deliveryDriverName : ''} في الطريق إليك الآن 🛵`}
+              {activeOrder.orderStatus === 'delivered' && "تم التسليم بنجاح! بالعافية ✅"}
+              {activeOrder.orderStatus === 'cancelled' && "تم إلغاء الطلب من المطعم ❌"}
             </span>
           </div>
         </div>
@@ -887,7 +887,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               onClick={() => setShowCartModal(true)}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl ${theme.primaryBg} ${theme.primaryHover} text-white font-bold text-sm shadow-lg transition-all transform hover:scale-105`}
             >
-              <span>{lang === 'ar' ? 'مراجعة الطلب وإرساله' : lang === 'tr' ? 'Siparişi İncele' : 'Review & Send'}</span>
+              <span>{lang === 'ar' ? 'عرض السلة' : lang === 'tr' ? 'Sepeti Gör' : 'View Cart'}</span>
               <ChevronRight className={`w-4 h-4 ${lang === 'ar' ? 'rotate-180' : ''}`} />
             </button>
           </div>
@@ -903,7 +903,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  {lang === 'ar' ? `مراجعة سلة الطلب (${totalItemsCount} أصناف)` : lang === 'tr' ? `Sepeti İncele (${totalItemsCount} ürün)` : `Review Cart (${totalItemsCount} items)`}
+                  {lang === 'ar' ? `السلة (${totalItemsCount})` : lang === 'tr' ? `Sepet (${totalItemsCount})` : `Cart (${totalItemsCount})`}
                 </h3>
               </div>
               <button onClick={() => setShowCartModal(false)} className="text-slate-400 hover:text-slate-600">
@@ -966,7 +966,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               {orderType === "dine_in" && tenant.subscriptionPlan !== "lite" ? (
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {lang === 'ar' ? 'حدد رقم الطاولة التي تجلس عليها *' : lang === 'tr' ? 'Oturduğunuz masa numarasını seçin *' : 'Select the table number you are sitting at *'}
+                    {lang === 'ar' ? 'اختر رقم الطاولة *' : lang === 'tr' ? 'Masa No seçin *' : 'Select table number *'}
                   </label>
                   <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
                     {tables.map((t) => (
@@ -1015,12 +1015,12 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   {orderType === "delivery" && (
                     <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                       <label className="block text-xs font-black text-slate-800 dark:text-white">
-                        📍 {lang === 'ar' ? 'عنوان التوصيل أو الموقع الجغرافي *' : 'Delivery Address & Location *'}
+                        📍 {lang === 'ar' ? 'عنوان التوصيل *' : 'Delivery Address *'}
                       </label>
                       <textarea
                         rows={2}
                         required
-                        placeholder={lang === 'ar' ? 'اكتب عنوان التوصيل بالتفصيل (اسم الشارع، رقم البناء، الحي)...' : 'Enter full delivery address...'}
+                        placeholder={lang === 'ar' ? 'اكتب عنوانك بالتفصيل هنا...' : 'Enter your address...'}
                         value={customerAddress}
                         onChange={(e) => setCustomerAddress(e.target.value)}
                         className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-emerald-500"
@@ -1032,7 +1032,7 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                         className="w-full py-2.5 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 text-sky-800 dark:text-sky-300 rounded-xl border border-sky-200 dark:border-sky-800 text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-3xs active:scale-98 disabled:opacity-50"
                       >
                         <MapPin className={`w-4 h-4 text-sky-600 ${isLocating ? 'animate-bounce' : ''}`} />
-                        <span>{isLocating ? (lang === 'ar' ? 'جاري تحديد موقعك عبر الـ GPS...' : 'Locating GPS...') : (lang === 'ar' ? '📍 مشاركة موقعي الجغرافي الحالي (GPS)' : '📍 Share Current GPS Location')}</span>
+                        <span>{isLocating ? (lang === 'ar' ? 'تحديد الموقع...' : 'Locating...') : (lang === 'ar' ? '📍 تحديد موقعي (GPS)' : '📍 Share GPS Location')}</span>
                       </button>
                     </div>
                   )}
