@@ -321,6 +321,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [customerName, setCustomerName] = useState<string>("");
   const [customerPhone, setCustomerPhone] = useState<string>("");
   const [customerAddress, setCustomerAddress] = useState<string>("");
+  const [selectedDriverName, setSelectedDriverName] = useState<string>("");
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -852,6 +853,12 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       return;
     }
 
+    const finalDriverName = orderType === "delivery"
+      ? (selectedDriverName === "AUTO"
+          ? (deliveryDrivers[0]?.name || undefined)
+          : (selectedDriverName || undefined))
+      : undefined;
+
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/tenants/${tenant.id}/orders`, {
@@ -863,6 +870,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           customerName: customerName || (orderType === "dine_in" ? `${posTranslations[lang].dineInLabel} ${selectedTable}` : posTranslations[lang].takeawayLabel),
           customerPhone,
           customerAddress: orderType === "delivery" ? customerAddress : undefined,
+          deliveryDriverName: finalDriverName,
           items: cart,
           subtotal,
           taxAmount,
@@ -902,6 +910,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       setCustomerName("");
       setCustomerPhone("");
       setCustomerAddress("");
+      setSelectedDriverName("");
       setDiscountAmount(0);
       setActiveOrderSession(null);
 
@@ -1213,13 +1222,32 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                 />
               </div>
               {orderType === "delivery" && (
-                <input
-                  type="text"
-                  placeholder={posTranslations[lang].addressPlaceholder}
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none"
-                />
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder={posTranslations[lang].addressPlaceholder}
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none"
+                  />
+                  <div className="flex items-center gap-2 p-2 bg-sky-50 dark:bg-sky-950/30 rounded-xl border border-sky-200 dark:border-sky-800/50">
+                    <Bike className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                    <select
+                      value={selectedDriverName}
+                      onChange={(e) => setSelectedDriverName(e.target.value)}
+                      className="w-full text-xs font-bold bg-transparent text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
+                    >
+                      <option value="" className="text-slate-800 dark:bg-slate-900">
+                        ⚡ {lang === 'ar' ? 'تعيين تلقائي (أول سائق متاح / شاشة السائقين)' : 'Auto-assign available driver'}
+                      </option>
+                      {deliveryDrivers.map((driver) => (
+                        <option key={driver.id} value={driver.name} className="text-slate-800 dark:bg-slate-900">
+                          🛵 {driver.name} {driver.phone ? `(${driver.phone})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               )}
             </div>
           )}
