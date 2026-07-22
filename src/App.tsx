@@ -17,6 +17,7 @@ import { LandingPageView } from "./components/LandingPageView";
 import { SaaSAuthView } from "./components/SaaSAuthView";
 import { SaaSOnboardingModal } from "./components/SaaSOnboardingModal";
 import { TermsView } from "./components/TermsView";
+import { DeliveryDriverView } from "./components/DeliveryDriverView";
 import { getThemeClasses } from "./utils/theme";
 import { Store, RefreshCw, AlertCircle } from "lucide-react";
 
@@ -75,8 +76,11 @@ export default function App() {
   }, [activeView]);
 
   useEffect(() => {
-    if (currentUser && (currentUser.role === 'waiter' || currentUser.role === 'delivery') && activeView !== 'pos_dashboard') {
+    if (currentUser && currentUser.role === 'waiter' && activeView !== 'pos_dashboard') {
       setActiveView('pos_dashboard');
+    }
+    if (currentUser && currentUser.role === 'delivery' && activeView !== 'delivery_view') {
+      setActiveView('delivery_view');
     }
   }, [currentUser, activeView]);
 
@@ -92,7 +96,9 @@ export default function App() {
       fetchTenants();
       
       // Route based on user plan and permissions
-      if (user.role === 'waiter' || user.role === 'delivery') {
+      if (user.role === 'delivery') {
+        setActiveView('delivery_view');
+      } else if (user.role === 'waiter') {
         setActiveView('pos_dashboard');
       } else if (user.permissions.canManagePOS && tenant.subscriptionPlan !== "lite") {
         setActiveView('pos_dashboard');
@@ -627,6 +633,18 @@ export default function App() {
     <SaaSAuthView mode="signup" onSelectView={setActiveView} onLoginSuccess={handleLoginSuccess} lang={lang} onLangChange={setLang} />
   );
   if (activeView === 'terms') return <TermsView onSelectView={setActiveView} />;
+
+  // Delivery Driver View - Standalone full screen (no navbar/footer)
+  if (activeView === 'delivery_view' && currentUser && currentTenant) {
+    return (
+      <DeliveryDriverView
+        tenant={currentTenant}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        lang={lang}
+      />
+    );
+  }
   if (activeView === 'super_admin_dashboard') return (
     <SuperAdminDashboard
       tenants={tenants}
@@ -771,21 +789,28 @@ export default function App() {
         )}
 
         {activeView === "pos_dashboard" && (
-          <POSDashboardView
-            tenant={currentTenant}
-            categories={categories}
-            items={items}
-            tables={tables}
-            currentUser={currentUser}
-            onOrderCreated={(newOrd) => {
-              // Optionally refresh tables or show toast
-            }}
-            onUpdateTableStatus={(tblId, st) => {
-              handleUpdateTable(tblId, { status: st });
-            }}
-            onUpdateTenant={handleUpdateTenant}
-            lang={lang}
-          />
+          currentTenant ? (
+            <POSDashboardView
+              tenant={currentTenant}
+              categories={categories}
+              items={items}
+              tables={tables}
+              currentUser={currentUser}
+              onOrderCreated={(newOrd) => {
+                // Optionally refresh tables or show toast
+              }}
+              onUpdateTableStatus={(tblId, st) => {
+                handleUpdateTable(tblId, { status: st });
+              }}
+              onUpdateTenant={handleUpdateTenant}
+              lang={lang}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-500 gap-4">
+              <div className="w-12 h-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+              <p className="text-sm font-medium">جاري تحميل بيانات المطعم...</p>
+            </div>
+          )
         )}
 
         {activeView === "admin_panel" && (

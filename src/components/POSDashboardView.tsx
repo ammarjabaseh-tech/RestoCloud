@@ -762,7 +762,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     }
   };
 
-  const theme = getThemeClasses(tenant.themeColor);
+  const theme = getThemeClasses((tenant?.themeColor || 'indigo') as string);
 
   // Filter items
   const filteredItems = useMemo(() => {
