@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Tenant, TenantUser, Order } from "../types";
 
 interface DeliveryDriverViewProps {
@@ -19,13 +19,43 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
   const [activeTab, setActiveTab] = useState<'ready' | 'mine' | 'done'>('ready');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const prevOrderCountRef = useRef<number | null>(null);
+
+  const playNotificationSound = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.4);
+    } catch (e) {}
+  };
 
   const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch(`/api/tenants/${tenant.id}/orders`);
       if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) setOrders(data);
+        const data: Order[] = await res.json();
+        if (Array.isArray(data)) {
+          const currentDeliveryCount = data.filter(
+            o => o.orderType === "delivery" && o.orderStatus !== "delivered" && o.orderStatus !== "cancelled"
+          ).length;
+
+          if (prevOrderCountRef.current !== null && currentDeliveryCount > prevOrderCountRef.current) {
+            playNotificationSound();
+          }
+          prevOrderCountRef.current = currentDeliveryCount;
+
+          setOrders(data);
+        }
       }
     } catch (e) {
       console.error("DeliveryView: failed to fetch orders", e);
@@ -36,7 +66,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 8000);
+    const interval = setInterval(fetchOrders, 6000);
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
@@ -59,6 +89,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
         body: JSON.stringify(body),
       });
       if (res.ok) {
+        playNotificationSound();
         await fetchOrders();
         if (newStatus === "out_for_delivery") {
           setActiveTab("mine");
@@ -142,12 +173,24 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
         </div>
       )}
 
-      {/* Address */}
+      {/* Address / Google Maps Link */}
       {order.customerAddress && (
-        <div className="flex items-start gap-2 bg-slate-50 rounded-xl p-3">
-          <span className="text-base shrink-0">📍</span>
-          <p className="text-xs text-slate-700 leading-relaxed">{order.customerAddress}</p>
-        </div>
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.customerAddress)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-start gap-2.5 bg-sky-50/70 hover:bg-sky-100/80 rounded-xl p-3 text-sky-900 border border-sky-100 transition-all cursor-pointer group"
+          title="انقر لفتح العنوان في خرائط جوجل Google Maps"
+        >
+          <span className="text-lg shrink-0 group-hover:scale-110 transition-transform">📍</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold leading-relaxed">{order.customerAddress}</p>
+            <span className="text-[10px] text-sky-600 font-extrabold flex items-center gap-1 mt-1 underline">
+              <span>فتح الموقع في الخريطة (Google Maps)</span>
+              <span>🗺️</span>
+            </span>
+          </div>
+        </a>
       )}
 
       {/* Phone */}
