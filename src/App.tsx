@@ -75,7 +75,7 @@ export default function App() {
   }, [activeView]);
 
   useEffect(() => {
-    if (currentUser && currentUser.role === 'waiter' && activeView !== 'pos_dashboard') {
+    if (currentUser && (currentUser.role === 'waiter' || currentUser.role === 'delivery') && activeView !== 'pos_dashboard') {
       setActiveView('pos_dashboard');
     }
   }, [currentUser, activeView]);
@@ -92,7 +92,7 @@ export default function App() {
       fetchTenants();
       
       // Route based on user plan and permissions
-      if (user.role === 'waiter') {
+      if (user.role === 'waiter' || user.role === 'delivery') {
         setActiveView('pos_dashboard');
       } else if (user.permissions.canManagePOS && tenant.subscriptionPlan !== "lite") {
         setActiveView('pos_dashboard');
@@ -200,7 +200,7 @@ export default function App() {
         // If they are logged in, we preserve their dashboard view instead of throwing them to login/landing!
         else if (currentTenant && currentUser) {
           console.log("[App Router] Logged in user detected. Restoring dashboard session...");
-          if (currentUser.role === 'waiter') {
+          if (currentUser.role === 'waiter' || currentUser.role === 'delivery') {
             setActiveView('pos_dashboard');
           } else {
             const saved = localStorage.getItem("activeView");

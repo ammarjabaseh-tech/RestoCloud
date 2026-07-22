@@ -2433,6 +2433,10 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     );
   };
 
+  if (currentUser?.role === 'waiter') {
+    return renderWaiterView();
+  }
+
   if (currentUser?.role === 'delivery') {
     return renderDeliveryView();
   }

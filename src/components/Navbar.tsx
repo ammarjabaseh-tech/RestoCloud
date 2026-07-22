@@ -268,7 +268,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Left Section: Navigation Tabs */}
           <nav className="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar justify-center flex-wrap max-w-full lg:max-w-2xl lg:mx-auto">
-            {(!currentUser || currentUser.permissions.canManagePOS) && currentTenant?.subscriptionPlan !== "lite" && (
+            {(!currentUser || currentUser.permissions.canManagePOS || currentUser.role === "waiter" || currentUser.role === "delivery") && currentTenant?.subscriptionPlan !== "lite" && (
               <button
                 onClick={() => onSelectView("pos_dashboard")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
@@ -279,19 +279,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 {currentUser?.role === "waiter" ? (
                   <LayoutGrid className="w-3.5 h-3.5" />
+                ) : currentUser?.role === "delivery" ? (
+                  <Bike className="w-3.5 h-3.5" />
                 ) : (
                   <CreditCard className="w-3.5 h-3.5" />
                 )}
                 <span className="hidden lg:inline">
                   {currentUser?.role === "waiter"
                     ? (lang === 'ar' ? 'إدارة الطاولات' : 'Tables Management')
+                    : currentUser?.role === "delivery"
+                    ? (lang === 'ar' ? 'شاشة التوصيل' : 'Delivery Screen')
                     : navTranslations[lang].pos
                   }
                 </span>
               </button>
             )}
 
-            {(!currentUser || currentUser.permissions.canManageMenu) && (
+            {(!currentUser || (currentUser.permissions.canManageMenu && currentUser.role !== "waiter" && currentUser.role !== "delivery")) && (
               <button
                 onClick={() => onSelectView("admin_panel")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
@@ -306,7 +310,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
 
-            {(!currentUser || currentUser.role !== "waiter") && (
+            {(!currentUser || (currentUser.role !== "waiter" && currentUser.role !== "delivery")) && (
               <button
                 onClick={() => onSelectView("digital_menu")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
@@ -320,7 +324,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {(!currentUser || currentUser.permissions.canViewReports) && currentTenant?.subscriptionPlan !== "lite" && (
+            {(!currentUser || (currentUser.permissions.canViewReports && currentUser.role !== "waiter" && currentUser.role !== "delivery")) && currentTenant?.subscriptionPlan !== "lite" && (
               <button
                 onClick={() => onSelectView("ai_assistant")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
@@ -334,7 +338,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {currentUser && currentUser.role !== "waiter" && currentTenant?.subscriptionPlan !== "lite" && (
+            {currentUser && currentUser.role !== "waiter" && currentUser.role !== "delivery" && currentTenant?.subscriptionPlan !== "lite" && (
               <button
                 onClick={() => onSelectView("kitchen_display")}
                 className={`flex items-center gap-0.5 sm:gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
