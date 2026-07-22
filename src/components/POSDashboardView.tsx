@@ -2649,12 +2649,12 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
         </div>
       )}
 
-      {/* POS Top Header Bar (12 Cols) */}
+      {/* POS Top Header Bar (12 Cols) - Fixed Container & Consistent Layout */}
       {activeOrderSession === null && (
-        <div className="lg:col-span-12 bg-white p-2.5 px-4 rounded-3xl border border-slate-200 shadow-sm space-y-2"><div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="lg:col-span-12 bg-white p-3 px-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 min-h-[64px]">
           <div className="flex flex-wrap items-center gap-4 flex-1 justify-between md:justify-start">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center text-base border border-slate-200 overflow-hidden">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center text-base border border-slate-200 overflow-hidden shrink-0">
                 <RestaurantLogo logo={tenant.logo} />
               </div>
               <div>
@@ -2695,147 +2695,146 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             )}
           </div>
 
-          {currentUser && (
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto border border-slate-200 no-scrollbar">
-              <button
-                onClick={() => setPosMode("sales")}
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  posMode === "sales"
-                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
-                    : "text-slate-600 hover:bg-white/70"
-                }`}
-              >
-                {posTranslations[lang].newSale}
-              </button>
-              <button
-                onClick={() => {
-                  setPosMode("orders");
-                  fetchHistoryOrders();
-                }}
-                className={`relative flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  posMode === "orders"
-                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
-                    : "text-slate-600 hover:bg-white/70"
-                }`}
-              >
-                <span>{posTranslations[lang].ordersList}</span>
-                {pendingSelfOrders.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center animate-pulse">
-                    {pendingSelfOrders.length}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setPosMode("tables")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                  posMode === "tables"
-                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
-                    : "text-slate-600 hover:bg-white/70"
-                }`}
-              >
-                <span>{lang === 'ar' ? 'حالة الطاولات' : lang === 'tr' ? 'Masa Durumu' : 'Tables Status'}</span>
-              </button>
-              <button
-                onClick={() => {
-                  setPosMode("delivery");
-                  fetchHistoryOrders();
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                  posMode === "delivery"
-                    ? `${theme.primaryBg} text-white shadow-sm font-bold`
-                    : "text-slate-600 hover:bg-white/70"
-                }`}
-              >
-                <Bike className="w-3.5 h-3.5" />
-                <span>{lang === 'ar' ? 'حالة التوصيل 🛵' : lang === 'tr' ? 'Teslimat Durumu 🛵' : 'Delivery Status 🛵'}</span>
-              </button>
-            </div>
-          )}
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              {currentUser?.role !== "waiter" && (
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            {currentUser && (
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                <button
+                  onClick={() => setPosMode("sales")}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    posMode === "sales"
+                      ? `${theme.primaryBg} text-white shadow-sm`
+                      : "text-slate-600 hover:bg-white/70"
+                  }`}
+                >
+                  {posTranslations[lang].newSale}
+                </button>
                 <button
                   onClick={() => {
+                    setPosMode("orders");
                     fetchHistoryOrders();
-                    setHistoryTab("all");
-                    setShowOrderHistoryModal(true);
                   }}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] border border-slate-200 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
-                  title={posTranslations[lang].invoiceHistory}
+                  className={`relative flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    posMode === "orders"
+                      ? `${theme.primaryBg} text-white shadow-sm`
+                      : "text-slate-600 hover:bg-white/70"
+                  }`}
                 >
-                  <History className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{posTranslations[lang].invoiceHistory}</span>
-                  <span className="sm:hidden">{lang === 'ar' ? 'الفواتير' : lang === 'tr' ? 'Faturalar' : 'Invoices'}</span>
-                </button>
-              )}
-
-              {posMode === "sales" && (
-                <div className="relative w-full sm:w-48">
-                  <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder={posTranslations[lang].searchPlaceholder}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pr-8 pl-3 py-1 rounded-lg text-xs bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                  {searchQuery && (
-                    <button 
-                      onClick={() => setSearchQuery("")}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+                  <span>{posTranslations[lang].ordersList}</span>
+                  {pendingSelfOrders.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center animate-pulse">
+                      {pendingSelfOrders.length}
+                    </span>
                   )}
-                </div>
-              )}
-            </div>
+                </button>
+                <button
+                  onClick={() => setPosMode("tables")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    posMode === "tables"
+                      ? `${theme.primaryBg} text-white shadow-sm`
+                      : "text-slate-600 hover:bg-white/70"
+                  }`}
+                >
+                  <span>{lang === 'ar' ? 'حالة الطاولات' : lang === 'tr' ? 'Masa Durumu' : 'Tables Status'}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setPosMode("delivery");
+                    fetchHistoryOrders();
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    posMode === "delivery"
+                      ? `${theme.primaryBg} text-white shadow-sm`
+                      : "text-slate-600 hover:bg-white/70"
+                  }`}
+                >
+                  <Bike className="w-3.5 h-3.5" />
+                  <span>{lang === 'ar' ? 'حالة التوصيل 🛵' : lang === 'tr' ? 'Teslimat Durumu 🛵' : 'Delivery Status 🛵'}</span>
+                </button>
+              </div>
+            )}
+
+            {currentUser?.role !== "waiter" && (
+              <button
+                onClick={() => {
+                  fetchHistoryOrders();
+                  setHistoryTab("all");
+                  setShowOrderHistoryModal(true);
+                }}
+                className="flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition-colors whitespace-nowrap shadow-3xs cursor-pointer shrink-0"
+                title={posTranslations[lang].invoiceHistory}
+              >
+                <History className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{posTranslations[lang].invoiceHistory}</span>
+                <span className="sm:hidden">{lang === 'ar' ? 'الفواتير' : lang === 'tr' ? 'Faturalar' : 'Invoices'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Categories & Search Sub-bar (sales mode only) */}
+      {posMode === "sales" && activeOrderSession === null && (
+        <div className="lg:col-span-12 bg-white p-2.5 px-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 flex-1 no-scrollbar">
+            <button
+              onClick={() => setSelectedCategory("all")}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 border shadow-3xs cursor-pointer ${
+                selectedCategory === "all"
+                  ? `${theme.primaryBg} text-white border-transparent shadow-xs`
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+              }`}
+            >
+              <span>🔥</span>
+              <span>{lang === 'ar' ? 'الكل' : lang === 'tr' ? 'Tümü' : 'All'} ({items.filter(i => i.isAvailable).length})</span>
+            </button>
+
+            {categories.map((cat) => {
+              const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
+              const isSelected = selectedCategory === cat.id;
+              const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 border shadow-3xs cursor-pointer ${
+                    isSelected
+                      ? `${theme.primaryBg} text-white border-transparent shadow-xs`
+                      : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
+                  }`}
+                >
+                  {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
+                    <img src={cat.icon} alt="" className="w-4 h-4 object-cover rounded shrink-0" />
+                  ) : (
+                    <span className="text-[10px] shrink-0">{cat.icon}</span>
+                  )}
+                  <span>{catName}</span>
+                  <span className={`text-[9px] font-mono px-1.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Categories horizontal tabs (sales only) */}
-          {posMode === "sales" && (
-            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 border-t pt-2 border-slate-100 no-scrollbar">
-              <button
-                onClick={() => setSelectedCategory("all")}
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-300 border shadow-3xs cursor-pointer ${
-                  selectedCategory === "all"
-                    ? `${theme.primaryBg} text-white border-transparent shadow-xs`
-                    : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
-                }`}
+          <div className="relative w-full sm:w-56 shrink-0">
+            <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder={posTranslations[lang].searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pr-9 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                <span>🔥</span>
-                <span>{lang === 'ar' ? 'الكل' : lang === 'tr' ? 'Tümü' : 'All'} ({items.filter(i => i.isAvailable).length})</span>
+                <X className="w-3.5 h-3.5" />
               </button>
-
-              {categories.map((cat) => {
-                const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
-                const isSelected = selectedCategory === cat.id;
-                const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-300 border shadow-3xs cursor-pointer ${
-                      isSelected
-                        ? `${theme.primaryBg} text-white border-transparent shadow-xs`
-                        : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
-                    }`}
-                  >
-                    {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
-                      <img src={cat.icon} alt="" className="w-4.5 h-4.5 object-cover rounded shrink-0" />
-                    ) : (
-                      <span className="text-[10px] shrink-0">{cat.icon}</span>
-                    )}
-                    <span>{catName}</span>
-                    <span className={`text-[8px] font-mono px-1 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-                </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Cashier Active Order Session Header (when in session) */}
