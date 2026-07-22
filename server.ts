@@ -257,6 +257,21 @@ async function checkAndUpdateSubscriptions() {
   }
 }
 
+async function initTenantUsersSchema() {
+  try {
+    await pool.query(`
+      ALTER TABLE tenant_users ADD COLUMN IF NOT EXISTS can_access_waiter boolean DEFAULT false;
+      ALTER TABLE tenant_users ADD COLUMN IF NOT EXISTS can_access_delivery boolean DEFAULT false;
+      ALTER TABLE tenant_users DROP CONSTRAINT IF EXISTS tenant_users_role_check;
+      ALTER TABLE tenant_users ADD CONSTRAINT tenant_users_role_check 
+        CHECK (role IN ('owner', 'manager', 'cashier', 'waiter', 'worker', 'delivery'));
+    `);
+  } catch (err: any) {
+    console.error("[Schema Init Error]:", err.message);
+  }
+}
+initTenantUsersSchema();
+
 app.get("/api/tenants", async (req, res) => {
   try {
     await checkAndUpdateSubscriptions();
@@ -661,20 +676,28 @@ app.post("/api/tenants/:tenantId/users", async (req, res) => {
     canManageUsers: role === "owner",
     canViewReports: role === "owner" || role === "manager",
     canManageSettings: role === "owner",
+    canAccessWaiter: role === "waiter",
+    canAccessDelivery: role === "delivery"
   };
 
   try {
+    const cleanEmail = email.trim().toLowerCase();
     const result = await pool.query(
       `INSERT INTO tenant_users
         (id, tenant_id, name, email, phone, password_hash, role, status, avatar,
-         can_manage_pos, can_manage_menu, can_manage_users, can_view_reports, can_manage_settings)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [`user-${Date.now()}`, tenantId, name, email, phone || "", password || "123456", role || "cashier",
-       avatar || (role === "owner" ? "👨‍🍳" : role === "manager" ? "👔" : role === "cashier" ? "🖥️" : "🍽️"),
-       perms.canManagePOS, perms.canManageMenu, perms.canManageUsers, perms.canViewReports, perms.canManageSettings]
+         can_manage_pos, can_manage_menu, can_manage_users, can_view_reports, can_manage_settings,
+         can_access_waiter, can_access_delivery)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
+      [`user-${Date.now()}`, tenantId, name.trim(), cleanEmail, phone || "", password || "123456", role || "cashier",
+       avatar || (role === "owner" ? "👨‍🍳" : role === "manager" ? "👔" : role === "cashier" ? "🖥️" : role === "delivery" ? "🛵" : "🍽️"),
+       perms.canManagePOS, perms.canManageMenu, perms.canManageUsers, perms.canViewReports, perms.canManageSettings,
+       perms.canAccessWaiter ?? false, perms.canAccessDelivery ?? false]
     );
     res.status(201).json(mapUser(result.rows[0]));
   } catch (err: any) {
+    if (err.code === "23505") {
+      return res.status(400).json({ error: "البريد الإلكتروني مسجل بالفعل لموظف آخر في هذا المطعم" });
+    }
     res.status(500).json({ error: err.message });
   }
 });
@@ -683,20 +706,35 @@ app.put("/api/users/:id", async (req, res) => {
   const { id } = req.params;
   const f = req.body;
   try {
+    const cleanEmail = f.email ? f.email.trim().toLowerCase() : undefined;
     const result = await pool.query(
       `UPDATE tenant_users SET
-        name = COALESCE($2, name), role = COALESCE($3, role), status = COALESCE($4, status),
-        can_manage_pos = COALESCE($5, can_manage_pos), can_manage_menu = COALESCE($6, can_manage_menu),
-        can_manage_users = COALESCE($7, can_manage_users), can_view_reports = COALESCE($8, can_view_reports),
-        can_manage_settings = COALESCE($9, can_manage_settings)
+        name = COALESCE($2, name),
+        email = COALESCE($3, email),
+        phone = COALESCE($4, phone),
+        password_hash = COALESCE($5, password_hash),
+        role = COALESCE($6, role),
+        status = COALESCE($7, status),
+        can_manage_pos = COALESCE($8, can_manage_pos),
+        can_manage_menu = COALESCE($9, can_manage_menu),
+        can_manage_users = COALESCE($10, can_manage_users),
+        can_view_reports = COALESCE($11, can_view_reports),
+        can_manage_settings = COALESCE($12, can_manage_settings),
+        can_access_waiter = COALESCE($13, can_access_waiter),
+        can_access_delivery = COALESCE($14, can_access_delivery)
        WHERE id = $1 RETURNING *`,
-      [id, f.name, f.role, f.status,
+      [id, f.name, cleanEmail, f.phone, f.password, f.role, f.status,
        f.permissions?.canManagePOS, f.permissions?.canManageMenu,
-       f.permissions?.canManageUsers, f.permissions?.canViewReports, f.permissions?.canManageSettings]
+       f.permissions?.canManageUsers, f.permissions?.canViewReports,
+       f.permissions?.canManageSettings, f.permissions?.canAccessWaiter,
+       f.permissions?.canAccessDelivery]
     );
     if (!result.rows[0]) return res.status(404).json({ error: "المستخدم غير موجود" });
     res.json(mapUser(result.rows[0]));
   } catch (err: any) {
+    if (err.code === "23505") {
+      return res.status(400).json({ error: "البريد الإلكتروني مستخدم بالفعل لدى موظف آخر" });
+    }
     res.status(500).json({ error: err.message });
   }
 });

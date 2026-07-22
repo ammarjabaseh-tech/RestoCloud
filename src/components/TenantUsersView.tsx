@@ -380,13 +380,16 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
             permissions
           })
         });
-        if (!res.ok) throw new Error(usersTranslations[lang].updateError);
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error || usersTranslations[lang].updateError);
+        }
         const updated = await res.json();
         setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
         setSuccessMsg(usersTranslations[lang].editSuccess);
       } else {
         // Create user
-        const avatar = role === "owner" ? "👨‍🍳" : role === "manager" ? "👔" : role === "cashier" ? "🖥️" : "🍽️";
+        const avatar = role === "owner" ? "👨‍🍳" : role === "manager" ? "👔" : role === "cashier" ? "🖥️" : role === "delivery" ? "🛵" : "🍽️";
         const res = await fetch(`/api/tenants/${currentTenant.id}/users`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -400,7 +403,10 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
             avatar
           })
         });
-        if (!res.ok) throw new Error(usersTranslations[lang].addError);
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error || usersTranslations[lang].addError);
+        }
         const newU = await res.json();
         setUsers(prev => [...prev, newU]);
         setSuccessMsg(usersTranslations[lang].addSuccess);
