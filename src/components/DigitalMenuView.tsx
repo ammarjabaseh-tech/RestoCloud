@@ -25,7 +25,8 @@ import {
   ChevronRight,
   Info,
   Facebook,
-  Instagram
+  Instagram,
+  Bike
 } from "lucide-react";
 import { QRCodeModal } from "./QRCodeModal";
 
@@ -44,6 +45,7 @@ const translations = {
     orderType: "نوع الطلب",
     dineIn: "🪑 تناول داخل المطعم",
     takeaway: "🛍️ طلب خارجي / سفري",
+    delivery: "🛵 توصيل للمنزل",
     tableNum: "رقم الطاولة",
     notes: "ملاحظات خاصة (بدون بصل، إكسترا جبن...)",
     notesPlaceholder: "مثال: بدون فلفل حار...",
@@ -84,6 +86,7 @@ const translations = {
     orderType: "Order Type",
     dineIn: "🪑 Dine In",
     takeaway: "🛍️ Takeaway",
+    delivery: "🛵 Delivery",
     tableNum: "Table Number",
     notes: "Special Notes (no onions, extra cheese...)",
     notesPlaceholder: "e.g. No spicy...",
@@ -181,10 +184,12 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [cart, setCart] = useState<OrderItem[]>([]);
   const [showCartModal, setShowCartModal] = useState<boolean>(false);
-  const [orderType, setOrderType] = useState<"dine_in" | "takeaway">("dine_in");
+  const [orderType, setOrderType] = useState<"dine_in" | "takeaway" | "delivery">("dine_in");
   const [selectedTable, setSelectedTable] = useState<number>(tables[0]?.tableNumber || 1);
   const [customerName, setCustomerName] = useState<string>("");
   const [customerPhone, setCustomerPhone] = useState<string>("");
+  const [customerAddress, setCustomerAddress] = useState<string>("");
+  const [isLocating, setIsLocating] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [orderSuccessNumber, setOrderSuccessNumber] = useState<string | null>(null);
   const [selectedItemDetail, setSelectedItemDetail] = useState<MenuItem | null>(null);
@@ -284,6 +289,29 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
     setCart((prev) => prev.map((i) => (i.itemId === itemId ? { ...i, notes } : i)));
   };
 
+  const handleGetGPSLocation = () => {
+    if (!navigator.geolocation) {
+      alert(lang === 'ar' ? "متصفحك لا يدعم تحديد الموقع الجغرافي تلقائياً" : "Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const mapUrl = `https://maps.google.com/?q=${lat},${lng}`;
+        setCustomerAddress(prev => prev ? `${prev}\n📍 موقعي الجغرافي: ${mapUrl}` : `📍 موقعي الجغرافي: ${mapUrl}`);
+        setIsLocating(false);
+      },
+      (err) => {
+        console.error("GPS Error:", err);
+        setIsLocating(false);
+        alert(lang === 'ar' ? "تعذر تحديد موقعك تلقائياً. يرجى السماح بتحديد الموقع في المتصفح أو كتابة العنوان يدوياً." : "Could not determine location automatically. Please allow location access or enter address manually.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const handleSubmitCustomerOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
@@ -322,10 +350,11 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
 
       const customerNameText = customerName ? `\nالعميل: ${customerName}` : "";
       const customerPhoneText = customerPhone ? `\nالهاتف: ${customerPhone}` : "";
+      const customerAddressText = orderType === "delivery" && customerAddress ? `\nالعنوان/الموقع: ${customerAddress}` : "";
 
       const msg = `*طلب جديد من المنيو الرقمي (RestoCloud)*\n` +
         `----------------------------------------\n` +
-        `*نوع الطلب:* ${typeLabel}${tableText}${customerNameText}${customerPhoneText}\n` +
+        `*نوع الطلب:* ${typeLabel}${tableText}${customerNameText}${customerPhoneText}${customerAddressText}\n` +
         `----------------------------------------\n` +
         `*الطلبات:*\n${itemsText}\n` +
         `----------------------------------------\n` +
@@ -354,8 +383,9 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
         body: JSON.stringify({
           orderType,
           tableNumber: orderType === "dine_in" ? selectedTable : undefined,
-          customerName: customerName || (orderType === "dine_in" ? `طلب من طاولة ${selectedTable}` : "زبون قائمة QR"),
+          customerName: customerName || (orderType === "dine_in" ? `طلب من طاولة ${selectedTable}` : orderType === "delivery" ? "زبون توصيل (أونلاين)" : "زبون قائمة QR"),
           customerPhone,
+          customerAddress: orderType === "delivery" ? customerAddress : undefined,
           items: cart,
           subtotal,
           taxAmount,
@@ -863,20 +893,20 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
               {/* Order Mode Selection */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">{translations[lang].orderType}:</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setOrderType("dine_in")}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2.5 px-2 rounded-xl text-[11px] font-bold border transition-all flex items-center justify-center gap-1 ${
                       orderType === "dine_in"
                         ? `${theme.primaryBg} text-white border-transparent shadow-sm`
                         : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                     }`}
                   >
-                    <UtensilsCrossed className="w-4 h-4" />
+                    <UtensilsCrossed className="w-3.5 h-3.5" />
                     <span>
                       {tenant.subscriptionPlan === "lite"
-                        ? (lang === 'ar' ? 'تناول في المطعم' : lang === 'tr' ? 'Restoranda Yemek' : 'Dine In')
+                        ? (lang === 'ar' ? 'في المطعم' : lang === 'tr' ? 'Restoranda' : 'Dine In')
                         : translations[lang].dineIn}
                     </span>
                   </button>
@@ -884,14 +914,27 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setOrderType("takeaway")}
-                    className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2.5 px-2 rounded-xl text-[11px] font-bold border transition-all flex items-center justify-center gap-1 ${
                       orderType === "takeaway"
                         ? `${theme.primaryBg} text-white border-transparent shadow-sm`
                         : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                     }`}
                   >
-                    <ShoppingBag className="w-4 h-4" />
+                    <ShoppingBag className="w-3.5 h-3.5" />
                     <span>{translations[lang].takeaway}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setOrderType("delivery")}
+                    className={`py-2.5 px-2 rounded-xl text-[11px] font-bold border transition-all flex items-center justify-center gap-1 ${
+                      orderType === "delivery"
+                        ? `${theme.primaryBg} text-white border-transparent shadow-sm`
+                        : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    <Bike className="w-3.5 h-3.5" />
+                    <span>{translations[lang].delivery}</span>
                   </button>
                 </div>
               </div>
@@ -920,29 +963,56 @@ export const DigitalMenuView: React.FC<DigitalMenuViewProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{translations[lang].customerName} *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder={translations[lang].customerNamePlaceholder}
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none text-slate-900 dark:text-white"
-                    />
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{translations[lang].customerName} *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder={translations[lang].customerNamePlaceholder}
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{translations[lang].customerPhone} *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder={translations[lang].customerPhonePlaceholder}
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{translations[lang].customerPhone} *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder={translations[lang].customerPhonePlaceholder}
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono outline-none"
-                    />
-                  </div>
+
+                  {orderType === "delivery" && (
+                    <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <label className="block text-xs font-black text-slate-800 dark:text-white">
+                        📍 {lang === 'ar' ? 'عنوان التوصيل أو الموقع الجغرافي *' : 'Delivery Address & Location *'}
+                      </label>
+                      <textarea
+                        rows={2}
+                        required
+                        placeholder={lang === 'ar' ? 'اكتب عنوان التوصيل بالتفصيل (اسم الشارع، رقم البناء، الحي)...' : 'Enter full delivery address...'}
+                        value={customerAddress}
+                        onChange={(e) => setCustomerAddress(e.target.value)}
+                        className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleGetGPSLocation}
+                        disabled={isLocating}
+                        className="w-full py-2.5 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 text-sky-800 dark:text-sky-300 rounded-xl border border-sky-200 dark:border-sky-800 text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-3xs active:scale-98 disabled:opacity-50"
+                      >
+                        <MapPin className={`w-4 h-4 text-sky-600 ${isLocating ? 'animate-bounce' : ''}`} />
+                        <span>{isLocating ? (lang === 'ar' ? 'جاري تحديد موقعك عبر الـ GPS...' : 'Locating GPS...') : (lang === 'ar' ? '📍 مشاركة موقعي الجغرافي الحالي (GPS)' : '📍 Share Current GPS Location')}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
