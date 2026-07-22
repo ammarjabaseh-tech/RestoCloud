@@ -2772,68 +2772,178 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
         </div>
       )}
 
-      {/* Categories & Search Sub-bar (sales mode only) */}
-      {posMode === "sales" && activeOrderSession === null && (
-        <div className="lg:col-span-12 bg-white p-2.5 px-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
-          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 flex-1 no-scrollbar">
-            <button
-              onClick={() => setSelectedCategory("all")}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 border shadow-3xs cursor-pointer ${
-                selectedCategory === "all"
-                  ? `${theme.primaryBg} text-white border-transparent shadow-xs`
-                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-              }`}
-            >
-              <span>🔥</span>
-              <span>{lang === 'ar' ? 'الكل' : lang === 'tr' ? 'Tümü' : 'All'} ({items.filter(i => i.isAvailable).length})</span>
-            </button>
-
-            {categories.map((cat) => {
-              const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
-              const isSelected = selectedCategory === cat.id;
-              const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
-              return (
+      {/* Tier 2: Contextual Controls Sub-bar - ALWAYS PRESENT across all modes for 100% Fixed Alignment */}
+      {activeOrderSession === null && (
+        <div className="lg:col-span-12 bg-white dark:bg-slate-900 p-2.5 px-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-h-[54px] animate-in fade-in duration-200">
+          
+          {/* Sales Mode Sub-bar */}
+          {posMode === "sales" && (
+            <>
+              <div className="flex items-center gap-1 overflow-x-auto pb-0.5 flex-1 no-scrollbar">
                 <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 border shadow-3xs cursor-pointer ${
-                    isSelected
+                  onClick={() => setSelectedCategory("all")}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 border shadow-3xs cursor-pointer ${
+                    selectedCategory === "all"
                       ? `${theme.primaryBg} text-white border-transparent shadow-xs`
-                      : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
+                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
                   }`}
                 >
-                  {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
-                    <img src={cat.icon} alt="" className="w-4 h-4 object-cover rounded shrink-0" />
-                  ) : (
-                    <span className="text-[10px] shrink-0">{cat.icon}</span>
-                  )}
-                  <span>{catName}</span>
-                  <span className={`text-[9px] font-mono px-1.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                    {count}
-                  </span>
+                  <span>🔥</span>
+                  <span>{lang === 'ar' ? 'الكل' : lang === 'tr' ? 'Tümü' : 'All'} ({items.filter(i => i.isAvailable).length})</span>
                 </button>
-              );
-            })}
-          </div>
 
-          <div className="relative w-full sm:w-56 shrink-0">
-            <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder={posTranslations[lang].searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pr-9 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery("")}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                {categories.map((cat) => {
+                  const count = items.filter((i) => i.categoryId === cat.id && i.isAvailable).length;
+                  const isSelected = selectedCategory === cat.id;
+                  const catName = lang === 'en' && cat.nameEn ? cat.nameEn : lang === 'tr' && cat.nameTr ? cat.nameTr : cat.nameAr;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 border shadow-3xs cursor-pointer ${
+                        isSelected
+                          ? `${theme.primaryBg} text-white border-transparent shadow-xs`
+                          : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/80"
+                      }`}
+                    >
+                      {cat.icon.startsWith("http") || cat.icon.startsWith("data:image") ? (
+                        <img src={cat.icon} alt="" className="w-4 h-4 object-cover rounded shrink-0" />
+                      ) : (
+                        <span className="text-[10px] shrink-0">{cat.icon}</span>
+                      )}
+                      <span>{catName}</span>
+                      <span className={`text-[9px] font-mono px-1.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="relative w-full sm:w-56 shrink-0">
+                <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder={posTranslations[lang].searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pr-9 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery("")}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Orders Mode Sub-bar */}
+          {posMode === "orders" && (
+            <>
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 flex-1 no-scrollbar">
+                {(["all", "pending", "preparing", "ready", "archived"] as const).map(tab => {
+                  const count = tab === "all" 
+                    ? historyOrders.filter(o => o.orderStatus !== "delivered" && o.orderStatus !== "cancelled").length
+                    : tab === "archived"
+                    ? historyOrders.filter(o => o.orderStatus === "delivered" || o.orderStatus === "cancelled").length
+                    : historyOrders.filter(o => o.orderStatus === tab).length;
+                    
+                  const label = 
+                    tab === "all" ? "الطلبات النشطة" :
+                    tab === "pending" ? "بانتظار الموافقة" :
+                    tab === "preparing" ? "تحت التحضير" :
+                    tab === "ready" ? "جاهز للتسليم" : "المؤرشفة (المنتهية)";
+                    
+                  const badgeColor = 
+                    tab === "pending" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400" :
+                    tab === "preparing" ? "bg-indigo-100 text-indigo-850 dark:bg-indigo-950/40 dark:text-indigo-400" :
+                    tab === "ready" ? "bg-emerald-100 text-emerald-850 dark:bg-emerald-950/40 dark:text-emerald-400" : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-400";
+
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setPosOrderTab(tab)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                        posOrderTab === tab
+                          ? `${theme.primaryBg} text-white shadow-sm font-bold`
+                          : "text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      <span>{label}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${posOrderTab === tab ? "bg-white/20 text-white" : badgeColor}`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="relative w-full sm:w-64 shrink-0">
+                <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="ابحث برقم الطلب أو اسم الزبون..."
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  className="w-full pr-9 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Tables Mode Sub-bar */}
+          {posMode === "tables" && (
+            <>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold font-sans flex-1">
+                <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>{lang === 'ar' ? `متاح (${tables.filter(t => t.status === 'available').length})` : 'Available'}</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span>{lang === 'ar' ? `مشغول (${tables.filter(t => t.status === 'occupied').length})` : 'Occupied'}</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border border-blue-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <span>{lang === 'ar' ? `محجوز (${tables.filter(t => t.status === 'reserved').length})` : 'Reserved'}</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-250/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span>{lang === 'ar' ? `تنظيف (${tables.filter(t => t.status === 'needs_cleaning').length})` : 'Needs Cleaning'}</span>
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 font-bold shrink-0">
+                {lang === 'ar' ? `إجمالي الصالة: ${tables.length} طاولات` : `Total Salon: ${tables.length} Tables`}
+              </p>
+            </>
+          )}
+
+          {/* Delivery Mode Sub-bar */}
+          {posMode === "delivery" && (
+            <>
+              <div className="flex items-center gap-2 text-xs font-bold flex-1 overflow-x-auto no-scrollbar">
+                <span className="px-3 py-1 rounded-xl bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                  🛵 طلبات التوصيل المباشرة
+                </span>
+                <span className="text-slate-400">|</span>
+                <span className="text-slate-600 dark:text-slate-300">
+                  السائقون النشطون: {deliveryDrivers.length}
+                </span>
+              </div>
+              <button
+                onClick={() => fetchHistoryOrders()}
+                className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-3xs flex items-center gap-1.5 shrink-0 active:scale-95"
               >
-                <X className="w-3.5 h-3.5" />
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>تحديث البيانات</span>
               </button>
-            )}
-          </div>
+            </>
+          )}
+
         </div>
       )}
 
@@ -3092,58 +3202,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       {/* Live Orders Management Page (orders mode only) */}
       {posMode === "orders" && (
         <div className="lg:col-span-12 space-y-4 animate-in fade-in duration-200 pos-orders-dashboard">
-          {/* Header tabs for statuses */}
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-              {(["all", "pending", "preparing", "ready", "archived"] as const).map(tab => {
-                const count = tab === "all" 
-                  ? historyOrders.filter(o => o.orderStatus !== "delivered" && o.orderStatus !== "cancelled").length
-                  : tab === "archived"
-                  ? historyOrders.filter(o => o.orderStatus === "delivered" || o.orderStatus === "cancelled").length
-                  : historyOrders.filter(o => o.orderStatus === tab).length;
-                  
-                const label = 
-                  tab === "all" ? "الطلبات النشطة" :
-                  tab === "pending" ? "بانتظار الموافقة" :
-                  tab === "preparing" ? "تحت التحضير" :
-                  tab === "ready" ? "جاهز للتسليم" : "المؤرشفة (المنتهية)";
-                  
-                const badgeColor = 
-                  tab === "pending" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400" :
-                  tab === "preparing" ? "bg-indigo-100 text-indigo-850 dark:bg-indigo-950/40 dark:text-indigo-400" :
-                  tab === "ready" ? "bg-emerald-100 text-emerald-850 dark:bg-emerald-950/40 dark:text-emerald-400" : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-400";
-
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setPosOrderTab(tab)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                      posOrderTab === tab
-                        ? `${theme.primaryBg} text-white shadow-sm font-bold`
-                        : "text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    }`}
-                  >
-                    <span>{label}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${posOrderTab === tab ? "bg-white/20 text-white" : badgeColor}`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            
-            {/* Search filter for orders */}
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="ابحث برقم الطلب أو اسم الزبون..."
-                value={historySearch}
-                onChange={(e) => setHistorySearch(e.target.value)}
-                className="w-full pr-8 pl-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
+          {/* Orders Grid */}
 
           {/* Orders Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
