@@ -776,6 +776,7 @@ export default function App() {
             categories={categories}
             items={items}
             tables={tables}
+            currentUser={currentUser}
             onOrderCreated={(newOrd) => {
               // Optionally refresh tables or show toast
             }}

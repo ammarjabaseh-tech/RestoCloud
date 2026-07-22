@@ -299,6 +299,7 @@ interface POSDashboardViewProps {
   onUpdateTableStatus: (tableId: string, status: any) => void;
   onUpdateTenant?: (tenant: Tenant) => void;
   lang?: 'ar' | 'en' | 'tr';
+  currentUser?: TenantUser | null;
 }
 
 export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
@@ -309,7 +310,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   onOrderCreated,
   onUpdateTableStatus,
   onUpdateTenant,
-  lang = 'ar'
+  lang = 'ar',
+  currentUser: propCurrentUser
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -330,6 +332,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [historySearch, setHistorySearch] = useState<string>("");
   const [historyTab, setHistoryTab] = useState<"all" | "pending">("all");
   const [currentUser] = useState<TenantUser | null>(() => {
+    if (propCurrentUser) return propCurrentUser;
     const saved = localStorage.getItem("currentUser");
     return saved ? JSON.parse(saved) : null;
   });
