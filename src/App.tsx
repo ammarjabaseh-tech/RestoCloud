@@ -267,7 +267,7 @@ export default function App() {
         // F. Normal SaaS Landing Page route
         else {
           const saved = localStorage.getItem("activeView");
-          if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login') {
+          if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login' && currentUser) {
             setActiveView(saved as ActivePortalView);
           } else {
             setActiveView('landing_page');

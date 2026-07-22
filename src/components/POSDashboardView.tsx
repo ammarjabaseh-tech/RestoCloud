@@ -331,11 +331,11 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [historyLoading, setHistoryLoading] = useState<boolean>(false);
   const [historySearch, setHistorySearch] = useState<string>("");
   const [historyTab, setHistoryTab] = useState<"all" | "pending">("all");
-  const [currentUser] = useState<TenantUser | null>(() => {
+  const currentUser = useMemo(() => {
     if (propCurrentUser) return propCurrentUser;
     const saved = localStorage.getItem("currentUser");
     return saved ? JSON.parse(saved) : null;
-  });
+  }, [propCurrentUser]);
   const [posMode, setPosMode] = useState<"sales" | "orders" | "tables">(() => {
     const savedUser = localStorage.getItem("currentUser");
     if (savedUser) {
@@ -2041,7 +2041,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
       o.deliveryDriverName === currentUser?.name
     );
 
-    const totalCashCollected = myCompletedOrders.reduce((sum, o) => sum + Number(o.total), 0);
+    const totalCashCollected = myCompletedOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
 
     return (
       <div className="space-y-6 max-w-5xl mx-auto pb-24 font-sans select-none" dir="rtl">
