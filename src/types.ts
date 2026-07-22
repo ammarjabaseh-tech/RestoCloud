@@ -82,7 +82,7 @@ export interface OrderItem {
 export type OrderType = 'dine_in' | 'takeaway' | 'delivery';
 export type PaymentMethod = 'cash' | 'card' | 'pending' | 'credit';
 export type PaymentStatus = 'paid' | 'pending' | 'refunded';
-export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled';
 
 export interface Order {
   id: string;

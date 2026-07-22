@@ -18,7 +18,8 @@ import {
   FileText,
   LogOut,
   ChefHat,
-  LayoutGrid
+  LayoutGrid,
+  Bike
 } from "lucide-react";
 
 const navTranslations = {

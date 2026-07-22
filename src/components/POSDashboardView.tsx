@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Tenant, Category, MenuItem, RestaurantTable, OrderItem, OrderType, PaymentMethod, Order, Printer } from "../types";
+import { Tenant, Category, MenuItem, RestaurantTable, OrderItem, OrderType, PaymentMethod, Order, Printer, TenantUser, ThemeColor } from "../types";
 import { getThemeClasses } from "../utils/theme";
 import { RestaurantLogo } from "./RestaurantLogo";
 import confetti from "canvas-confetti";
@@ -647,7 +647,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           if (Array.isArray(data)) {
             setHistoryOrders(prev => {
               const prevMap = new Map(prev.map(o => [o.id, o]));
-              data.forEach(newOrder => {
+              data.forEach((newOrder: any) => {
                 const oldOrder = prevMap.get(newOrder.id);
                 // 1. New customer pending order placed
                 if (!oldOrder && newOrder.orderStatus === "pending") {
@@ -659,7 +659,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   setActiveNotifications(n => [...n, { id: newOrder.id + "-pending", message: msg, type: "pending" }]);
                 }
                 // 2. Kitchen marks order as ready -> Notify Waiter
-                if (oldOrder && oldOrder.orderStatus === "preparing" && newOrder.orderStatus === "ready") {
+                if (oldOrder && (oldOrder as any).orderStatus === "preparing" && newOrder.orderStatus === "ready") {
                   const tblName = tables.find(t => t.id === newOrder.tableId)?.tableNumber || newOrder.tableId || "";
                   const msg = lang === 'ar'
                     ? `🍽️ طلب طاولة ${tblName} جاهز في المطبخ للتسليم!`
@@ -762,7 +762,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
     }
   };
 
-  const theme = getThemeClasses((tenant?.themeColor || 'indigo') as string);
+  const theme = getThemeClasses((tenant?.themeColor || 'indigo') as ThemeColor);
 
   // Filter items
   const filteredItems = useMemo(() => {

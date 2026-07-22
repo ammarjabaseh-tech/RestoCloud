@@ -257,7 +257,11 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
               <p className="text-xs mt-1">ستظهر هنا الطلبات التي انتهت من المطبخ</p>
             </div>
           ) : (
-            readyOrders.map((o) => <OrderCard key={o.id} order={o} showActions />)
+            readyOrders.map((o) => (
+              <div key={o.id}>
+                <OrderCard order={o} showActions />
+              </div>
+            ))
           )
         ) : activeTab === "mine" ? (
           myActiveOrders.length === 0 ? (
@@ -266,7 +270,11 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
               <p className="text-sm font-bold">لا توجد طلبات قيد التوصيل حالياً</p>
             </div>
           ) : (
-            myActiveOrders.map((o) => <OrderCard key={o.id} order={o} showActions />)
+            myActiveOrders.map((o) => (
+              <div key={o.id}>
+                <OrderCard order={o} showActions />
+              </div>
+            ))
           )
         ) : (
           <>
@@ -284,7 +292,11 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
                   </div>
                   <span className="text-3xl">💰</span>
                 </div>
-                {myDoneOrders.map((o) => <OrderCard key={o.id} order={o} />)}
+                {myDoneOrders.map((o) => (
+                  <div key={o.id}>
+                    <OrderCard order={o} />
+                  </div>
+                ))}
               </>
             )}
           </>
