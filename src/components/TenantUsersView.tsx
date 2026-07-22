@@ -466,11 +466,10 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        
+    <div className="space-y-6 animate-in fade-in duration-200">
+      
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-2xl flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
               <Users className="w-7 h-7" />
@@ -700,8 +699,6 @@ export const TenantUsersView: React.FC<TenantUsersViewProps> = ({ currentTenant,
             </div>
           )}
         </div>
-
-      </div>
 
       {/* Add / Edit User Modal */}
       {showAddModal && (
