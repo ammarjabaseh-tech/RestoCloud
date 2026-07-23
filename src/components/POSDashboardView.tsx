@@ -1095,8 +1095,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
                   {orderType === "dine_in" 
                     ? `طاولة رقم ${selectedTable}` 
                     : orderType === "takeaway" 
-                    ? "طلب سفري خارجي" 
-                    : "طلب توصيل للمنزل"}
+                    ? "طلب سفري" 
+                    : "طلب توصيل"}
                 </span>
               </div>
               <span className="text-[9px] bg-indigo-150 text-indigo-800 px-2 py-0.5 rounded-full font-black uppercase">
@@ -2957,12 +2957,12 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             <div className="text-right">
               <h3 className="text-sm font-black text-white">
                 {activeOrderSession.type === "dine_in" 
-                  ? `تسجيل طلب للطاولة رقم ${activeOrderSession.tableNumber}` 
+                  ? `طاولة رقم ${activeOrderSession.tableNumber}` 
                   : activeOrderSession.type === "takeaway" 
-                  ? "تسجيل طلب سفري جديد" 
-                  : "تسجيل طلب توصيل جديد"}
+                  ? "طلب سفري" 
+                  : "طلب توصيل"}
               </h3>
-              <p className="text-[10px] text-indigo-250 mt-0.5">أضف الوجبات للطلب الحالي وأتمم الفاتورة</p>
+              <p className="text-[10px] text-indigo-250 mt-0.5">أضف الوجبات الفاتورة</p>
             </div>
           </div>
           <button
@@ -2988,14 +2988,14 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               className="py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl font-black text-sm shadow-md shadow-amber-500/10 flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-98"
             >
               <span className="text-xl">🛍️</span>
-              <span>{lang === 'ar' ? 'طلب سفري خارجي جديد' : 'New Takeaway Order'}</span>
+              <span>{lang === 'ar' ? 'طلب سفري' : 'Takeaway'}</span>
             </button>
             <button
               onClick={() => handleStartOrderSession('delivery')}
               className="py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-2xl font-black text-sm shadow-md shadow-emerald-600/10 flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-98"
             >
               <span className="text-xl">🛵</span>
-              <span>{lang === 'ar' ? 'طلب توصيل للمنزل جديد' : 'New Delivery Order'}</span>
+              <span>{lang === 'ar' ? 'طلب توصيل' : 'Delivery'}</span>
             </button>
           </div>
 
