@@ -40,14 +40,14 @@ import { RestaurantLogo } from "./RestaurantLogo";
 
 const adminTranslations = {
   ar: {
-    title: "لوحة التحكم وإدارة المطعم",
-    subtitle: "التحكم في الهوية، قائمة الأصناف والأسعار، وإدارة الطاولات",
-    tabMenu: "إدارة المنيو والأصناف",
+    title: "لوحة الإدارة",
+    subtitle: "إدارة المنيو، الهوية، الطاولات، والتحليلات",
+    tabMenu: "الأصناف والمنيو",
     tabBranding: "الهوية والألوان",
-    tabTables: "إدارة الطاولات",
-    tabAnalytics: "تحليلات المبيعات",
+    tabTables: "الطاولات",
+    tabAnalytics: "التحليلات",
     tabUsers: "الموظفون والصلاحيات",
-    tabPrinters: "إدارة الطابعات"
+    tabPrinters: "الطابعات"
   },
   en: {
     title: "Restaurant Management Panel",

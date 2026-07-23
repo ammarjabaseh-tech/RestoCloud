@@ -209,7 +209,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
         {/* Driver Assignment Badge */}
         {order.deliveryDriverName && (
           <div className="text-[11px] font-bold text-sky-700 bg-sky-50 rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-sky-100">
-            <span>🛵 السائق المحدد:</span>
+            <span>🛵 السائق:</span>
             <span>{order.deliveryDriverName}</span>
           </div>
         )}
@@ -219,13 +219,13 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
           <div
             onClick={() => openGoogleMaps(order.customerAddress!)}
             className="flex items-start gap-2.5 bg-sky-50/80 hover:bg-sky-100/90 rounded-xl p-3 text-sky-900 border border-sky-200/80 transition-all cursor-pointer group shadow-2xs active:scale-98"
-            title="انقر لفتح العنوان في خرائط جوجل Google Maps"
+            title="فتح الخريطة"
           >
             <span className="text-xl shrink-0 group-hover:scale-110 transition-transform">📍</span>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold leading-relaxed">{order.customerAddress}</p>
               <span className="text-[11px] text-sky-700 font-black flex items-center gap-1 mt-1 underline">
-                <span>فتح الموقع في الخريطة (Google Maps)</span>
+                <span>فتح الخريطة</span>
                 <span>🗺️ ↗</span>
               </span>
             </div>
@@ -271,14 +271,14 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
                   onClick={() => updateOrderStatus(order.id, "out_for_delivery", currentUser.name)}
                   className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
                 >
-                  {updatingId === order.id ? "⏳ جاري التحديث..." : "🛵 استلام الطلب والخروج للتوصيل"}
+                  {updatingId === order.id ? "⏳ تحديث..." : "🛵 استلام وسحب الطلب"}
                 </button>
               ) : (
                 <button
                   disabled
                   className="w-full bg-slate-100 text-slate-500 text-xs font-bold py-2.5 rounded-xl cursor-not-allowed border border-slate-200 text-center flex items-center justify-center gap-1.5"
                 >
-                  <span>👨‍🍳 الطلب قيد التحضير في المطبخ (غير جاهز للاستلام بعد)</span>
+                  <span>👨‍🍳 الطلب في المطبخ (غير جاهز بعد)</span>
                 </button>
               )
             )}
@@ -288,7 +288,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
                 onClick={() => updateOrderStatus(order.id, "delivered")}
                 className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black py-2.5 rounded-xl hover:opacity-90 transition-all disabled:opacity-50 cursor-pointer shadow-md active:scale-98"
               >
-                {updatingId === order.id ? "⏳ جاري التحديث..." : "✅ تم التوصيل بنجاح"}
+                {updatingId === order.id ? "⏳ تحديث..." : "✅ تم التسليم بنجاح"}
               </button>
             )}
           </div>
@@ -311,7 +311,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
               🛵
             </div>
             <div>
-              <h1 className="text-base font-black text-white">شاشة الدليفري والتوصيل</h1>
+              <h1 className="text-base font-black text-white">شاشة التوصيل</h1>
               <p className="text-[11px] text-sky-200 mt-0.5">
                 {currentUser.name} · {tenant.nameAr}
               </p>
@@ -322,9 +322,9 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
               <button
                 onClick={requestNotificationPermission}
                 className="text-[10px] bg-amber-500 hover:bg-amber-600 text-white font-black px-2.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm animate-pulse"
-                title="تفعيل إشعارات وتنبيهات التوصيل"
+                title="تفعيل الإشعارات"
               >
-                🔔 تفعيل الإشعارات
+                🔔 الإشعارات
               </button>
             )}
             <button
@@ -341,7 +341,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
       <div className="max-w-2xl mx-auto px-4 pt-4 grid grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-emerald-600">{readyOrders.length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">طلبات قيد المتابعة</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">قيد المتابعة</p>
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-sky-600">{myActiveOrders.length}</p>
@@ -349,7 +349,7 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 text-center">
           <p className="text-2xl font-black text-slate-700">{myDoneOrders.length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">تم تسليمها</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">مكتملة</p>
         </div>
       </div>
 
@@ -381,14 +381,14 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
         {loading ? (
           <div className="text-center py-16 text-slate-400">
             <div className="w-10 h-10 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-sm">جاري تحميل الطلبات...</p>
+            <p className="text-sm">جاري التحميل...</p>
           </div>
         ) : activeTab === "ready" ? (
           readyOrders.length === 0 ? (
             <div className="text-center py-16 text-slate-400">
               <p className="text-4xl mb-3">🛵</p>
-              <p className="text-sm font-bold">لا توجد طلبات توصيل متاحة حالياً</p>
-              <p className="text-xs mt-1">ستظهر هنا الطلبات فور إرسالها من الكاشير أو تجهيزها في المطبخ</p>
+              <p className="text-sm font-bold">لا توجد طلبات توصيل متاحة</p>
+              <p className="text-xs mt-1">ستظهر طلبات المطبخ فور تجهيزها</p>
             </div>
           ) : (
             readyOrders.map((o) => (
@@ -401,8 +401,8 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
           myActiveOrders.length === 0 ? (
             <div className="text-center py-16 text-slate-400">
               <p className="text-4xl mb-3">📦</p>
-              <p className="text-sm font-bold">لا توجد طلبات قيد التوصيل في الطريق</p>
-              <p className="text-xs mt-1">استلم الطلبات الجاهزة من تبويب "جاهزة" للبدء بالتوصيل</p>
+              <p className="text-sm font-bold">لا توجد طلبات في الطريق</p>
+              <p className="text-xs mt-1">استلم الطلبات الجاهزة لبدء التوصيل</p>
             </div>
           ) : (
             myActiveOrders.map((o) => (
@@ -416,13 +416,13 @@ export const DeliveryDriverView: React.FC<DeliveryDriverViewProps> = ({
             {myDoneOrders.length === 0 ? (
               <div className="text-center py-16 text-slate-400">
                 <p className="text-4xl mb-3">✅</p>
-                <p className="text-sm font-bold">لم تُنجز أي طلبات بعد اليوم</p>
+                <p className="text-sm font-bold">لا توجد طلبات منجزة اليوم</p>
               </div>
             ) : (
               <>
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl p-4 flex justify-between items-center shadow-md">
                   <div>
-                    <p className="text-[11px] text-emerald-100">إجمالي المبالغ المحصلة</p>
+                    <p className="text-[11px] text-emerald-100">المبالغ المحصلة</p>
                     <p className="text-2xl font-black mt-0.5">{totalEarnings.toFixed(2)} {tenant.currency}</p>
                   </div>
                   <span className="text-3xl">💰</span>

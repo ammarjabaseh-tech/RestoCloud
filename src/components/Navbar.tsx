@@ -24,20 +24,20 @@ import {
 
 const navTranslations = {
   ar: {
-    saDashboard: "لوحة تحكم السوبر أدمن",
-    pos: "كاشير POS",
-    admin: "لوحة الإدارة",
-    menu: "المنيو الرقمي (QR)",
-    ai: "المساعد الذكي",
-    kds: "شاشة المطبخ (KDS)",
-    saasOnboard: "🚀 حجز مطعم والدفع",
+    saDashboard: "سوبر أدمن",
+    pos: "الكاشير",
+    admin: "الإدارة",
+    menu: "المنيو",
+    ai: "مساعد الذكاء الاصطناعي",
+    kds: "المطبخ",
+    saasOnboard: "🚀 تسجيل مطعم",
     saasPortal: "بوابة SaaS",
-    saasSubs: "اشتراكات SaaS",
-    postgres: "PostgreSQL / VPS",
-    logout: "تسجيل الخروج",
-    registeredRestaurants: "المطاعم المسجلة (المستأجرون)",
+    saasSubs: "الاشتراكات",
+    postgres: "PostgreSQL",
+    logout: "خروج",
+    registeredRestaurants: "المطاعم المسجلة",
     restaurantsCount: "مطاعم",
-    addNewRestaurant: "إضافة مطعم جديد (SaaS Onboarding)"
+    addNewRestaurant: "إضافة مطعم جديد"
   },
   en: {
     saDashboard: "Super Admin Dashboard",
