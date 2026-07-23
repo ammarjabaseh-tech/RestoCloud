@@ -82,7 +82,10 @@ export default function App() {
     if (currentUser && currentUser.role === 'delivery' && activeView !== 'delivery_view') {
       setActiveView('delivery_view');
     }
-  }, [currentUser, activeView]);
+    if (currentTenant?.subscriptionPlan === 'lite' && activeView === 'pos_dashboard' && currentUser?.role !== 'waiter' && currentUser?.role !== 'delivery') {
+      setActiveView('admin_panel');
+    }
+  }, [currentUser, currentTenant?.subscriptionPlan, activeView]);
 
   // Handle login success from SaaSAuthView
   const handleLoginSuccess = (isSuperAdmin: boolean, user?: TenantUser, tenant?: Tenant) => {
@@ -216,10 +219,14 @@ export default function App() {
             if (originalPathname === '/menu' || originalPathname.includes('/menu')) {
               setActiveView('digital_menu');
             } else if (saved && saved !== 'super_admin_dashboard' && saved !== 'super_admin_login' && saved !== 'landing_page') {
-              setActiveView(saved as ActivePortalView);
+              if (saved === 'pos_dashboard' && currentTenant?.subscriptionPlan === "lite" && currentUser.role !== 'waiter' && currentUser.role !== 'delivery') {
+                setActiveView('admin_panel');
+              } else {
+                setActiveView(saved as ActivePortalView);
+              }
             } else {
               // Fallback based on permissions
-              if (currentUser.permissions.canManagePOS) {
+              if (currentUser.permissions.canManagePOS && currentTenant?.subscriptionPlan !== "lite") {
                 setActiveView('pos_dashboard');
               } else if (currentUser.permissions.canManageMenu) {
                 setActiveView('admin_panel');

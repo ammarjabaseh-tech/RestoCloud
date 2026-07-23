@@ -40,9 +40,50 @@ pool.query(`
     action_type TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  )
+  );
+
+  CREATE TABLE IF NOT EXISTS purchases (
+    id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    supplier_name TEXT NOT NULL,
+    invoice_number TEXT,
+    category TEXT NOT NULL,
+    amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+    payment_method TEXT NOT NULL DEFAULT 'cash',
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+
+  CREATE TABLE IF NOT EXISTS expenses (
+    id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+    payment_method TEXT NOT NULL DEFAULT 'cash',
+    notes TEXT,
+    created_by TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+
+  CREATE TABLE IF NOT EXISTS cash_shifts (
+    id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    cashier_name TEXT NOT NULL,
+    opening_cash NUMERIC(10,2) NOT NULL DEFAULT 0,
+    expected_cash NUMERIC(10,2) NOT NULL DEFAULT 0,
+    actual_cash NUMERIC(10,2) NOT NULL DEFAULT 0,
+    difference NUMERIC(10,2) NOT NULL DEFAULT 0,
+    cash_sales NUMERIC(10,2) NOT NULL DEFAULT 0,
+    card_sales NUMERIC(10,2) NOT NULL DEFAULT 0,
+    cash_expenses NUMERIC(10,2) NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'open',
+    notes TEXT,
+    opened_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    closed_at TIMESTAMPTZ
+  );
 `).then(() => {
-  console.log("🔒 Verification (tenant_otps) table initialized.");
+  console.log("🔒 Verification & Accounting tables (purchases, expenses, cash_shifts) initialized.");
   
   // Migration to update plan CHECK constraints to support 'lite' plan
   return pool.query(`

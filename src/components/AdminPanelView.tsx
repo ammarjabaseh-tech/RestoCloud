@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tenant, Category, MenuItem, RestaurantTable, ThemeColor, Printer } from "../types";
+import { Tenant, Category, MenuItem, RestaurantTable, ThemeColor, Printer, PurchaseRecord, ExpenseRecord, CashShift, Order } from "../types";
 import { getThemeClasses } from "../utils/theme";
 import { TenantUsersView } from "./TenantUsersView";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
@@ -17,6 +17,7 @@ import {
   BarChart3, 
   Users, 
   DollarSign, 
+  Banknote,
   Eye, 
   EyeOff, 
   RefreshCw,
@@ -33,7 +34,14 @@ import {
   Printer as PrinterIcon,
   Share2,
   Facebook,
-  Instagram
+  Instagram,
+  Calculator,
+  Receipt,
+  Wallet,
+  PlusCircle,
+  ArrowDownRight,
+  ArrowUpRight,
+  Lock
 } from "lucide-react";
 import { QRCodeModal } from "./QRCodeModal";
 import { RestaurantLogo } from "./RestaurantLogo";
@@ -47,7 +55,8 @@ const adminTranslations = {
     tabTables: "الطاولات",
     tabAnalytics: "التحليلات",
     tabUsers: "الموظفون والصلاحيات",
-    tabPrinters: "الطابعات"
+    tabPrinters: "الطابعات",
+    tabAccounting: "المحاسبة والصندوق"
   },
   en: {
     title: "Restaurant Management Panel",
@@ -57,7 +66,8 @@ const adminTranslations = {
     tabTables: "Tables",
     tabAnalytics: "Sales Analytics",
     tabUsers: "Staff Permissions",
-    tabPrinters: "Printers"
+    tabPrinters: "Printers",
+    tabAccounting: "Accounting & Cash"
   },
   tr: {
     title: "Restoran Yönetim Paneli",
@@ -67,7 +77,8 @@ const adminTranslations = {
     tabTables: "Masalar",
     tabAnalytics: "Satış Analizleri",
     tabUsers: "Personel Yetkileri",
-    tabPrinters: "Yazıcılar"
+    tabPrinters: "Yazıcılar",
+    tabAccounting: "Muhasebe & Kasa"
   }
 };
 
@@ -135,7 +146,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   onReorderCategories,
   lang = 'ar'
 }) => {
-  const [activeTab, setActiveTab] = useState<"menu" | "branding" | "tables" | "analytics" | "users" | "printers">("menu");
+  const [activeTab, setActiveTab] = useState<"menu" | "branding" | "tables" | "analytics" | "users" | "printers" | "accounting">("menu");
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
   const [qrTargetTable, setQrTargetTable] = useState<number | "general">("general");
   
@@ -144,6 +155,28 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
   const [loadingPrinters, setLoadingPrinters] = useState(false);
   const [showPrinterModal, setShowPrinterModal] = useState(false);
   const [editingPrinter, setEditingPrinter] = useState<Partial<Printer> | null>(null);
+
+  // Accounting & Orders State
+  const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
+  const [shifts, setShifts] = useState<CashShift[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [accSubTab, setAccSubTab] = useState<"summary" | "purchases" | "expenses" | "shifts">("summary");
+
+  // Purchase Form State
+  const [purSupplier, setPurSupplier] = useState("");
+  const [purInvoice, setPurInvoice] = useState("");
+  const [purCategory, setPurCategory] = useState<PurchaseRecord["category"]>("raw_materials");
+  const [purAmount, setPurAmount] = useState("");
+  const [purPayment, setPurPayment] = useState<PurchaseRecord["paymentMethod"]>("cash");
+  const [purNotes, setPurNotes] = useState("");
+
+  // Expense Form State
+  const [expTitle, setExpTitle] = useState("");
+  const [expCategory, setExpCategory] = useState<ExpenseRecord["category"]>("petty_cash");
+  const [expAmount, setExpAmount] = useState("");
+  const [expPayment, setExpPayment] = useState<ExpenseRecord["paymentMethod"]>("cash");
+  const [expNotes, setExpNotes] = useState("");
 
   const fetchPrinters = async () => {
     setLoadingPrinters(true);
@@ -164,7 +197,108 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
     if (activeTab === "printers") {
       fetchPrinters();
     }
+    if (activeTab === "accounting" || activeTab === "analytics") {
+      fetchAccountingData();
+    }
   }, [activeTab]);
+
+  const fetchAccountingData = async () => {
+    try {
+      const [purRes, expRes, shfRes, ordRes] = await Promise.all([
+        fetch(`/api/tenants/${tenant.id}/purchases`),
+        fetch(`/api/tenants/${tenant.id}/expenses`),
+        fetch(`/api/tenants/${tenant.id}/shifts`),
+        fetch(`/api/tenants/${tenant.id}/orders`)
+      ]);
+      if (purRes.ok) setPurchases(await purRes.json());
+      if (expRes.ok) setExpenses(await expRes.json());
+      if (shfRes.ok) setShifts(await shfRes.json());
+      if (ordRes.ok) setOrders(await ordRes.json());
+    } catch (err) {
+      console.error("Failed to fetch accounting data:", err);
+    }
+  };
+
+  const handleAddPurchase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!purSupplier || !purAmount) return;
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/purchases`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          supplierName: purSupplier,
+          invoiceNumber: purInvoice,
+          category: purCategory,
+          amount: parseFloat(purAmount),
+          paymentMethod: purPayment,
+          notes: purNotes
+        })
+      });
+      if (res.ok) {
+        const newPur = await res.json();
+        setPurchases(prev => [newPur, ...prev]);
+        setPurSupplier("");
+        setPurInvoice("");
+        setPurAmount("");
+        setPurNotes("");
+      }
+    } catch (err) {
+      alert("فشل في إضافة المشتريات");
+    }
+  };
+
+  const handleDeletePurchase = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذه المشتريات؟")) return;
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/purchases/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPurchases(prev => prev.filter(p => p.id !== id));
+      }
+    } catch (err) {
+      alert("فشل في حذف المشتريات");
+    }
+  };
+
+  const handleAddExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expTitle || !expAmount) return;
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/expenses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: expTitle,
+          category: expCategory,
+          amount: parseFloat(expAmount),
+          paymentMethod: expPayment,
+          notes: expNotes,
+          createdBy: tenant.ownerName || "الإدارة"
+        })
+      });
+      if (res.ok) {
+        const newExp = await res.json();
+        setExpenses(prev => [newExp, ...prev]);
+        setExpTitle("");
+        setExpAmount("");
+        setExpNotes("");
+      }
+    } catch (err) {
+      alert("فشل في إضافة المصروف");
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذا المصروف؟")) return;
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/expenses/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setExpenses(prev => prev.filter(e => e.id !== id));
+      }
+    } catch (err) {
+      alert("فشل في حذف المصروف");
+    }
+  };
 
   React.useEffect(() => {
     if (tenant.subscriptionPlan === "lite" && activeTab !== "menu" && activeTab !== "branding") {
@@ -635,18 +769,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
 
         {/* Row 2: Tab Switcher (Stretches full width of the card) */}
         <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-2xl overflow-x-auto border border-slate-150 dark:border-slate-805/50 w-full no-scrollbar">
-          <button
-            onClick={() => setActiveTab("menu")}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === "menu"
-                ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
-                : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
-            }`}
-          >
-            <Utensils className="w-4 h-4" />
-            <span>{adminTranslations[lang].tabMenu}</span>
-          </button>
-
+          {/* 1. الهوية والألوان */}
           <button
             onClick={() => setActiveTab("branding")}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
@@ -659,20 +782,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             <span>{adminTranslations[lang].tabBranding}</span>
           </button>
 
-          {tenant.subscriptionPlan !== "lite" && (
-            <button
-              onClick={() => setActiveTab("tables")}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === "tables"
-                  ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
-                  : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
-              }`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-              <span>{adminTranslations[lang].tabTables}</span>
-            </button>
-          )}
-
+          {/* 2. التحليلات */}
           {tenant.subscriptionPlan !== "lite" && (
             <button
               onClick={() => setActiveTab("analytics")}
@@ -687,6 +797,50 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             </button>
           )}
 
+          {/* 3. المحاسبة */}
+          {tenant.subscriptionPlan !== "lite" && (
+            <button
+              onClick={() => setActiveTab("accounting")}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                activeTab === "accounting"
+                  ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                  : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
+              }`}
+            >
+              <Calculator className="w-4 h-4" />
+              <span>{adminTranslations[lang].tabAccounting}</span>
+            </button>
+          )}
+
+          {/* 4. الأصناف والمنيو */}
+          <button
+            onClick={() => setActiveTab("menu")}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === "menu"
+                ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
+            }`}
+          >
+            <Utensils className="w-4 h-4" />
+            <span>{adminTranslations[lang].tabMenu}</span>
+          </button>
+
+          {/* 5. الطاولات */}
+          {tenant.subscriptionPlan !== "lite" && (
+            <button
+              onClick={() => setActiveTab("tables")}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                activeTab === "tables"
+                  ? `${theme.primaryBg} text-white shadow-sm scale-[1.02]`
+                  : "text-slate-650 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900"
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>{adminTranslations[lang].tabTables}</span>
+            </button>
+          )}
+
+          {/* 6. الموظفون والصلاحيات */}
           {tenant.subscriptionPlan !== "lite" && (
             <button
               onClick={() => setActiveTab("users")}
@@ -701,6 +855,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             </button>
           )}
 
+          {/* 7. الطابعات */}
           {tenant.subscriptionPlan !== "lite" && (
             <button
               onClick={() => setActiveTab("printers")}
@@ -1495,48 +1650,6 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
             </button>
           </div>
 
-          {/* QR Code Barcode Studio Banner */}
-          <div className="bg-gradient-to-r from-indigo-900 via-slate-900 to-purple-900 text-white p-6 rounded-3xl border border-indigo-800 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl shrink-0 border border-white/20">
-                📲
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-white flex items-center gap-2">
-                  <span>{lang === 'ar' ? 'مركز باركود الـ QR وستاندات الطاولات للطباعة' : lang === 'tr' ? 'QR Barkod Merkezi ve Masa Standı Basımı' : 'QR Barcode Studio & Table Stands Printing'}</span>
-                  <span className="text-xs bg-emerald-500 text-white px-2.5 py-0.5 rounded-full font-sans font-bold">
-                    {lang === 'ar' ? 'جاهز للطباعة' : lang === 'tr' ? 'Baskıya Hazır' : 'Ready to Print'}
-                  </span>
-                </h3>
-                <p className="text-xs text-indigo-200 mt-1">
-                  {lang === 'ar' ? 'يمكنك طباعة ستاند طاولة مخصص لكل رقم طاولة، أو طباعة باركود المنيو العام على الطاولات والإعلانات.' : lang === 'tr' ? 'Her masa numarası için özel bir masa standı yazdırabilir veya masalar ve reklamlar için genel menü barkodunu yazdırabilirsiniz.' : 'You can print a custom table stand for each table number, or print the general menu QR code for tables and advertisements.'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <button
-                onClick={() => {
-                  setQrTargetTable("general");
-                  setShowQRModal(true);
-                }}
-                className="flex-1 md:flex-none px-4 py-2.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <QrCode className="w-4 h-4 text-indigo-600" />
-                <span>{lang === 'ar' ? 'المنيو العام (QR)' : lang === 'tr' ? 'Genel Menü (QR)' : 'General Menu (QR)'}</span>
-              </button>
-              <button
-                onClick={() => {
-                  setQrTargetTable(1);
-                  setShowQRModal(true);
-                }}
-                className="flex-1 md:flex-none px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <QrCode className="w-4 h-4 text-white" />
-                <span>{lang === 'ar' ? '🖨️ طباعة جميع الطاولات' : lang === 'tr' ? '🖨️ Tüm Masaları Yazdır' : '🖨️ Print All Tables'}</span>
-              </button>
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {tables.map((t) => {
               const statusColor = 
@@ -1603,94 +1716,113 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
       )}
 
       {/* TAB 4: DAILY SALES ANALYTICS */}
-      {activeTab === "analytics" && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-bold">{lang === 'ar' ? 'إجمالي إيرادات الأطباق اليوم' : lang === 'tr' ? 'Bugünkü Toplam Yemek Geliri' : 'Total Food Revenue Today'}</span>
-                <DollarSign className="w-5 h-5 text-emerald-500" />
+      {activeTab === "analytics" && (() => {
+        const validOrders = orders.filter(o => o.orderStatus !== 'cancelled');
+        const totalRev = validOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+        const validOrdersCount = validOrders.length;
+        const avgTicket = validOrdersCount > 0 ? (totalRev / validOrdersCount).toFixed(2) : "0.00";
+        const cashRev = validOrders.filter(o => o.paymentMethod === 'cash').reduce((sum, o) => sum + (o.total || 0), 0);
+        const cardRev = validOrders.filter(o => o.paymentMethod === 'card').reduce((sum, o) => sum + (o.total || 0), 0);
+
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-xs font-bold">إجمالي الإيرادات والمبيعات</span>
+                  <DollarSign className="w-5 h-5 text-emerald-500" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">
+                  {totalRev.toFixed(2)} <span className="text-xs font-normal text-emerald-600">{tenant.currency}</span>
+                </h3>
+                <p className="text-[11px] text-emerald-600 font-semibold font-sans">تراكمي لجميع فواتير المبيعات</p>
               </div>
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white font-sans">
-                {items.reduce((sum, i) => sum + i.price * 3, 0)} <span className="text-sm font-normal text-emerald-600">{tenant.currency}</span>
-              </h3>
-              <p className="text-xs text-emerald-600 font-semibold font-sans">{lang === 'ar' ? '+14.2% مقارنة بالأمس' : lang === 'tr' ? 'Düne göre +%14.2' : '+14.2% vs yesterday'}</p>
+
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-xs font-bold">مبيعات الكاش والشبكة</span>
+                  <Banknote className="w-5 h-5 text-blue-500" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white font-sans">
+                  {cashRev.toFixed(0)} <span className="text-xs text-slate-400 font-normal">كاش</span> / {cardRev.toFixed(0)} <span className="text-xs text-slate-400 font-normal">شبكة</span>
+                </h3>
+                <p className="text-[11px] text-slate-400 font-semibold">توزيع طرق الدفع للفواتير</p>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-xs font-bold">إجمالي عدد الفواتير</span>
+                  <Utensils className="w-5 h-5 text-amber-500" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">
+                  {validOrdersCount} <span className="text-xs font-normal text-slate-500 font-sans">فاتورة</span>
+                </h3>
+                <p className="text-[11px] text-slate-400 font-semibold">الصالة + السفري + التوصيل</p>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-xs font-bold">متوسط قيمة الفاتورة</span>
+                  <TrendingUp className="w-5 h-5 text-indigo-500" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">
+                  {avgTicket} <span className="text-xs font-normal text-indigo-600">{tenant.currency}</span>
+                </h3>
+                <p className="text-[11px] text-indigo-600 font-semibold">معدل الإنفاق للفاتورة الواحدة</p>
+              </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-bold">{lang === 'ar' ? 'الأصناف المتاحة في الكاشير' : lang === 'tr' ? 'Kasiyerde Mevcut Ürünler' : 'Active Cashier Menu Items'}</span>
-                <Utensils className="w-5 h-5 text-amber-500" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Bar Chart: Items per category */}
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  {lang === 'ar' ? 'توزيع الأصناف حسب الأقسام' : lang === 'tr' ? 'Kategorilere Göre Ürün Dağılımı' : 'Items Distribution by Category'}
+                </h3>
+                <div className="h-64 w-full" dir="ltr">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={categoryChartData}>
+                      <XAxis dataKey="name" stroke="#888888" fontSize={11} />
+                      <YAxis stroke="#888888" fontSize={11} />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#10b981" radius={[8, 8, 0, 0]} name={lang === 'ar' ? 'عدد الأصناف' : lang === 'tr' ? 'Ürün Sayısı' : 'Number of Items'} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white font-sans">
-                {items.filter(i => i.isAvailable).length} <span className="text-sm font-normal text-slate-500 font-sans">{lang === 'ar' ? `من ${items.length}` : lang === 'tr' ? ` / ${items.length}` : ` of ${items.length}`}</span>
-              </h3>
-              <p className="text-xs text-slate-400 font-semibold">{lang === 'ar' ? 'جاهز للطلب في المنيو الرقمي' : lang === 'tr' ? 'Dijital menüde siparişe hazır' : 'Ready for digital menu orders'}</p>
-            </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-bold">{lang === 'ar' ? 'متوسط هامش الربح التقريبي' : lang === 'tr' ? 'Ortalama Yaklaşık Kâr Marjı' : 'Average Estimated Profit Margin'}</span>
-                <TrendingUp className="w-5 h-5 text-indigo-500" />
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white font-sans">
-                61.5%
-              </h3>
-              <p className="text-xs text-indigo-600 font-semibold">{lang === 'ar' ? 'معدل ممتاز للمطاعم ومحلات التجزئة' : lang === 'tr' ? 'Restoranlar ve perakende için mükemmel oran' : 'Excellent rate for restaurants and retail'}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Bar Chart: Items per category */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {lang === 'ar' ? 'توزيع الأصناف حسب الأقسام' : lang === 'tr' ? 'Kategorilere Göre Ürün Dağılımı' : 'Items Distribution by Category'}
-              </h3>
-              <div className="h-64 w-full" dir="ltr">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryChartData}>
-                    <XAxis dataKey="name" stroke="#888888" fontSize={11} />
-                    <YAxis stroke="#888888" fontSize={11} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#10b981" radius={[8, 8, 0, 0]} name={lang === 'ar' ? 'عدد الأصناف' : lang === 'tr' ? 'Ürün Sayısı' : 'Number of Items'} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Best Sellers List */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Flame className="w-5 h-5 text-amber-500" />
-                <span>{lang === 'ar' ? 'الأصناف الأكثر طلباً ومبيعاً (Best Sellers)' : lang === 'tr' ? 'En Çok Satan Ürünler (Best Sellers)' : 'Best Selling Items'}</span>
-              </h3>
-              <div className="space-y-3">
-                {bestSellers.map((it, idx) => {
-                  const itName = lang === 'en' && it.nameEn ? it.nameEn : lang === 'tr' && it.nameTr ? it.nameTr : it.nameAr;
-                  return (
-                    <div key={it.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-black flex items-center justify-center font-sans">
-                          #{idx + 1}
-                        </span>
-                        <img src={it.image} alt={itName} className="w-10 h-10 rounded-xl object-cover" />
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white">{itName}</h4>
-                          <p className="text-[11px] text-slate-500 font-sans">{lang === 'ar' ? 'السعر:' : lang === 'tr' ? 'Fiyat:' : 'Price:'} {it.price} {tenant.currency}</p>
+              {/* Best Sellers List */}
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Flame className="w-5 h-5 text-amber-500" />
+                  <span>{lang === 'ar' ? 'الأصناف الأكثر طلباً ومبيعاً (Best Sellers)' : lang === 'tr' ? 'En Çok Satan Ürünler (Best Sellers)' : 'Best Selling Items'}</span>
+                </h3>
+                <div className="space-y-3">
+                  {bestSellers.map((it, idx) => {
+                    const itName = lang === 'en' && it.nameEn ? it.nameEn : lang === 'tr' && it.nameTr ? it.nameTr : it.nameAr;
+                    return (
+                      <div key={it.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <span className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-black flex items-center justify-center font-sans">
+                            #{idx + 1}
+                          </span>
+                          <img src={it.image} alt={itName} className="w-10 h-10 rounded-xl object-cover" />
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white">{itName}</h4>
+                            <p className="text-[11px] text-slate-500 font-sans">{lang === 'ar' ? 'السعر:' : lang === 'tr' ? 'Fiyat:' : 'Price:'} {it.price} {tenant.currency}</p>
+                          </div>
                         </div>
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg">
+                          {lang === 'ar' ? 'مطلوب بكثرة' : lang === 'tr' ? 'Popüler' : 'Popular'}
+                        </span>
                       </div>
-                      <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-lg">
-                        {lang === 'ar' ? 'مطلوب بكثرة' : lang === 'tr' ? 'Popüler' : 'Popular'}
-                      </span>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-
+        );
+      })()}
       {activeTab === "users" && (
         <TenantUsersView currentTenant={tenant} lang={lang} />
       )}
@@ -2390,6 +2522,532 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* TAB 7: ACCOUNTING & CASH SHIFTS (محاسبة المبيعات، المشتريات، والصندوق) */}
+      {activeTab === "accounting" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          
+          {/* Header Card */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-emerald-600" />
+                <span>نظام المحاسبة وإدارة الصندوق (P&L & Cash Control)</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                تتبع فواتير المشتريات، المصروفات التشغيلية، وصافي الأرباح ومطابقة عجز وزيادة صندوق الكاشير (Z-Report).
+              </p>
+            </div>
+
+            {/* Sub-tabs Nav */}
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl shrink-0 overflow-x-auto no-scrollbar">
+              {(["summary", "purchases", "expenses", "shifts"] as const).map(tab => {
+                const label = 
+                  tab === "summary" ? "📊 الإرباح والخسائر" :
+                  tab === "purchases" ? "🛍️ المشتريات" :
+                  tab === "expenses" ? "💸 المصروفات" : "🔒 ورديات الصندوق";
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setAccSubTab(tab)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      accSubTab === tab
+                        ? `${theme.primaryBg} text-white shadow-sm font-extrabold`
+                        : "text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SUB-TAB 1: FINANCIAL P&L SUMMARY */}
+          {accSubTab === "summary" && (() => {
+            const totalRev = orders.filter(o => o.orderStatus !== 'cancelled').reduce((sum, o) => sum + o.total, 0);
+            const totalPur = purchases.reduce((sum, p) => sum + p.amount, 0);
+            const totalExp = expenses.reduce((sum, e) => sum + e.amount, 0);
+            const netProfit = totalRev - (totalPur + totalExp);
+            
+            return (
+              <div className="space-y-6">
+                {/* 4 Financial Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                      <span>إجمالي المبيعات والإيرادات</span>
+                      <span className="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 rounded-xl">💰</span>
+                    </div>
+                    <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                      {totalRev.toFixed(2)} <span className="text-xs font-normal text-slate-400">{tenant.currency}</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400">مجموع المبيعات الكلية بالفواتير</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                      <span>إجمالي المشتريات</span>
+                      <span className="p-2 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl">🛍️</span>
+                    </div>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white">
+                      {totalPur.toFixed(2)} <span className="text-xs font-normal text-slate-400">{tenant.currency}</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400">فواتير توريد المواد والأغذية</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                      <span>إجمالي المصروفات</span>
+                      <span className="p-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 rounded-xl">💸</span>
+                    </div>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white">
+                      {totalExp.toFixed(2)} <span className="text-xs font-normal text-slate-400">{tenant.currency}</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400">الإيجارات، الرواتب، النثريات</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                      <span>صافي الربح التشغيلي</span>
+                      <span className="p-2 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 rounded-xl">💎</span>
+                    </div>
+                    <p className={`text-2xl font-black ${netProfit >= 0 ? "text-indigo-600 dark:text-indigo-400" : "text-rose-600"}`}>
+                      {netProfit.toFixed(2)} <span className="text-xs font-normal text-slate-400">{tenant.currency}</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400">الإيرادات - (المشتريات + المصروفات)</p>
+                  </div>
+                </div>
+
+                {/* Categories Breakdown Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Purchases Breakdown */}
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                      <span>توزيع المشتريات حسب الفئة</span>
+                      <span className="text-xs text-slate-400 font-mono">({purchases.length} فاتورة)</span>
+                    </h3>
+                    <div className="space-y-3">
+                      {(["raw_materials", "meat_poultry", "vegetables", "beverages", "packaging", "cleaning", "other"] as const).map(cat => {
+                        const catTotal = purchases.filter(p => p.category === cat).reduce((sum, p) => sum + p.amount, 0);
+                        if (catTotal === 0) return null;
+                        const catLabel = 
+                          cat === "raw_materials" ? "مواد خام أولية" :
+                          cat === "meat_poultry" ? "لحوم ودواجن" :
+                          cat === "vegetables" ? "خضروات وفواكه" :
+                          cat === "beverages" ? "عصائر ومشروبات" :
+                          cat === "packaging" ? "أدوات تغليف" :
+                          cat === "cleaning" ? "مواد نظافة" : "أخرى";
+                        const pct = totalPur > 0 ? ((catTotal / totalPur) * 100).toFixed(0) : "0";
+                        return (
+                          <div key={cat} className="space-y-1">
+                            <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                              <span>{catLabel}</span>
+                              <span>{catTotal.toFixed(2)} {tenant.currency} ({pct}%)</span>
+                            </div>
+                            <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-amber-500 rounded-full" style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {purchases.length === 0 && (
+                        <p className="text-xs text-slate-400 text-center py-6">لم يتم إدخال أي فواتير مشتريات بعد.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Expenses Breakdown */}
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                      <span>توزيع المصروفات التشغيلية</span>
+                      <span className="text-xs text-slate-400 font-mono">({expenses.length} مصروف)</span>
+                    </h3>
+                    <div className="space-y-3">
+                      {(["rent", "salaries", "utilities", "maintenance", "marketing", "petty_cash", "other"] as const).map(cat => {
+                        const catTotal = expenses.filter(e => e.category === cat).reduce((sum, e) => sum + e.amount, 0);
+                        if (catTotal === 0) return null;
+                        const catLabel = 
+                          cat === "rent" ? "إيجار المطعم" :
+                          cat === "salaries" ? "رواتب الموظفين" :
+                          cat === "utilities" ? "كهرباء وماء وغاز" :
+                          cat === "maintenance" ? "صيانة ومعدات" :
+                          cat === "marketing" ? "دعاية وتسويق" :
+                          cat === "petty_cash" ? "نثريات يومية" : "أخرى";
+                        const pct = totalExp > 0 ? ((catTotal / totalExp) * 100).toFixed(0) : "0";
+                        return (
+                          <div key={cat} className="space-y-1">
+                            <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                              <span>{catLabel}</span>
+                              <span>{catTotal.toFixed(2)} {tenant.currency} ({pct}%)</span>
+                            </div>
+                            <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-rose-500 rounded-full" style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {expenses.length === 0 && (
+                        <p className="text-xs text-slate-400 text-center py-6">لم يتم إدخال أي مصروفات تشغيلية بعد.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* SUB-TAB 2: PURCHASES MANAGEMENT */}
+          {accSubTab === "purchases" && (
+            <div className="space-y-6">
+              {/* Add Purchase Form */}
+              <form onSubmit={handleAddPurchase} className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <PlusCircle className="w-4 h-4 text-emerald-600" />
+                  <span>إضافة فاتورة مشتريات / توريد جديدة</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم المورد / الشركة *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="مثال: شركة اللحوم الطازجة"
+                      value={purSupplier}
+                      onChange={(e) => setPurSupplier(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">تصنيف المشتريات *</label>
+                    <select
+                      value={purCategory}
+                      onChange={(e) => setPurCategory(e.target.value as any)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    >
+                      <option value="raw_materials">مواد خام أولية</option>
+                      <option value="meat_poultry">لحوم ودواجن</option>
+                      <option value="vegetables">خضروات وفواكه</option>
+                      <option value="beverages">عصائر ومشروبات</option>
+                      <option value="packaging">أدوات تغليف</option>
+                      <option value="cleaning">مواد نظافة</option>
+                      <option value="other">أخرى</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مبلغ الفاتورة *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      placeholder="0.00"
+                      value={purAmount}
+                      onChange={(e) => setPurAmount(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">طريقة الدفع *</label>
+                    <select
+                      value={purPayment}
+                      onChange={(e) => setPurPayment(e.target.value as any)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    >
+                      <option value="cash">نقدي (كاش الصندوق)</option>
+                      <option value="card">شبكة / تحويل بنكي</option>
+                      <option value="credit">آجل (حساب المورد)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                  <input
+                    type="text"
+                    placeholder="رقم الفاتورة أو ملاحظات إضافية (اختياري)..."
+                    value={purNotes}
+                    onChange={(e) => setPurNotes(e.target.value)}
+                    className="w-full sm:w-2/3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className={`px-6 py-2.5 rounded-xl ${theme.primaryBg} text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap`}
+                  >
+                    + إدخال فاتورة المشتريات
+                  </button>
+                </div>
+              </form>
+
+              {/* Purchases List Table */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white">سجل فواتير المشتريات</h4>
+                  <span className="text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full font-bold">
+                    إجمالي المشتريات: {purchases.reduce((s, p) => s + p.amount, 0).toFixed(2)} {tenant.currency}
+                  </span>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-xs">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
+                      <tr>
+                        <th className="p-3">المورد</th>
+                        <th className="p-3">الفئة</th>
+                        <th className="p-3">المبلغ</th>
+                        <th className="p-3">طريقة الدفع</th>
+                        <th className="p-3">التاريخ</th>
+                        <th className="p-3 text-center">الإجراء</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                      {purchases.map(p => (
+                        <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                          <td className="p-3 font-bold text-slate-900 dark:text-white">{p.supplierName}</td>
+                          <td className="p-3 text-slate-500">{p.category}</td>
+                          <td className="p-3 font-mono font-bold text-emerald-600">{p.amount.toFixed(2)} {tenant.currency}</td>
+                          <td className="p-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              p.paymentMethod === 'cash' ? "bg-emerald-100 text-emerald-800" :
+                              p.paymentMethod === 'card' ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"
+                            }`}>
+                              {p.paymentMethod === 'cash' ? 'كاش' : p.paymentMethod === 'card' ? 'شبكة' : 'آجل'}
+                            </span>
+                          </td>
+                          <td className="p-3 text-slate-400 font-mono text-[11px]">{new Date(p.createdAt).toLocaleDateString("ar-SA")}</td>
+                          <td className="p-3 text-center">
+                            <button
+                              onClick={() => handleDeletePurchase(p.id)}
+                              className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer"
+                              title="حذف الفاتورة"
+                            >
+                              <Trash2 className="w-4 h-4 mx-auto" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {purchases.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-8 text-slate-400">لا توجد فواتير مشتريات مسجلة حالياً.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SUB-TAB 3: EXPENSES MANAGEMENT */}
+          {accSubTab === "expenses" && (
+            <div className="space-y-6">
+              {/* Add Expense Form */}
+              <form onSubmit={handleAddExpense} className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <PlusCircle className="w-4 h-4 text-rose-600" />
+                  <span>تسجيل مصروف تشغيلي جديد</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">عنوان المصروف *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="مثال: فاتورة كهرباء الشهر"
+                      value={expTitle}
+                      onChange={(e) => setExpTitle(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نوع المصروف *</label>
+                    <select
+                      value={expCategory}
+                      onChange={(e) => setExpCategory(e.target.value as any)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    >
+                      <option value="petty_cash">نثريات يومية</option>
+                      <option value="rent">إيجار المطعم</option>
+                      <option value="salaries">رواتب موظفين</option>
+                      <option value="utilities">كهرباء وماء وغاز</option>
+                      <option value="maintenance">صيانة وتصليح</option>
+                      <option value="marketing">دعاية وتسويق</option>
+                      <option value="other">أخرى</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المبلغ *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      placeholder="0.00"
+                      value={expAmount}
+                      onChange={(e) => setExpAmount(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">طريقة الصرف *</label>
+                    <select
+                      value={expPayment}
+                      onChange={(e) => setExpPayment(e.target.value as any)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                    >
+                      <option value="cash">نقداً من الدرج (Cash)</option>
+                      <option value="card">شبكة / حساب البنك</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                  <input
+                    type="text"
+                    placeholder="ملاحظات تفصيلية..."
+                    value={expNotes}
+                    onChange={(e) => setExpNotes(e.target.value)}
+                    className="w-full sm:w-2/3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
+                  >
+                    + تسجيل المصروف
+                  </button>
+                </div>
+              </form>
+
+              {/* Expenses List Table */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white">سجل المصروفات التشغيلية</h4>
+                  <span className="text-xs bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full font-bold">
+                    إجمالي المصروفات: {expenses.reduce((s, e) => s + e.amount, 0).toFixed(2)} {tenant.currency}
+                  </span>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-xs">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
+                      <tr>
+                        <th className="p-3">عنوان المصروف</th>
+                        <th className="p-3">الفئة</th>
+                        <th className="p-3">المبلغ</th>
+                        <th className="p-3">طريقة الصرف</th>
+                        <th className="p-3">التاريخ</th>
+                        <th className="p-3 text-center">الإجراء</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                      {expenses.map(e => (
+                        <tr key={e.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                          <td className="p-3 font-bold text-slate-900 dark:text-white">{e.title}</td>
+                          <td className="p-3 text-slate-500">{e.category}</td>
+                          <td className="p-3 font-mono font-bold text-rose-600">{e.amount.toFixed(2)} {tenant.currency}</td>
+                          <td className="p-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              e.paymentMethod === 'cash' ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
+                            }`}>
+                              {e.paymentMethod === 'cash' ? 'كاش الدرج' : 'شبكة/بنك'}
+                            </span>
+                          </td>
+                          <td className="p-3 text-slate-400 font-mono text-[11px]">{new Date(e.createdAt).toLocaleDateString("ar-SA")}</td>
+                          <td className="p-3 text-center">
+                            <button
+                              onClick={() => handleDeleteExpense(e.id)}
+                              className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer"
+                              title="حذف المصروف"
+                            >
+                              <Trash2 className="w-4 h-4 mx-auto" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {expenses.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center py-8 text-slate-400">لا توجد مصروفات مسجلة حالياً.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SUB-TAB 4: CASH SHIFTS (Z-REPORTS) */}
+          {accSubTab === "shifts" && (
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">سجل ورديات الصندوق وتقارير Z-Report</h4>
+                <span className="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-bold">
+                  إجمالي الورديات: {shifts.length}
+                </span>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-right text-xs">
+                  <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
+                    <tr>
+                      <th className="p-3">الكاشير</th>
+                      <th className="p-3">الحالة</th>
+                      <th className="p-3">افتتاحية الدرج</th>
+                      <th className="p-3">مبيعات الكاش</th>
+                      <th className="p-3">الكاش المتوقع</th>
+                      <th className="p-3">الكاش الفعلي</th>
+                      <th className="p-3">العجز / الزيادة</th>
+                      <th className="p-3">وقت الفتح/الإغلاق</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                    {shifts.map(s => (
+                      <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <td className="p-3 font-bold text-slate-900 dark:text-white">{s.cashierName}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            s.status === 'open' ? "bg-emerald-100 text-emerald-800 animate-pulse" : "bg-slate-100 text-slate-600"
+                          }`}>
+                            {s.status === 'open' ? '🟢 ميعاد نشط' : '🔒 مغلقة (Z)'}
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono">{s.openingCash.toFixed(2)} {tenant.currency}</td>
+                        <td className="p-3 font-mono text-emerald-600 font-bold">{s.cashSales.toFixed(2)} {tenant.currency}</td>
+                        <td className="p-3 font-mono text-indigo-600 font-bold">{s.expectedCash.toFixed(2)} {tenant.currency}</td>
+                        <td className="p-3 font-mono font-bold text-slate-900 dark:text-white">{s.actualCash.toFixed(2)} {tenant.currency}</td>
+                        <td className="p-3 font-mono font-bold">
+                          {s.difference === 0 ? (
+                            <span className="text-emerald-600">0.00 (متطابق)</span>
+                          ) : s.difference < 0 ? (
+                            <span className="text-rose-600">🔻 {s.difference.toFixed(2)} (عجز)</span>
+                          ) : (
+                            <span className="text-blue-600">🔺 +{s.difference.toFixed(2)} (زيادة)</span>
+                          )}
+                        </td>
+                        <td className="p-3 text-slate-400 font-mono text-[10px]">
+                          {new Date(s.openedAt).toLocaleTimeString("ar-SA", { hour: '2-digit', minute: '2-digit' })}
+                          {s.closedAt && ` - ${new Date(s.closedAt).toLocaleTimeString("ar-SA", { hour: '2-digit', minute: '2-digit' })}`}
+                        </td>
+                      </tr>
+                    ))}
+                    {shifts.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="text-center py-8 text-slate-400">لا توجد وراديات صندوق مسجلة حالياً.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
         </div>
       )}
 

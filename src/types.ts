@@ -179,3 +179,55 @@ export interface Printer {
   isActive: boolean;
   assignedCategories?: string[]; // IDs of categories assigned to this printer
 }
+
+// Accounting & Cash Drawer Types
+export interface PurchaseRecord {
+  id: string;
+  tenantId: string;
+  supplierName: string;
+  invoiceNumber?: string;
+  category: 'raw_materials' | 'meat_poultry' | 'vegetables' | 'beverages' | 'packaging' | 'cleaning' | 'other';
+  amount: number;
+  paymentMethod: 'cash' | 'card' | 'credit';
+  notes?: string;
+  createdAt: string;
+}
+
+export interface ExpenseRecord {
+  id: string;
+  tenantId: string;
+  title: string;
+  category: 'rent' | 'salaries' | 'utilities' | 'maintenance' | 'marketing' | 'petty_cash' | 'other';
+  amount: number;
+  paymentMethod: 'cash' | 'card';
+  notes?: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
+export interface CashShift {
+  id: string;
+  tenantId: string;
+  cashierName: string;
+  openingCash: number;
+  expectedCash: number;
+  actualCash: number;
+  difference: number;
+  cashSales: number;
+  cardSales: number;
+  cashExpenses: number;
+  status: 'open' | 'closed';
+  notes?: string;
+  openedAt: string;
+  closedAt?: string;
+}
+
+export interface Supplier {
+  id: string;
+  tenantId: string;
+  name: string;
+  phone?: string;
+  category?: string;
+  balanceDue: number;
+}
+

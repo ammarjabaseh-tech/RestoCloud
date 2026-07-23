@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Tenant, Category, MenuItem, RestaurantTable, OrderItem, OrderType, PaymentMethod, Order, Printer, TenantUser, ThemeColor } from "../types";
+import { Tenant, Category, MenuItem, RestaurantTable, OrderItem, OrderType, PaymentMethod, Order, Printer, TenantUser, ThemeColor, CashShift } from "../types";
 import { getThemeClasses } from "../utils/theme";
 import { RestaurantLogo } from "./RestaurantLogo";
 import confetti from "canvas-confetti";
@@ -353,6 +353,78 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   const [offlineQueueCount, setOfflineQueueCount] = useState<number>(0);
   const [activeNotifications, setActiveNotifications] = useState<{ id: string; message: string; type: "pending" | "ready" }[]>([]);
 
+  // Shift & Cash Box Management States
+  const [showShiftModal, setShowShiftModal] = useState<boolean>(false);
+  const [shiftMode, setShiftMode] = useState<'open' | 'close'>('open');
+  const [openingCashInput, setOpeningCashInput] = useState<string>('0');
+  const [actualCashInput, setActualCashInput] = useState<string>('');
+  const [shiftNotesInput, setShiftNotesInput] = useState<string>('');
+  const [activeShift, setActiveShift] = useState<CashShift | null>(null);
+
+  const fetchActiveShift = async () => {
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/shifts`);
+      if (res.ok) {
+        const shiftsData: CashShift[] = await res.json();
+        const open = shiftsData.find(s => s.status === 'open');
+        setActiveShift(open || null);
+      }
+    } catch (e) {
+      console.error("Failed to fetch shift:", e);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchActiveShift();
+  }, [tenant.id]);
+
+  const handleOpenShiftSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/shifts/open`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cashierName: currentUser?.name || "الكاشير",
+          openingCash: parseFloat(openingCashInput || '0'),
+          notes: shiftNotesInput
+        })
+      });
+      if (res.ok) {
+        const newShift = await res.json();
+        setActiveShift(newShift);
+        setShowShiftModal(false);
+        alert("تم فتح وردية الصندوق بنجاح 🟢");
+      }
+    } catch (e) {
+      alert("فشل فتح الوردية");
+    }
+  };
+
+  const handleCloseShiftSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeShift) return;
+    try {
+      const res = await fetch(`/api/tenants/${tenant.id}/shifts/${activeShift.id}/close`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          actualCash: parseFloat(actualCashInput || '0'),
+          notes: shiftNotesInput
+        })
+      });
+      if (res.ok) {
+        const closed = await res.json();
+        setActiveShift(null);
+        setShowShiftModal(false);
+        const diffText = closed.difference === 0 ? "متطابق 🟢" : closed.difference < 0 ? `عجز (${closed.difference} ${tenant.currency}) 🔻` : `زيادة (+${closed.difference} ${tenant.currency}) 🔺`;
+        alert(`تم إغلاق الوردية وإصدار تقرير Z بنجاح 🔒\nحالة الصندوق: ${diffText}`);
+      }
+    } catch (e) {
+      alert("فشل إغلاق الوردية");
+    }
+  };
+
   // Dedicated Waiter Screen States
   const [waiterActiveTable, setWaiterActiveTable] = useState<RestaurantTable | null>(null);
   const [showWaiterOrderModal, setShowWaiterOrderModal] = useState<boolean>(false);
@@ -674,7 +746,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           }
         })
         .catch(err => console.error("Silent polling failed:", err));
-    }, 10000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [tenant.id, tables, lang]);
 
@@ -848,6 +920,17 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
   // Submit Order
   const handleCheckout = async (statusOverride?: 'paid' | 'pending') => {
     if (cart.length === 0) return;
+
+    // Shift Enforcement: Require open shift before completing sales for cashiers in non-lite plans
+    if (!activeShift && currentUser?.role !== 'waiter' && tenant.subscriptionPlan !== 'lite' && statusOverride !== 'pending') {
+      alert(lang === 'ar'
+        ? "⚠️ يرجى فتح وردية الصندوق أولاً قبل بدء عمليات البيع وإصدار الفواتير!"
+        : "⚠️ Please open a cash shift first before processing sales!");
+      setShiftMode('open');
+      setShowShiftModal(true);
+      return;
+    }
+
     if (orderType === "dine_in" && !selectedTable) {
       alert(posTranslations[lang].selectTableAlert);
       return;
@@ -878,7 +961,8 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
           total,
           paymentMethod: statusOverride === 'pending' ? 'pending' : paymentMethod,
           paymentStatus: statusOverride === 'pending' ? 'pending' : 'paid',
-          cashierName: posTranslations[lang].generalCashier
+          cashierName: currentUser?.name || posTranslations[lang].generalCashier,
+          shiftId: activeShift?.id || null
         })
       });
 
@@ -2496,13 +2580,7 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={() => fetchHistoryOrders()}
-            className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-sm flex items-center gap-2 shrink-0 self-start md:self-auto active:scale-95"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>تحديث البيانات</span>
-          </button>
+
         </div>
 
         {/* Stats Summary Bar */}
@@ -2525,11 +2603,10 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{totalCashDelivered.toFixed(0)} {tenant.currency}</p>
           </div>
         </div>
-
         {/* Available Drivers Bar */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
           <h3 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <span>كباتن السائقين المتاحين بالمطعم ({deliveryDrivers.length})</span>
+            <span>كباتن السائقين المتاحون بالمطعم ({deliveryDrivers.length})</span>
           </h3>
           {deliveryDrivers.length === 0 ? (
             <p className="text-xs text-slate-400">لا يوجد سائقين مسجلين بصلاحية توصيل حالياً. يمكنك إضافة سائقين من لوحة إدارة الموظفين.</p>
@@ -2552,8 +2629,6 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
             </div>
           )}
         </div>
-
-        {/* Delivery Orders Live Tracking List */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
           <h3 className="text-xs font-black text-slate-900 dark:text-white">قائمة وتفاصيل طلبات التوصيل وتتبع السائقين</h3>
           {deliveryOrders.length === 0 ? (
@@ -2753,27 +2828,51 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               </div>
             )}
 
-            {currentUser?.role !== "waiter" && (
-              <button
-                onClick={() => {
-                  fetchHistoryOrders();
-                  setHistoryTab("all");
-                  setShowOrderHistoryModal(true);
-                }}
-                className="flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition-colors whitespace-nowrap shadow-3xs cursor-pointer shrink-0"
-                title={posTranslations[lang].invoiceHistory}
-              >
-                <History className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{posTranslations[lang].invoiceHistory}</span>
-                <span className="sm:hidden">{lang === 'ar' ? 'الفواتير' : lang === 'tr' ? 'Faturalar' : 'Invoices'}</span>
-              </button>
+            {currentUser?.role !== "waiter" && tenant.subscriptionPlan !== "lite" && (
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeShift) {
+                      setShiftMode('close');
+                      setActualCashInput(activeShift.expectedCash.toString());
+                    } else {
+                      setShiftMode('open');
+                      setOpeningCashInput('0');
+                    }
+                    setShowShiftModal(true);
+                  }}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-black transition-all border shadow-3xs cursor-pointer whitespace-nowrap ${
+                    activeShift
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800"
+                      : "bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 animate-pulse"
+                  }`}
+                  title={activeShift ? "وردية مفتوحة - انقر للإغلاق وإصدار Z-Report" : "انقر لفتح وردية الصندوق"}
+                >
+                  <span>{activeShift ? "🔒 إغلاق الوردية (Z)" : "🔓 فتح الوردية"}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    fetchHistoryOrders();
+                    setHistoryTab("all");
+                    setShowOrderHistoryModal(true);
+                  }}
+                  className="flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition-colors whitespace-nowrap shadow-3xs cursor-pointer shrink-0"
+                  title={posTranslations[lang].invoiceHistory}
+                >
+                  <History className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{posTranslations[lang].invoiceHistory}</span>
+                  <span className="sm:hidden">{lang === 'ar' ? 'الفواتير' : lang === 'tr' ? 'Faturalar' : 'Invoices'}</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Tier 2: Contextual Controls Sub-bar - ALWAYS PRESENT across all modes for 100% Fixed Alignment */}
-      {activeOrderSession === null && (
+      {/* Tier 2: Contextual Controls Sub-bar - ALWAYS PRESENT across sales, orders, tables modes */}
+      {activeOrderSession === null && posMode !== "delivery" && (
         <div className="lg:col-span-12 bg-white dark:bg-slate-900 p-2.5 px-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-h-[54px] animate-in fade-in duration-200">
           
           {/* Sales Mode Sub-bar */}
@@ -2919,28 +3018,6 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
               <p className="text-xs text-slate-500 font-bold shrink-0">
                 {lang === 'ar' ? `إجمالي الصالة: ${tables.length} طاولات` : `Total Salon: ${tables.length} Tables`}
               </p>
-            </>
-          )}
-
-          {/* Delivery Mode Sub-bar */}
-          {posMode === "delivery" && (
-            <>
-              <div className="flex items-center gap-2 text-xs font-bold flex-1 overflow-x-auto no-scrollbar">
-                <span className="px-3 py-1 rounded-xl bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                  🛵 طلبات التوصيل المباشرة
-                </span>
-                <span className="text-slate-400">|</span>
-                <span className="text-slate-600 dark:text-slate-300">
-                  السائقون النشطون: {deliveryDrivers.length}
-                </span>
-              </div>
-              <button
-                onClick={() => fetchHistoryOrders()}
-                className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-3xs flex items-center gap-1.5 shrink-0 active:scale-95"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>تحديث البيانات</span>
-              </button>
             </>
           )}
 
@@ -3939,6 +4016,123 @@ export const POSDashboardView: React.FC<POSDashboardViewProps> = ({
         ))}
       </div>
 
-</div>
+      {/* CASH SHIFT OPEN / CLOSE MODAL */}
+      {showShiftModal && (
+        <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" dir="rtl">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>{shiftMode === 'open' ? "🔓 فتح وردية صندوق جديدة" : "🔒 إغلاق الوردية وإصدار Z-Report"}</span>
+              </h3>
+              <button onClick={() => setShowShiftModal(false)} className="text-slate-400 hover:text-slate-600">
+                ✕
+              </button>
+            </div>
+
+            {shiftMode === 'open' ? (
+              <form onSubmit={handleOpenShiftSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المبلغ الافتتاحي للكاش في الدرج *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="0.00"
+                    value={openingCashInput}
+                    onChange={(e) => setOpeningCashInput(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-lg font-mono font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1">أدخل قيمة المبلغ النظير/الفكة في الدرج عند استلام الوردية.</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">ملاحظات فتح الوردية (اختياري)</label>
+                  <input
+                    type="text"
+                    placeholder="ملاحظات..."
+                    value={shiftNotesInput}
+                    onChange={(e) => setShiftNotesInput(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white outline-none"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowShiftModal(false)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md"
+                  >
+                    🔓 فتح الوردية الآن
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleCloseShiftSubmit} className="space-y-4">
+                {activeShift && (
+                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl space-y-2 text-xs">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-300">
+                      <span>افتتاحية الكاش:</span>
+                      <span className="font-mono font-bold">{activeShift.openingCash.toFixed(2)} {tenant.currency}</span>
+                    </div>
+                    <div className="flex justify-between text-indigo-600 dark:text-indigo-400 font-bold">
+                      <span>الكاش المتوقع بالنظام (افتتاحية + مبيعات كاش - مصروفات):</span>
+                      <span className="font-mono">{activeShift.expectedCash.toFixed(2)} {tenant.currency}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المبلغ الفعلي الموجود بالدرج الآن *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="0.00"
+                    value={actualCashInput}
+                    onChange={(e) => setActualCashInput(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-lg font-mono font-black text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1">قم بعدّ النقود في الدرج بدقة للتحقق من العجز أو الزيادة.</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">ملاحظات الإغلاق (اختياري)</label>
+                  <input
+                    type="text"
+                    placeholder="سبب العجز/الزيادة إن وجد..."
+                    value={shiftNotesInput}
+                    onChange={(e) => setShiftNotesInput(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white outline-none"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowShiftModal(false)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md"
+                  >
+                    🔒 إغلاق الوردية وطباعة Z-Report
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+    </div>
   );
 };

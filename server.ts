@@ -219,6 +219,53 @@ function mapPrinter(row: any, categories?: string[]) {
   };
 }
 
+function mapPurchase(row: any) {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    supplierName: row.supplier_name,
+    invoiceNumber: row.invoice_number || "",
+    category: row.category,
+    amount: parseFloat(row.amount),
+    paymentMethod: row.payment_method,
+    notes: row.notes || "",
+    createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+  };
+}
+
+function mapExpense(row: any) {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    title: row.title,
+    category: row.category,
+    amount: parseFloat(row.amount),
+    paymentMethod: row.payment_method,
+    notes: row.notes || "",
+    createdBy: row.created_by || "",
+    createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+  };
+}
+
+function mapShift(row: any) {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    cashierName: row.cashier_name,
+    openingCash: parseFloat(row.opening_cash),
+    expectedCash: parseFloat(row.expected_cash),
+    actualCash: parseFloat(row.actual_cash),
+    difference: parseFloat(row.difference),
+    cashSales: parseFloat(row.cash_sales),
+    cardSales: parseFloat(row.card_sales),
+    cashExpenses: parseFloat(row.cash_expenses),
+    status: row.status,
+    notes: row.notes || "",
+    openedAt: row.opened_at ? new Date(row.opened_at).toISOString() : new Date().toISOString(),
+    closedAt: row.closed_at ? new Date(row.closed_at).toISOString() : undefined,
+  };
+}
+
 function mapInvoice(row: any) {
   return {
     id: row.id,
@@ -1486,6 +1533,162 @@ app.put("/api/tenants/:tenantId/orders/:id", async (req, res) => {
         price: parseFloat(oi.price), quantity: oi.quantity, notes: oi.notes,
       })),
     });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// PURCHASES & EXPENSES & CASH SHIFTS (ACCOUNTING)
+// ============================================================
+
+// Purchases
+app.get("/api/tenants/:tenantId/purchases", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM purchases WHERE tenant_id = $1 ORDER BY created_at DESC",
+      [req.params.tenantId]
+    );
+    res.json(result.rows.map(mapPurchase));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/tenants/:tenantId/purchases", async (req, res) => {
+  const { tenantId } = req.params;
+  const { supplierName, invoiceNumber, category, amount, paymentMethod = 'cash', notes } = req.body;
+  const id = `pur-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  try {
+    const result = await pool.query(
+      `INSERT INTO purchases (id, tenant_id, supplier_name, invoice_number, category, amount, payment_method, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [id, tenantId, supplierName || "مورد عام", invoiceNumber || null, category || "raw_materials", amount || 0, paymentMethod, notes || null]
+    );
+    res.json(mapPurchase(result.rows[0]));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/tenants/:tenantId/purchases/:id", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM purchases WHERE id = $1 AND tenant_id = $2", [req.params.id, req.params.tenantId]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Expenses
+app.get("/api/tenants/:tenantId/expenses", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM expenses WHERE tenant_id = $1 ORDER BY created_at DESC",
+      [req.params.tenantId]
+    );
+    res.json(result.rows.map(mapExpense));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/tenants/:tenantId/expenses", async (req, res) => {
+  const { tenantId } = req.params;
+  const { title, category, amount, paymentMethod = 'cash', notes, createdBy } = req.body;
+  const id = `exp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  try {
+    const result = await pool.query(
+      `INSERT INTO expenses (id, tenant_id, title, category, amount, payment_method, notes, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [id, tenantId, title || "مصروف تشغيلي", category || "petty_cash", amount || 0, paymentMethod, notes || null, createdBy || null]
+    );
+    res.json(mapExpense(result.rows[0]));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/tenants/:tenantId/expenses/:id", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM expenses WHERE id = $1 AND tenant_id = $2", [req.params.id, req.params.tenantId]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Cash Shifts
+app.get("/api/tenants/:tenantId/shifts", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM cash_shifts WHERE tenant_id = $1 ORDER BY opened_at DESC",
+      [req.params.tenantId]
+    );
+    res.json(result.rows.map(mapShift));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/tenants/:tenantId/shifts/open", async (req, res) => {
+  const { tenantId } = req.params;
+  const { cashierName, openingCash = 0, notes } = req.body;
+  const id = `shift-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  try {
+    const result = await pool.query(
+      `INSERT INTO cash_shifts (id, tenant_id, cashier_name, opening_cash, expected_cash, actual_cash, difference, cash_sales, card_sales, cash_expenses, status, notes)
+       VALUES ($1, $2, $3, $4, $4, $4, 0, 0, 0, 0, 'open', $5) RETURNING *`,
+      [id, tenantId, cashierName || "الكاشير", openingCash, notes || null]
+    );
+    res.json(mapShift(result.rows[0]));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/api/tenants/:tenantId/shifts/:id/close", async (req, res) => {
+  const { id, tenantId } = req.params;
+  const { actualCash, notes } = req.body;
+  try {
+    const shiftRes = await pool.query("SELECT * FROM cash_shifts WHERE id = $1 AND tenant_id = $2", [id, tenantId]);
+    if (!shiftRes.rows[0]) return res.status(404).json({ error: "الوردية غير موجودة" });
+
+    const shift = shiftRes.rows[0];
+    const openedAt = shift.opened_at;
+
+    const salesRes = await pool.query(
+      "SELECT payment_method, SUM(total) as total_sum FROM orders WHERE tenant_id = $1 AND created_at >= $2 AND order_status != 'cancelled' GROUP BY payment_method",
+      [tenantId, openedAt]
+    );
+    let cashSales = 0;
+    let cardSales = 0;
+    for (const r of salesRes.rows) {
+      if (r.payment_method === 'cash') cashSales = parseFloat(r.total_sum || 0);
+      if (r.payment_method === 'card') cardSales = parseFloat(r.total_sum || 0);
+    }
+
+    const expRes = await pool.query(
+      "SELECT SUM(amount) as total_sum FROM expenses WHERE tenant_id = $1 AND created_at >= $2 AND payment_method = 'cash'",
+      [tenantId, openedAt]
+    );
+    const cashExpenses = parseFloat(expRes.rows[0]?.total_sum || 0);
+
+    const openingCash = parseFloat(shift.opening_cash);
+    const expectedCash = openingCash + cashSales - cashExpenses;
+    const actual = parseFloat(actualCash || expectedCash);
+    const diff = actual - expectedCash;
+
+    const result = await pool.query(
+      `UPDATE cash_shifts SET
+        expected_cash = $1, actual_cash = $2, difference = $3,
+        cash_sales = $4, card_sales = $5, cash_expenses = $6,
+        status = 'closed', notes = COALESCE($7, notes), closed_at = NOW()
+       WHERE id = $8 RETURNING *`,
+      [expectedCash, actual, diff, cashSales, cardSales, cashExpenses, notes || null, id]
+    );
+
+    res.json(mapShift(result.rows[0]));
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
